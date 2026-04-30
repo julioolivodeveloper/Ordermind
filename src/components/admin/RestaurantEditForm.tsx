@@ -110,13 +110,21 @@ export function RestaurantEditForm({ restaurant, plans, owner, stats }: Props) {
             /r/{restaurant.slug} · Creado {new Date(restaurant.created_at).toLocaleDateString('es-MX')}
           </p>
         </div>
-        <a
-          href={`/r/${restaurant.slug}`}
-          target="_blank"
-          className="text-indigo-600 text-sm font-medium hover:underline flex items-center gap-1"
-        >
-          Ver menú ↗
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="/dashboard/menu"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          >
+            Gestionar menú
+          </a>
+          <a
+            href={`/r/${restaurant.slug}`}
+            target="_blank"
+            className="text-indigo-600 text-sm font-medium hover:underline flex items-center gap-1"
+          >
+            Ver menú ↗
+          </a>
+        </div>
       </div>
 
       {/* Stats rápidas */}
