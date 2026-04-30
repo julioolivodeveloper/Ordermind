@@ -13,13 +13,19 @@ export async function getProfile(): Promise<Profile | null> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
-    .select('*, restaurant:restaurants(*)')
+    .select('*')
     .eq('id', user.id)
     .single()
 
-  return data ? { ...data, email: user.email } : null
+  if (!profile) return null
+
+  const { data: restaurant } = profile.restaurant_id
+    ? await supabase.from('restaurants').select('*').eq('id', profile.restaurant_id).single()
+    : { data: null }
+
+  return { ...profile, email: user.email, restaurant: restaurant ?? undefined }
 }
 
 export async function requireAuth() {

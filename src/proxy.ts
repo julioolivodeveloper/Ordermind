@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -24,12 +24,16 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
-  // Redirect logged-in users away from login
+  // Redirect logged-in users away from login (only if profile is verifiable)
   if (path === '/login' && user) {
     const { data: profile } = await supabase
       .from('profiles').select('role').eq('id', user.id).single()
-    const dest = profile?.role === 'super_admin' ? '/admin' : '/dashboard'
-    return NextResponse.redirect(new URL(dest, request.url))
+    if (profile) {
+      const dest = profile.role === 'super_admin' ? '/admin' : '/dashboard'
+      return NextResponse.redirect(new URL(dest, request.url))
+    }
+    // No profile found — let them see the login page to re-authenticate
+    return supabaseResponse
   }
 
   // Protect /admin routes

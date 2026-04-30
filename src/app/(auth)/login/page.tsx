@@ -1,40 +1,38 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleLogin() {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const supabase = createClient()
+      const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (authError) {
-      setError('Correo o contraseña incorrectos')
+      if (authError || !user) {
+        setError('Correo o contraseña incorrectos')
+        setLoading(false)
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      window.location.href = profile?.role === 'super_admin' ? '/admin' : '/dashboard'
+    } catch {
+      setError('Error de conexión. Intenta de nuevo.')
       setLoading(false)
-      return
     }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .single()
-
-    if (profile?.role === 'super_admin') {
-      router.push('/admin')
-    } else {
-      router.push('/dashboard')
-    }
-    router.refresh()
   }
 
   return (
@@ -55,7 +53,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h1 className="text-2xl font-bold text-slate-800 mb-6">Iniciar sesión</h1>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={e => e.preventDefault()} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Correo electrónico
@@ -93,7 +91,8 @@ export default function LoginPage() {
             )}
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleLogin}
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
             >
