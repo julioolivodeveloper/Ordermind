@@ -1,44 +1,206 @@
-export type MenuCategory = 'tortas' | 'tacos' | 'hamburguesas' | 'burritos'
+export type UserRole = 'super_admin' | 'restaurant_owner' | 'staff' | 'customer'
+export type RestaurantStatus = 'active' | 'demo' | 'suspended' | 'pending'
+export type OrderStatus = 'new' | 'confirmed' | 'preparing' | 'ready' | 'on_the_way' | 'completed' | 'cancelled'
+export type OrderType = 'pickup' | 'delivery' | 'dine_in'
+export type PaymentMethod = 'cash' | 'card' | 'stripe' | 'paypal'
+export type PaymentStatus = 'pending' | 'paid' | 'refunded' | 'failed'
+export type Locale = 'es' | 'en'
+
+export interface Plan {
+  id: string
+  name: string
+  slug: string
+  price: number
+  max_menu_items: number
+  max_staff: number
+  features: Record<string, unknown>
+  is_active: boolean
+  created_at: string
+}
+
+export interface Restaurant {
+  id: string
+  slug: string
+  name: string
+  description?: string
+  logo_url?: string
+  cover_url?: string
+  status: RestaurantStatus
+  is_demo: boolean
+  plan_id?: string
+  owner_id?: string
+  primary_color: string
+  secondary_color: string
+  phone?: string
+  email?: string
+  address?: string
+  city?: string
+  state?: string
+  country: string
+  website?: string
+  instagram?: string
+  facebook?: string
+  whatsapp?: string
+  timezone: string
+  language: string
+  currency: string
+  pickup_enabled: boolean
+  delivery_enabled: boolean
+  dine_in_enabled: boolean
+  delivery_fee: number
+  min_order_amount: number
+  tax_rate: number
+  tax_name: string
+  business_hours: Record<string, unknown>
+  custom_domain?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+  plan?: Plan
+  owner?: Profile
+}
+
+export interface Profile {
+  id: string
+  role: UserRole
+  restaurant_id?: string
+  full_name?: string
+  phone?: string
+  avatar_url?: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  restaurant?: Restaurant
+  email?: string
+}
+
+export interface MenuCategory {
+  id: string
+  restaurant_id: string
+  name: string
+  slug: string
+  description?: string
+  icon?: string
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  menu_items?: MenuItem[]
+}
+
+export interface ItemIngredient {
+  id: string
+  menu_item_id: string
+  name: string
+  is_default: boolean
+  extra_cost: number
+  sort_order: number
+}
 
 export interface MenuItem {
   id: string
+  restaurant_id: string
+  category_id?: string
   name: string
-  description: string
+  description?: string
   price: number
-  category: MenuCategory
-  image: string
-  available: boolean
-  popular: boolean
-  spicy: boolean
-  sort_order?: number
-  created_at?: string
-  updated_at?: string
+  image_url?: string
+  is_available: boolean
+  is_popular: boolean
+  is_spicy: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+  category?: MenuCategory
+  ingredients?: ItemIngredient[]
 }
 
-export type MenuItemInput = Omit<MenuItem, 'id' | 'created_at' | 'updated_at'>
+export interface Modification {
+  ingredient_id: string
+  name: string
+  type: 'remove' | 'add'
+  extra_cost: number
+}
 
-export interface CartItem extends MenuItem {
+export interface CartItem {
+  menu_item_id: string
+  item_name: string
+  item_price: number
+  image_url?: string
   quantity: number
+  modifications: Modification[]
   notes?: string
+  subtotal: number
+}
+
+export interface DeliveryAddress {
+  street: string
+  city: string
+  state?: string
+  zip?: string
+  references?: string
+}
+
+export interface OrderItem {
+  id: string
+  order_id: string
+  menu_item_id?: string
+  item_name: string
+  item_price: number
+  quantity: number
+  modifications: Modification[]
+  notes?: string
+  subtotal: number
 }
 
 export interface Order {
   id: string
-  items: CartItem[]
-  total: number
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled'
+  restaurant_id: string
+  order_number: number
+  status: OrderStatus
+  order_type: OrderType
   customer_name: string
-  customer_email: string
-  customer_phone: string
+  customer_email?: string
+  customer_phone?: string
+  delivery_address?: DeliveryAddress
+  subtotal: number
+  tax_amount: number
+  delivery_fee: number
+  discount_amount: number
+  total: number
+  payment_method: PaymentMethod
+  payment_status: PaymentStatus
   payment_intent_id?: string
+  notes?: string
   created_at: string
   updated_at: string
-  notes?: string
+  order_items?: OrderItem[]
 }
 
-export interface Category {
+export interface PaymentConnection {
   id: string
-  label: string
-  emoji: string
-  value: MenuCategory | 'all'
+  restaurant_id: string
+  provider: 'stripe' | 'paypal'
+  account_id?: string
+  publishable_key?: string
+  is_active: boolean
+  settings: Record<string, unknown>
+  created_at: string
+}
+
+export interface AdminStats {
+  total_restaurants: number
+  active_restaurants: number
+  demo_restaurants: number
+  suspended_restaurants: number
+  total_orders_today: number
+  total_revenue_today: number
+}
+
+export interface FinanceSummary {
+  total_orders: number
+  total_revenue: number
+  avg_ticket: number
+  by_payment_method: Record<string, number>
+  by_order_type: Record<string, number>
+  top_items: { name: string; count: number; revenue: number }[]
 }
