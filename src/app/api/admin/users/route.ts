@@ -22,10 +22,10 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-  await supabase.from('profiles').update({ role, restaurant_id, full_name: name }).eq('id', authUser.user.id)
+  await admin.from('profiles').update({ role, restaurant_id, full_name: name }).eq('id', authUser.user.id)
 
   if (restaurant_id && role === 'restaurant_owner') {
-    await supabase.from('restaurants').update({ owner_id: authUser.user.id }).eq('id', restaurant_id)
+    await admin.from('restaurants').update({ owner_id: authUser.user.id }).eq('id', restaurant_id)
   }
 
   return NextResponse.json({ id: authUser.user.id, email, name })

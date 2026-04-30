@@ -16,7 +16,9 @@ export async function POST(request: Request) {
   const body = await request.json()
   const { create_owner, owner_name, owner_email, owner_password, ...restaurantData } = body
 
-  const { data: restaurant, error } = await supabase
+  const admin = createAdminClient()
+
+  const { data: restaurant, error } = await admin
     .from('restaurants')
     .insert(restaurantData)
     .select()
@@ -25,7 +27,6 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   if (create_owner && owner_email && owner_password) {
-    const admin = createAdminClient()
     const { data: authUser, error: authError } = await admin.auth.admin.createUser({
       email: owner_email,
       password: owner_password,
@@ -34,13 +35,13 @@ export async function POST(request: Request) {
     })
 
     if (!authError && authUser.user) {
-      await supabase.from('profiles').update({
+      await admin.from('profiles').update({
         role: 'restaurant_owner',
         restaurant_id: restaurant.id,
         full_name: owner_name,
       }).eq('id', authUser.user.id)
 
-      await supabase.from('restaurants').update({ owner_id: authUser.user.id }).eq('id', restaurant.id)
+      await admin.from('restaurants').update({ owner_id: authUser.user.id }).eq('id', restaurant.id)
     }
   }
 
