@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 
@@ -7,10 +7,10 @@ const statusLabel: Record<string, string> = {
 }
 
 export default async function RestaurantsPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: restaurants } = await supabase
     .from('restaurants')
-    .select('*, plan:plans(name), owner:profiles!restaurants_owner_id_fkey(full_name, id)')
+    .select('*, plan:plans(name)')
     .order('created_at', { ascending: false })
 
   return (
@@ -55,7 +55,7 @@ export default async function RestaurantsPage() {
                     <span className="text-sm text-slate-600">{(r.plan as any)?.name ?? '—'}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-slate-600">{(r.owner as any)?.full_name ?? '—'}</span>
+                    <span className="text-sm text-slate-600">—</span>
                   </td>
                   <td className="px-6 py-4">
                     {r.status !== 'suspended' && (
