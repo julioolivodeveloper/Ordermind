@@ -91,7 +91,7 @@ export default function Home() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden">
 
         {/* Background image */}
         <div className="absolute inset-0">
@@ -103,17 +103,10 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/90 to-[#0a0a0a]/40" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
 
           {/* Left */}
           <div>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="text-[#a3e635] text-sm font-bold uppercase tracking-widest mb-4"
-            >
-              www.julioolivodeveloper.com
-            </motion.p>
-
             <motion.h1
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.7 }}
@@ -234,9 +227,6 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <p className="text-[#a3e635] text-sm font-bold uppercase tracking-widest mb-4">
-              www.julioolivodeveloper.com
-            </p>
             <h2 className="text-4xl md:text-6xl font-black uppercase leading-[0.95] mb-6">
               Transforma tu
               <br />
