@@ -1,8 +1,150 @@
 'use client'
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useDropzone } from 'react-dropzone'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '@/components/ui/Toast'
+import { createClient } from '@/lib/supabase/client'
 import type { Restaurant } from '@/types'
+
+const PRESET_COLORS = [
+  '#f97316','#ef4444','#ec4899','#a855f7','#6366f1',
+  '#3b82f6','#06b6d4','#10b981','#84cc16','#eab308',
+  '#64748b','#1f2937',
+]
+
+function ColorSwatch({ value, onChange, label }: { value: string; onChange: (c: string) => void; label: string }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  return (
+    <div className="relative" ref={ref}>
+      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full h-11 rounded-xl border border-slate-200 flex items-center gap-3 px-3 hover:border-slate-300 transition-colors bg-white"
+      >
+        <div className="w-7 h-7 rounded-lg shadow-sm border border-white/50" style={{ backgroundColor: value }} />
+        <span className="text-sm font-mono text-slate-600 uppercase">{value}</span>
+        <span className="ml-auto text-slate-400 text-xs">▼</span>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            className="absolute z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 w-full min-w-[240px]"
+          >
+            <p className="text-xs font-medium text-slate-500 mb-3">Colores predefinidos</p>
+            <div className="grid grid-cols-6 gap-2 mb-4">
+              {PRESET_COLORS.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => { onChange(c); setOpen(false) }}
+                  className={`w-8 h-8 rounded-lg shadow-sm hover:scale-110 transition-transform border-2 ${value === c ? 'border-indigo-500' : 'border-transparent'}`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+            <p className="text-xs font-medium text-slate-500 mb-2">Color personalizado</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-1"
+              />
+              <input
+                type="text"
+                value={value}
+                onChange={e => e.target.value.match(/^#[0-9a-fA-F]{0,6}$/) && onChange(e.target.value)}
+                className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button type="button" onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm">✓</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function ImageUploader({
+  label, hint, current, bucket, path, onUploaded, aspect,
+}: {
+  label: string; hint: string; current: string; bucket: string; path: string;
+  onUploaded: (url: string) => void; aspect: 'square' | 'wide'
+}) {
+  const [uploading, setUploading] = useState(false)
+  const { toast } = useToast()
+
+  const onDrop = useCallback(async (files: File[]) => {
+    const file = files[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const fullPath = `${path}.${ext}`
+      const { error } = await supabase.storage.from(bucket).upload(fullPath, file, { upsert: true })
+      if (error) throw error
+      const { data } = supabase.storage.from(bucket).getPublicUrl(fullPath)
+      onUploaded(data.publicUrl + `?t=${Date.now()}`)
+    } catch {
+      toast('Error al subir imagen', 'error')
+    } finally {
+      setUploading(false)
+    }
+  }, [path, bucket, onUploaded])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop, accept: { 'image/*': [] }, maxFiles: 1, disabled: uploading,
+  })
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-2">{label}</label>
+      {current ? (
+        <div className="relative group mb-2">
+          <img
+            src={current}
+            alt=""
+            className={`w-full object-cover rounded-xl border border-slate-200 ${aspect === 'square' ? 'h-32 w-32' : 'h-40'}`}
+          />
+          <div
+            {...getRootProps()}
+            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center cursor-pointer"
+          >
+            <input {...getInputProps()} />
+            <span className="text-white text-sm font-medium">📷 Cambiar imagen</span>
+          </div>
+        </div>
+      ) : (
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+            isDragActive ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+          }`}
+        >
+          <input {...getInputProps()} />
+          <p className="text-3xl mb-2">{isDragActive ? '⬇️' : '📷'}</p>
+          <p className="text-sm font-medium text-slate-600">
+            {uploading ? 'Subiendo...' : isDragActive ? 'Suelta aquí' : 'Arrastra o haz clic'}
+          </p>
+          <p className="text-xs text-slate-400 mt-1">{hint}</p>
+        </div>
+      )}
+      {uploading && (
+        <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-full bg-indigo-500 rounded-full animate-pulse w-2/3" />
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   const router = useRouter()
@@ -18,6 +160,9 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
     instagram: restaurant.instagram ?? '',
     facebook: restaurant.facebook ?? '',
     primary_color: restaurant.primary_color,
+    secondary_color: restaurant.secondary_color ?? '#1f2937',
+    logo_url: restaurant.logo_url ?? '',
+    cover_url: restaurant.cover_url ?? '',
     language: restaurant.language,
     currency: restaurant.currency,
     timezone: restaurant.timezone,
@@ -31,7 +176,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
     custom_domain: restaurant.custom_domain ?? '',
   })
   const [saving, setSaving] = useState(false)
-  const [tab, setTab] = useState<'general' | 'operations' | 'payments'>('general')
+  const [tab, setTab] = useState<'brand' | 'general' | 'operations' | 'payments'>('brand')
 
   function f(key: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -41,7 +186,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   async function handleSave() {
     setSaving(true)
     try {
-      const res = await fetch(`/api/dashboard/settings`, {
+      const res = await fetch('/api/dashboard/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -57,29 +202,97 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   }
 
   const tabs = [
-    { id: 'general', label: 'General' },
-    { id: 'operations', label: 'Operaciones' },
-    { id: 'payments', label: 'Pagos e impuestos' },
+    { id: 'brand', label: '🎨 Marca' },
+    { id: 'general', label: '📋 General' },
+    { id: 'operations', label: '⚙️ Operaciones' },
+    { id: 'payments', label: '💳 Pagos' },
   ] as const
 
-  const fieldClass = "w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  const fieldClass = "w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
 
   return (
-    <div>
+    <div className="max-w-2xl">
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-2xl w-fit">
         {tabs.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              tab === t.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            }`}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+        {tab === 'brand' && (
+          <>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <ImageUploader
+                  label="Logo del restaurante"
+                  hint="PNG o JPG, 1:1, máx 2MB"
+                  current={form.logo_url}
+                  bucket="menu-images"
+                  path={`restaurants/${restaurant.id}/logo`}
+                  aspect="square"
+                  onUploaded={url => setForm(f => ({ ...f, logo_url: url }))}
+                />
+              </div>
+              <div className="flex flex-col gap-4">
+                <ColorSwatch
+                  label="Color principal"
+                  value={form.primary_color}
+                  onChange={c => setForm(f => ({ ...f, primary_color: c }))}
+                />
+                <ColorSwatch
+                  label="Color secundario"
+                  value={form.secondary_color}
+                  onChange={c => setForm(f => ({ ...f, secondary_color: c }))}
+                />
+              </div>
+            </div>
+
+            <div>
+              <ImageUploader
+                label="Imagen de portada"
+                hint="JPG o PNG horizontal, recomendado 1200x400px"
+                current={form.cover_url}
+                bucket="menu-images"
+                path={`restaurants/${restaurant.id}/cover`}
+                aspect="wide"
+                onUploaded={url => setForm(f => ({ ...f, cover_url: url }))}
+              />
+            </div>
+
+            {/* Live preview */}
+            <div className="rounded-2xl overflow-hidden border border-slate-200">
+              <p className="text-xs font-medium text-slate-500 px-4 py-2 bg-slate-50 border-b border-slate-100">
+                Vista previa del encabezado
+              </p>
+              <div
+                className="p-6 flex items-center gap-4"
+                style={{ background: `linear-gradient(135deg, ${form.primary_color}, ${form.secondary_color})` }}
+              >
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="" className="w-14 h-14 rounded-xl object-cover ring-2 ring-white/30" />
+                ) : (
+                  <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center text-white font-black text-xl">
+                    {form.name[0]}
+                  </div>
+                )}
+                <div>
+                  <p className="text-white font-black text-lg">{form.name}</p>
+                  {form.description && <p className="text-white/70 text-sm">{form.description}</p>}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         {tab === 'general' && (
           <>
             <div>
@@ -88,7 +301,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-              <textarea value={form.description} onChange={f('description')} rows={2} className={`${fieldClass} resize-none`} placeholder="Breve descripción de tu restaurante..." />
+              <textarea value={form.description} onChange={f('description')} rows={3} placeholder="Breve descripción de tu restaurante..." className={`${fieldClass} resize-none`} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -100,15 +313,13 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
                 <input value={form.whatsapp} onChange={f('whatsapp')} placeholder="+52614..." className={fieldClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Correo de contacto</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Correo</label>
                 <input type="email" value={form.email} onChange={f('email')} className={fieldClass} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Instagram</label>
                 <input value={form.instagram} onChange={f('instagram')} placeholder="@mirestaurante" className={fieldClass} />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
                 <input value={form.address} onChange={f('address')} className={fieldClass} />
@@ -116,19 +327,6 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Ciudad</label>
                 <input value={form.city} onChange={f('city')} className={fieldClass} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Color principal</label>
-                <input type="color" value={form.primary_color} onChange={f('primary_color')} className="w-full h-10 border border-slate-200 rounded-xl px-2 cursor-pointer" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Idioma</label>
-                <select value={form.language} onChange={f('language')} className={fieldClass}>
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                </select>
               </div>
             </div>
             <div>
@@ -141,21 +339,25 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
 
         {tab === 'operations' && (
           <>
-            <div className="space-y-3">
-              <h3 className="font-medium text-slate-700">Tipos de pedido</h3>
-              {[
-                ['pickup_enabled', '🏪 Recoger en restaurante'],
-                ['delivery_enabled', '🚚 Delivery a domicilio'],
-                ['dine_in_enabled', '🍽️ Comer en mesa'],
-              ].map(([key, label]) => (
-                <label key={key} className="flex items-center gap-3 py-2 cursor-pointer">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-slate-700 mb-3">Tipos de pedido habilitados</h3>
+              {([
+                ['pickup_enabled', '🏪', 'Recoger en restaurante', 'Los clientes recogen su pedido'],
+                ['delivery_enabled', '🚚', 'Delivery a domicilio', 'Envío a la dirección del cliente'],
+                ['dine_in_enabled', '🍽️', 'Comer en mesa', 'Pedidos desde la mesa'],
+              ] as const).map(([key, icon, title, desc]) => (
+                <label key={key} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:border-indigo-200 cursor-pointer transition-colors">
                   <input
                     type="checkbox"
                     checked={form[key as keyof typeof form] as boolean}
                     onChange={f(key as keyof typeof form)}
-                    className="rounded w-4 h-4 text-indigo-600"
+                    className="rounded w-4 h-4 text-indigo-600 accent-indigo-600"
                   />
-                  <span className="text-sm text-slate-700">{label}</span>
+                  <span className="text-2xl">{icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{title}</p>
+                    <p className="text-xs text-slate-500">{desc}</p>
+                  </div>
                 </label>
               ))}
             </div>
@@ -186,11 +388,16 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
                 <input value={form.tax_name} onChange={f('tax_name')} placeholder="IVA" className={fieldClass} />
               </div>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-              <h4 className="font-medium text-slate-700 text-sm mb-2">Stripe</h4>
-              <p className="text-xs text-slate-500 mb-3">Conecta tu cuenta de Stripe para aceptar pagos con tarjeta en línea</p>
-              <button className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                Conectar Stripe
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-5 border border-indigo-100">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">S</div>
+                <div>
+                  <h4 className="font-semibold text-slate-800 text-sm">Stripe</h4>
+                  <p className="text-xs text-slate-500">Pagos con tarjeta en línea</p>
+                </div>
+              </div>
+              <button className="bg-indigo-600 text-white text-sm px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
+                Conectar Stripe →
               </button>
             </div>
           </>
@@ -200,7 +407,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors"
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white px-8 py-3 rounded-xl text-sm font-semibold transition-colors shadow-md shadow-indigo-500/20"
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
