@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/components/ui/Toast'
 import { formatCurrency } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 import type { MenuCategory, MenuItem, ItemIngredient } from '@/types'
 
 interface Props {
@@ -32,6 +33,24 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [catForm, setCatForm] = useState({ name: '', icon: '🍽️' })
   const [ingForm, setIngForm] = useState({ name: '', is_default: true, extra_cost: 0 })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  async function handleImageUpload(file: File) {
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `${restaurantId}/${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('menu-images').upload(path, file, { upsert: true })
+      if (error) throw error
+      const { data } = supabase.storage.from('menu-images').getPublicUrl(path)
+      setItemForm(f => ({ ...f, image_url: data.publicUrl }))
+    } catch {
+      toast('Error al subir imagen', 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const filteredItems = selectedCat === 'all' ? items : items.filter(i => i.category_id === selectedCat)
 
@@ -261,8 +280,27 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">URL de imagen</label>
-            <input value={itemForm.image_url} onChange={e => setItemForm(f => ({ ...f, image_url: e.target.value }))} placeholder="https://..." className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <label className="block text-sm font-medium text-slate-700 mb-1">Imagen del platillo</label>
+            {itemForm.image_url && (
+              <div className="relative mb-2">
+                <img src={itemForm.image_url} alt="" className="w-full h-36 object-cover rounded-xl border border-slate-200" />
+                <button
+                  type="button"
+                  onClick={() => setItemForm(f => ({ ...f, image_url: '' }))}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                >✕</button>
+              </div>
+            )}
+            <label className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded-xl px-4 py-3 text-sm cursor-pointer transition-colors ${uploading ? 'border-indigo-300 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'}`}>
+              <span>{uploading ? 'Subiendo...' : '📷 Seleccionar imagen'}</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
+              />
+            </label>
           </div>
           <div className="flex gap-6">
             {([['is_available', '✓ Disponible'], ['is_popular', '⭐ Popular'], ['is_spicy', '🌶️ Picante']] as [keyof typeof itemForm, string][]).map(([key, label]) => (
