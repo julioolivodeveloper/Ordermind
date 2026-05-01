@@ -149,6 +149,20 @@ function ImageUploader({
 export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   const router = useRouter()
   const { toast } = useToast()
+  const [zipInput, setZipInput] = useState('')
+  const [zipCodes, setZipCodes] = useState<string[]>(restaurant.delivery_zip_codes ?? [])
+
+  function addZip() {
+    const z = zipInput.trim()
+    if (!z || zipCodes.includes(z)) { setZipInput(''); return }
+    setZipCodes(prev => [...prev, z])
+    setZipInput('')
+  }
+
+  function removeZip(z: string) {
+    setZipCodes(prev => prev.filter(c => c !== z))
+  }
+
   const [form, setForm] = useState({
     name: restaurant.name,
     description: restaurant.description ?? '',
@@ -189,7 +203,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
       const res = await fetch('/api/dashboard/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, delivery_zip_codes: zipCodes }),
       })
       if (!res.ok) throw new Error()
       toast('¡Configuración guardada!')
@@ -362,16 +376,56 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
               ))}
             </div>
             {form.delivery_enabled && (
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tarifa de delivery ($)</label>
-                  <input type="number" step="0.50" value={form.delivery_fee} onChange={f('delivery_fee')} className={fieldClass} />
+              <>
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Tarifa de delivery ($)</label>
+                    <input type="number" step="0.50" value={form.delivery_fee} onChange={f('delivery_fee')} className={fieldClass} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Monto mínimo ($)</label>
+                    <input type="number" step="0.50" value={form.min_order_amount} onChange={f('min_order_amount')} className={fieldClass} />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Monto mínimo ($)</label>
-                  <input type="number" step="0.50" value={form.min_order_amount} onChange={f('min_order_amount')} className={fieldClass} />
+
+                {/* Zonas de entrega por ZIP */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-slate-700 mb-1">Zonas de entrega (Zip Codes)</h3>
+                  <p className="text-xs text-slate-400 mb-3">Solo se aceptan pedidos a domicilio en estos códigos postales. Si no agregas ninguno, se acepta cualquier dirección.</p>
+
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={zipInput}
+                      onChange={e => setZipInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addZip())}
+                      placeholder="Ej: 79900"
+                      maxLength={10}
+                      className={fieldClass + ' flex-1'}
+                    />
+                    <button
+                      type="button"
+                      onClick={addZip}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shrink-0"
+                    >
+                      + Agregar
+                    </button>
+                  </div>
+
+                  {zipCodes.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {zipCodes.map(z => (
+                        <span key={z} className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium px-3 py-1 rounded-full">
+                          📍 {z}
+                          <button type="button" onClick={() => removeZip(z)} className="text-indigo-400 hover:text-red-500 transition-colors font-bold leading-none">×</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">Sin zonas configuradas — delivery disponible en cualquier dirección.</p>
+                  )}
                 </div>
-              </div>
+              </>
             )}
           </>
         )}

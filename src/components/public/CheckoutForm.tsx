@@ -36,6 +36,14 @@ export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.customer_name || !form.customer_phone) return
+    if (
+      form.order_type === 'delivery' &&
+      (restaurant.delivery_zip_codes?.length ?? 0) > 0 &&
+      !restaurant.delivery_zip_codes?.includes(form.zip)
+    ) {
+      setError('El código postal ingresado no está en nuestra zona de entrega.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -139,8 +147,38 @@ export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
                   <input value={form.city} onChange={f('city')} required className={fieldClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Código postal</label>
-                  <input value={form.zip} onChange={f('zip')} className={fieldClass} />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Código postal *</label>
+                  <input
+                    value={form.zip}
+                    onChange={f('zip')}
+                    required
+                    placeholder="79900"
+                    maxLength={10}
+                    className={`${fieldClass} ${
+                      form.zip && (restaurant.delivery_zip_codes?.length ?? 0) > 0 && !restaurant.delivery_zip_codes?.includes(form.zip)
+                        ? 'border-red-400 focus:ring-red-400'
+                        : form.zip && (restaurant.delivery_zip_codes?.length ?? 0) > 0 && restaurant.delivery_zip_codes?.includes(form.zip)
+                        ? 'border-green-400 focus:ring-green-400'
+                        : ''
+                    }`}
+                  />
+                  {/* Zona validation feedback */}
+                  {form.zip && (restaurant.delivery_zip_codes?.length ?? 0) > 0 && (
+                    restaurant.delivery_zip_codes?.includes(form.zip) ? (
+                      <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                        ✓ ¡Hacemos delivery a tu zona!
+                      </p>
+                    ) : (
+                      <p className="text-xs text-red-500 mt-1">
+                        ✗ Lo sentimos, no hacemos delivery a este código postal.
+                      </p>
+                    )
+                  )}
+                  {(restaurant.delivery_zip_codes?.length ?? 0) > 0 && (
+                    <p className="text-xs text-slate-400 mt-1">
+                      Zonas disponibles: {restaurant.delivery_zip_codes?.join(', ')}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>

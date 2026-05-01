@@ -53,6 +53,7 @@ export interface Restaurant {
   tax_name: string
   business_hours: Record<string, unknown>
   custom_domain?: string
+  delivery_zip_codes?: string[]
   notes?: string
   created_at: string
   updated_at: string
