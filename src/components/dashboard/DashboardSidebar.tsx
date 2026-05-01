@@ -68,6 +68,20 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
         })}
       </nav>
 
+      {/* Ver restaurante */}
+      {restaurant?.slug && (
+        <div className="px-3 pb-2">
+          <a
+            href={`/r/${restaurant.slug}`}
+            target="_blank"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-orange-500/20 text-orange-300 hover:bg-orange-500/30 hover:text-orange-200 transition-colors w-full"
+          >
+            <span className="text-base">👁️</span>
+            Ver mi restaurante
+          </a>
+        </div>
+      )}
+
       {/* User + logout */}
       <div className="px-3 py-4 border-t border-indigo-800 space-y-1">
         <div className="flex items-center gap-2.5 px-3 py-2">

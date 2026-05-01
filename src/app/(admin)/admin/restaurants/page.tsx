@@ -62,9 +62,9 @@ export default async function RestaurantsPage() {
                       <a
                         href={`/r/${r.slug}`}
                         target="_blank"
-                        className="text-indigo-600 text-sm hover:underline"
+                        className="text-indigo-600 text-sm hover:underline font-medium"
                       >
-                        /r/{r.slug} ↗
+                        👁️ Ver menú ↗
                       </a>
                     )}
                   </td>
