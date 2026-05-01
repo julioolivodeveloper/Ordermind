@@ -13,10 +13,10 @@ export default async function MenuPage() {
   ])
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-[#111111] min-h-full">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Menú</h1>
-        <p className="text-slate-500 text-sm mt-1">Gestiona tus categorías y platillos</p>
+        <h1 className="text-2xl font-bold text-white">Menú</h1>
+        <p className="text-white/40 text-sm mt-1">Gestiona tus categorías y platillos</p>
       </div>
       <MenuManager
         restaurantId={restaurantId}

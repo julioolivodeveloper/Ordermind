@@ -2,14 +2,15 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 
 const nav = [
-  { href: '/dashboard/orders', label: 'Pedidos', icon: '📋' },
-  { href: '/dashboard/menu', label: 'Menú', icon: '🍽️' },
-  { href: '/dashboard/finances', label: 'Finanzas', icon: '💰' },
-  { href: '/dashboard/settings', label: 'Configuración', icon: '⚙️' },
+  { href: '/dashboard/orders', label: 'Pedidos', icon: ClipboardList },
+  { href: '/dashboard/menu', label: 'Menú', icon: UtensilsCrossed },
+  { href: '/dashboard/finances', label: 'Finanzas', icon: BarChart3 },
+  { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]
 
 export function DashboardSidebar({ profile }: { profile: Profile }) {
@@ -25,7 +26,7 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
   const restaurant = profile.restaurant as any
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col shrink-0 border-r border-white/5">
+    <aside className="w-64 bg-[#0a0a0a] flex flex-col shrink-0 border-r border-white/5">
 
       {/* Brand */}
       <div className="px-5 py-5 border-b border-white/5">
@@ -34,8 +35,8 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
             <img src={restaurant.logo_url} alt="" className="w-10 h-10 rounded-xl object-cover ring-2 ring-white/10" />
           ) : (
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white font-black text-sm shadow-lg"
-              style={{ backgroundColor: restaurant?.primary_color ?? '#f97316' }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-black font-black text-sm shadow-lg"
+              style={{ backgroundColor: '#a3e635' }}
             >
               {(restaurant?.name ?? 'R')[0].toUpperCase()}
             </div>
@@ -44,7 +45,7 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
             <p className="text-white font-bold text-sm leading-none truncate">
               {restaurant?.name ?? 'Restaurante'}
             </p>
-            <p className="text-slate-500 text-xs mt-1 capitalize">{profile.role.replace('_', ' ')}</p>
+            <p className="text-white/30 text-xs mt-1 capitalize">{profile.role.replace('_', ' ')}</p>
           </div>
         </div>
       </div>
@@ -58,14 +59,15 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
               {active && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute inset-0 bg-indigo-600 rounded-xl"
+                  className="absolute inset-0 rounded-xl"
+                  style={{ backgroundColor: '#a3e635' }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
-              <span className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                active ? 'text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+              <span className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                active ? 'text-black' : 'text-white/40 hover:text-white hover:bg-white/5'
               }`}>
-                <span className="text-base">{item.icon}</span>
+                <item.icon className="w-4 h-4 shrink-0" strokeWidth={active ? 2.5 : 1.8} />
                 {item.label}
               </span>
             </Link>
@@ -79,9 +81,9 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
           <a
             href={`/r/${restaurant.slug}`}
             target="_blank"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-orange-500/20 to-pink-500/20 text-orange-300 hover:from-orange-500/30 hover:to-pink-500/30 hover:text-orange-200 transition-all border border-orange-500/20 w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-[#a3e635]/10 text-[#a3e635] hover:bg-[#a3e635]/20 transition-all border border-[#a3e635]/20 w-full"
           >
-            <span className="text-base">👁️</span>
+            <Eye className="w-4 h-4 shrink-0" strokeWidth={1.8} />
             Ver mi restaurante
           </a>
         </div>
@@ -90,16 +92,17 @@ export function DashboardSidebar({ profile }: { profile: Profile }) {
       {/* User + logout */}
       <div className="px-3 py-4 border-t border-white/5 space-y-1">
         <div className="flex items-center gap-2.5 px-3 py-2">
-          <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-md">
+          <div className="w-7 h-7 bg-[#a3e635] rounded-full flex items-center justify-center text-black text-xs font-black shrink-0">
             {(profile.full_name ?? 'U')[0]?.toUpperCase()}
           </div>
-          <p className="text-slate-400 text-xs truncate">{profile.full_name ?? 'Usuario'}</p>
+          <p className="text-white/40 text-xs truncate">{profile.full_name ?? 'Usuario'}</p>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-500 hover:bg-white/5 hover:text-slate-300 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-white/30 hover:bg-white/5 hover:text-white/60 transition-colors w-full"
         >
-          ↩ Cerrar sesión
+          <LogOut className="w-4 h-4 shrink-0" strokeWidth={1.8} />
+          Cerrar sesión
         </button>
       </div>
     </aside>
