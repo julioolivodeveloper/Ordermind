@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  MapPin, Phone, Globe, ShoppingBag,
+  MapPin, Phone, Globe, ShoppingCart,
   Search, Star, Flame, ChevronDown, Bike, UtensilsCrossed,
   MessageCircle, X, Sparkles
 } from 'lucide-react'
@@ -122,7 +122,7 @@ export function PublicMenu({ restaurant, categories }: Props) {
                 className="relative flex items-center gap-2 text-white px-4 py-2 rounded-xl text-sm font-semibold shrink-0 shadow-md hover:brightness-110 transition-all"
                 style={{ backgroundColor: primary }}
               >
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingCart className="w-4 h-4 text-white" />
                 {count > 0 && (
                   <motion.span
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -294,7 +294,7 @@ export function PublicMenu({ restaurant, categories }: Props) {
             transition={{ delay: 0.5 }}
             className="relative flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-white/25 transition-all"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingCart className="w-4 h-4 text-white" />
             <AnimatePresence>
               {count > 0 && (
                 <motion.span

@@ -1,94 +1,79 @@
 'use client'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-
-const features = [
-  {
-    icon: '🍽️',
-    title: 'Menú digital interactivo',
-    desc: 'Crea tu menú con fotos, precios y personalización de ingredientes. Actualiza en segundos.',
-    color: 'from-orange-500/20 to-red-500/20',
-    border: 'border-orange-500/30',
-  },
-  {
-    icon: '⚡',
-    title: 'Pedidos en tiempo real',
-    desc: 'Recibe pedidos al instante en tu pantalla. Panel kanban para gestionar cada etapa.',
-    color: 'from-indigo-500/20 to-purple-500/20',
-    border: 'border-indigo-500/30',
-  },
-  {
-    icon: '📊',
-    title: 'Finanzas y reportes',
-    desc: 'Ingresos del día, semana y mes. Métodos de pago, platillos más vendidos y más.',
-    color: 'from-green-500/20 to-teal-500/20',
-    border: 'border-green-500/30',
-  },
-  {
-    icon: '🎨',
-    title: 'Marca personalizada',
-    desc: 'Colores, logo y dominio propio. Tu restaurante con tu identidad visual.',
-    color: 'from-pink-500/20 to-rose-500/20',
-    border: 'border-pink-500/30',
-  },
-  {
-    icon: '🚀',
-    title: 'Multi-restaurante',
-    desc: 'Gestiona varios restaurantes desde un solo panel. Perfecto para cadenas y franquicias.',
-    color: 'from-blue-500/20 to-cyan-500/20',
-    border: 'border-blue-500/30',
-  },
-  {
-    icon: '🔒',
-    title: 'Seguro y confiable',
-    desc: 'Datos cifrados, roles por usuario y respaldos automáticos. Tu negocio protegido.',
-    color: 'from-violet-500/20 to-purple-500/20',
-    border: 'border-violet-500/30',
-  },
-]
-
-const stats = [
-  { value: '< 5 min', label: 'Para estar online' },
-  { value: '100%', label: 'Personalizable' },
-  { value: '24/7', label: 'Pedidos activos' },
-  { value: '0%', label: 'Comisión por venta' },
-]
+import {
+  CheckCircle2, Zap, Shield, UtensilsCrossed, CreditCard,
+  Bike, LayoutDashboard, Tag, Cloud, Headphones, Lock,
+  TrendingUp, MessageCircle, ArrowRight
+} from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
-  show: (i: number) => ({
+  show: (i = 0) => ({
     opacity: 1, y: 0,
     transition: { delay: i * 0.1, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const },
   }),
 }
 
+const features = [
+  {
+    icon: UtensilsCrossed,
+    title: 'Menú Digital',
+    desc: 'Menú atractivo, fácil de usar y siempre actualizado.',
+  },
+  {
+    icon: CreditCard,
+    title: 'Recibe Pagos Online',
+    desc: 'Acepta tarjetas y pagos digitales de forma segura.',
+  },
+  {
+    icon: Bike,
+    title: 'Pedidos Online Pickup o Delivery',
+    desc: 'Tus clientes piden y tú gestionas todo desde un solo lugar.',
+  },
+  {
+    icon: LayoutDashboard,
+    title: 'Panel de Administración',
+    desc: 'Control total de tu restaurante desde cualquier dispositivo.',
+  },
+  {
+    icon: Tag,
+    title: 'Cupones de Descuento y Ofertas',
+    desc: 'Atrae más clientes y aumenta tus ventas.',
+  },
+]
+
+const checklist = [
+  'Ahorra tiempo',
+  'Reduce errores',
+  'Mejora la experiencia de tus clientes',
+  'Toma mejores decisiones con reportes en tiempo real',
+]
+
+const footerItems = [
+  { icon: Cloud, title: 'Acceso en la Nube', desc: 'Desde cualquier lugar y dispositivo.' },
+  { icon: Headphones, title: 'Soporte Dedicado', desc: 'Estamos contigo en cada paso.' },
+  { icon: Lock, title: '100% Seguro', desc: 'Protegemos tu información y la de tus clientes.' },
+  { icon: TrendingUp, title: 'Diseñado para Hacer Crecer tu Negocio', desc: '' },
+]
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#080818] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
 
-      {/* Animated background orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute top-[30%] right-[-15%] w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-pink-600/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
+      {/* ── NAV ── */}
+      <nav className="relative z-20 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-2.5"
         >
-          <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <span className="text-white font-bold text-sm">O</span>
+          <div className="w-9 h-9 bg-[#a3e635] rounded-xl flex items-center justify-center shadow-lg shadow-lime-500/30">
+            <span className="text-black font-black text-sm">O</span>
           </div>
           <span className="text-white font-bold text-xl tracking-tight">Ordermind</span>
         </motion.div>
-
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-3"
         >
           <Link href="/login" className="text-slate-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">
@@ -96,152 +81,244 @@ export default function Home() {
           </Link>
           <Link
             href="/login"
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
+            className="bg-[#a3e635] hover:bg-lime-400 text-black px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-lime-500/20 hover:scale-105"
           >
             Comenzar gratis →
           </Link>
         </motion.div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-32 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs px-4 py-2 rounded-full mb-8 backdrop-blur"
-        >
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-          Plataforma SaaS para restaurantes · Lanzamiento 2026
-        </motion.div>
+      {/* ── HERO ── */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
 
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.7 }}
-          className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-[1.05] tracking-tight"
-        >
-          Tu restaurante,
-          <br />
-          <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            digital y listo.
-          </span>
-        </motion.h1>
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80"
+            alt=""
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/90 to-[#0a0a0a]/40" />
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.6 }}
-          className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed"
-        >
-          Menú online, pedidos en tiempo real, finanzas y más.
-          Todo lo que necesitas para vender más sin complicaciones.
-        </motion.p>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.6 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
-        >
-          <Link
-            href="/login"
-            className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105"
+          {/* Left */}
+          <div>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="text-[#a3e635] text-sm font-bold uppercase tracking-widest mb-4"
+            >
+              www.julioolivodeveloper.com
+            </motion.p>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.7 }}
+              className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight mb-6 uppercase"
+            >
+              Software
+              <br />
+              <span className="text-white">para</span>
+              <br />
+              <span className="text-[#a3e635]">Restaurantes</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-slate-300 text-lg mb-8 leading-relaxed max-w-lg"
+            >
+              El sistema completo para gestionar tu restaurante{' '}
+              <span className="text-[#a3e635] font-bold">online</span> de forma{' '}
+              <span className="text-[#a3e635] font-bold">automatizada.</span>
+            </motion.p>
+
+            {/* Badges */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="flex flex-wrap gap-3 mb-10"
+            >
+              {[
+                { icon: CheckCircle2, label: 'Fácil' },
+                { icon: Zap, label: 'Rápido' },
+                { icon: Shield, label: 'Seguro' },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 border border-white/20 rounded-full px-5 py-2 text-sm font-bold text-white bg-white/5 backdrop-blur"
+                >
+                  <Icon className="w-4 h-4 text-[#a3e635]" />
+                  {label}
+                </div>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
+              >
+                Comenzar ahora <ArrowRight className="w-5 h-5" />
+              </Link>
+              <a
+                href="https://wa.me/+526561234567"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all"
+              >
+                <MessageCircle className="w-5 h-5 text-green-400" />
+                WhatsApp
+              </a>
+            </motion.div>
+          </div>
+
+          {/* Right — dashboard mockup */}
+          <motion.div
+            initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+            className="hidden lg:block relative"
           >
-            <span>Empezar ahora</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </Link>
-          <a
-            href="#features"
-            className="inline-flex items-center gap-2 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all backdrop-blur"
-          >
-            Ver cómo funciona ↓
-          </a>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto"
-        >
-          {stats.map((s) => (
-            <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur hover:bg-white/8 transition-colors">
-              <p className="text-2xl md:text-3xl font-black text-white mb-1">{s.value}</p>
-              <p className="text-slate-400 text-xs">{s.label}</p>
+            <div className="relative">
+              <div className="absolute -inset-4 bg-[#a3e635]/10 rounded-3xl blur-2xl" />
+              <img
+                src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=900&q=80"
+                alt="Dashboard"
+                className="relative rounded-2xl shadow-2xl border border-white/10 w-full object-cover"
+              />
             </div>
-          ))}
-        </motion.div>
+          </motion.div>
+        </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-black mb-4">
-            Todo lo que necesitas,
-            <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">nada de lo que no.</span>
-          </h2>
-          <p className="text-slate-400 text-lg max-w-xl mx-auto">
-            Sin mensualidades ocultas. Sin comisiones por pedido. Sin complicaciones técnicas.
-          </p>
-        </motion.div>
+      {/* ── FEATURES ── */}
+      <section className="bg-white py-20 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            {features.map((f, i) => (
+              <motion.div
+                key={f.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="flex flex-col items-center text-center"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-[#a3e635]/15 border border-[#a3e635]/30 flex items-center justify-center mb-4">
+                  <f.icon className="w-7 h-7 text-[#5a8a00]" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-black text-slate-800 text-sm uppercase tracking-tight mb-2 leading-snug">{f.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((f, i) => (
+      {/* ── CTA ── */}
+      <section className="bg-[#0a0a0a] py-20 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+          {/* Left — text */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <p className="text-[#a3e635] text-sm font-bold uppercase tracking-widest mb-4">
+              www.julioolivodeveloper.com
+            </p>
+            <h2 className="text-4xl md:text-6xl font-black uppercase leading-[0.95] mb-6">
+              Transforma tu
+              <br />
+              restaurante
+              <br />
+              <span className="text-[#a3e635]">¡Vende más!</span>
+            </h2>
+
+            {/* Underline accent */}
+            <div className="w-24 h-1.5 bg-[#a3e635] rounded-full mb-8" />
+
+            <ul className="space-y-4 mb-10">
+              {checklist.map((item) => (
+                <li key={item} className="flex items-center gap-3 text-slate-300 text-base">
+                  <CheckCircle2 className="w-5 h-5 text-[#a3e635] shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <a
+              href="https://wa.me/+526561234567"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
+            >
+              <MessageCircle className="w-6 h-6" />
+              Solicita tu Demo Gratis
+            </a>
+            <p className="text-slate-500 text-sm mt-4">Y lleva tu restaurante al siguiente nivel.</p>
+          </motion.div>
+
+          {/* Right — person photo */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative flex justify-center"
+          >
+            <div className="relative">
+              <div className="absolute -inset-6 bg-[#a3e635]/10 rounded-full blur-3xl" />
+              <img
+                src="https://images.unsplash.com/photo-1583394293214-aac25f752f45?w=700&q=80"
+                alt="Restaurante"
+                className="relative rounded-3xl shadow-2xl w-full max-w-sm object-cover"
+                style={{ aspectRatio: '3/4', objectPosition: 'top' }}
+              />
+              {/* Badge */}
+              <div className="absolute bottom-6 right-6 bg-[#a3e635] text-black rounded-2xl px-5 py-3 shadow-xl">
+                <p className="font-black text-xs uppercase leading-tight text-center">
+                  Más Control<br />Más Ventas<br />Más Clientes
+                </p>
+                <div className="flex justify-center mt-1 text-black text-xs">★★★★★</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="bg-[#a3e635] py-12 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {footerItems.map((item, i) => (
             <motion.div
-              key={f.title}
+              key={item.title}
               custom={i}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
               variants={fadeUp}
-              whileHover={{ y: -6, scale: 1.02 }}
-              className={`group relative bg-gradient-to-br ${f.color} border ${f.border} rounded-3xl p-6 backdrop-blur cursor-default transition-all hover:shadow-2xl`}
+              className="flex flex-col items-center text-center"
             >
-              <div className="text-4xl mb-4">{f.icon}</div>
-              <h3 className="text-white font-bold text-lg mb-2">{f.title}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
+              <div className="w-14 h-14 rounded-2xl bg-black/10 flex items-center justify-center mb-3">
+                <item.icon className="w-7 h-7 text-black" strokeWidth={1.5} />
+              </div>
+              <h4 className="font-black text-black text-xs uppercase tracking-tight leading-snug mb-1">{item.title}</h4>
+              {item.desc && <p className="text-black/60 text-xs">{item.desc}</p>}
             </motion.div>
           ))}
         </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pb-24">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative bg-gradient-to-br from-indigo-600/30 to-purple-600/30 border border-indigo-500/30 rounded-3xl p-12 md:p-20 text-center overflow-hidden backdrop-blur"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-purple-600/10 pointer-events-none" />
-          <h2 className="relative text-4xl md:text-5xl font-black mb-4">
-            ¿Listo para modernizar
-            <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">tu restaurante?</span>
-          </h2>
-          <p className="relative text-slate-300 text-lg mb-8 max-w-lg mx-auto">
-            Empieza hoy. En menos de 5 minutos tienes tu menú online listo para recibir pedidos.
-          </p>
-          <Link
-            href="/login"
-            className="relative inline-flex items-center gap-2 bg-white text-indigo-900 hover:bg-indigo-50 px-10 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-2xl"
-          >
-            Crear mi restaurante gratis →
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-8 text-center text-slate-600 text-sm">
-        Ordermind © {new Date().getFullYear()} — Sistema de pedidos para restaurantes
+        <div className="mt-10 text-center text-black/50 text-xs">
+          Ordermind © {new Date().getFullYear()} — Sistema de pedidos para restaurantes
+        </div>
       </footer>
     </main>
   )
