@@ -79,12 +79,14 @@ export default function Home() {
           <Link href="/login" className="text-slate-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">
             Iniciar sesión
           </Link>
-          <Link
-            href="/login"
+          <a
+            href="https://wa.me/12094609828"
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-[#a3e635] hover:bg-lime-400 text-black px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-lime-500/20 hover:scale-105"
           >
-            Comenzar gratis →
-          </Link>
+            Comenzar
+          </a>
         </motion.div>
       </nav>
 
@@ -167,7 +169,7 @@ export default function Home() {
                 Comenzar ahora <ArrowRight className="w-5 h-5" />
               </Link>
               <a
-                href="https://wa.me/+526561234567"
+                href="https://wa.me/12094609828"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all"
@@ -256,7 +258,7 @@ export default function Home() {
             </ul>
 
             <a
-              href="https://wa.me/+526561234567"
+              href="https://wa.me/12094609828"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
