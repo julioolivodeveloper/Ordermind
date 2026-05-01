@@ -130,9 +130,9 @@ export default function Home() {
         {/* Background image */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80"
+            src="/dashboard-preview.png"
             alt=""
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-30 object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/90 to-[#0a0a0a]/40" />
         </div>
