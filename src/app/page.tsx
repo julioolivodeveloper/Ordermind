@@ -301,20 +301,22 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="relative flex justify-center"
           >
-            <div className="relative">
-              <div className="absolute -inset-6 bg-[#a3e635]/10 rounded-full blur-3xl" />
+            {/* Glow */}
+            <div className="absolute inset-0 bg-[#a3e635]/10 rounded-full blur-3xl scale-110" />
+
+            <div className="relative w-full max-w-xs md:max-w-sm">
               <img
-                src="https://images.unsplash.com/photo-1583394293214-aac25f752f45?w=700&q=80"
-                alt="Restaurante"
-                className="relative rounded-3xl shadow-2xl w-full max-w-sm object-cover"
-                style={{ aspectRatio: '3/4', objectPosition: 'top' }}
+                src="/restaurante-persona.png"
+                alt="Dueño de restaurante usando Ordermind"
+                className="relative rounded-3xl shadow-2xl w-full object-cover object-top"
+                style={{ aspectRatio: '3/4' }}
               />
               {/* Badge */}
-              <div className="absolute bottom-6 right-6 bg-[#a3e635] text-black rounded-2xl px-5 py-3 shadow-xl">
+              <div className="absolute bottom-5 right-4 bg-[#a3e635] text-black rounded-2xl px-4 py-3 shadow-2xl">
                 <p className="font-black text-xs uppercase leading-tight text-center">
                   Más Control<br />Más Ventas<br />Más Clientes
                 </p>
-                <div className="flex justify-center mt-1 text-black text-xs">★★★★★</div>
+                <div className="flex justify-center mt-1 text-black text-xs tracking-wider">★★★★★</div>
               </div>
             </div>
           </motion.div>
