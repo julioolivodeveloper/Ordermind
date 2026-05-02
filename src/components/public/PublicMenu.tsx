@@ -52,15 +52,45 @@ function isOpenNow(business_hours: Record<string, unknown> | undefined): boolean
   return mins >= oh * 60 + om && mins < ch * 60 + cm
 }
 
+const LABELS = {
+  es: {
+    search: 'Buscar platillos...', all: 'Todos', menu: 'Nuestro Menú',
+    dishes: 'platillos', viewMenu: 'Ver menú', myOrder: 'Mi pedido',
+    notFound: 'No se encontraron platillos', noItems: 'Sin platillos disponibles',
+    clearSearch: 'Limpiar búsqueda', popular: 'Popular', spicy: 'Picante',
+    customizable: 'Personalizable', add: '+ Agregar', findUs: 'Encuéntranos',
+    address: 'Dirección', whatsapp: 'WhatsApp', phone: 'Teléfono',
+    open: 'Abierto ahora', closed: 'Cerrado', off: 'de desc.',
+  },
+  en: {
+    search: 'Search dishes...', all: 'All', menu: 'Our Menu',
+    dishes: 'items', viewMenu: 'View menu', myOrder: 'My order',
+    notFound: 'No dishes found', noItems: 'No items available',
+    clearSearch: 'Clear search', popular: 'Popular', spicy: 'Spicy',
+    customizable: 'Customizable', add: '+ Add', findUs: 'Find us',
+    address: 'Address', whatsapp: 'WhatsApp', phone: 'Phone',
+    open: 'Open now', closed: 'Closed', off: 'off',
+  },
+}
+
 export function PublicMenu({ restaurant, categories, promotions = [], reviews = [] }: Props) {
   const { setRestaurant, itemCount, openCart } = useCartStore()
   const [selectedCat, setSelectedCat] = useState<string>('all')
   const [search, setSearch] = useState('')
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
   const [navVisible, setNavVisible] = useState(false)
+  const [lang, setLang] = useState<'es' | 'en'>('es')
   const heroRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const isOpen = isOpenNow(restaurant.business_hours)
+  const t = LABELS[lang]
+
+  function itemName(item: MenuItem) { return lang === 'en' && item.name_en ? item.name_en : item.name }
+  function itemDesc(item: MenuItem) { return lang === 'en' && item.description_en ? item.description_en : item.description }
+  function discountedPrice(item: MenuItem) {
+    if (!item.discount_percent || item.discount_percent <= 0) return null
+    return item.price * (1 - item.discount_percent / 100)
+  }
 
   useEffect(() => { setRestaurant(restaurant.slug) }, [restaurant.slug])
 
@@ -133,6 +163,14 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                 )}
               </div>
 
+              {/* Lang toggle */}
+              <button
+                onClick={() => setLang(l => l === 'es' ? 'en' : 'es')}
+                className="shrink-0 border border-slate-200 text-slate-600 hover:bg-slate-50 px-3 py-2 rounded-xl text-xs font-bold transition-colors"
+              >
+                {lang === 'es' ? 'EN' : 'ES'}
+              </button>
+
               {/* Cart */}
               <motion.button
                 onClick={openCart}
@@ -149,7 +187,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                     {count}
                   </motion.span>
                 )}
-                {count > 0 && <span className="hidden sm:inline">Mi pedido</span>}
+                {count > 0 && <span className="hidden sm:inline">{t.myOrder}</span>}
               </motion.button>
             </div>
 
@@ -268,7 +306,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
             {isOpen !== null && (
               <span className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-semibold backdrop-blur ${isOpen ? 'bg-green-500/20 text-green-300 border border-green-400/30' : 'bg-red-500/20 text-red-300 border border-red-400/30'}`}>
                 <span className={`w-2 h-2 rounded-full ${isOpen ? 'bg-green-400' : 'bg-red-400'}`} />
-                {isOpen ? 'Abierto ahora' : 'Cerrado'}
+                {isOpen ? t.open : t.closed}
               </span>
             )}
             {restaurant.address && (
@@ -298,7 +336,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
             onClick={scrollToMenu}
             className="group flex flex-col items-center gap-2 text-white/60 hover:text-white transition-colors"
           >
-            <span className="text-sm font-medium">Ver menú</span>
+            <span className="text-sm font-medium">{t.viewMenu}</span>
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
@@ -329,7 +367,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                 </motion.span>
               )}
             </AnimatePresence>
-            {count > 0 ? `Mi pedido (${count})` : 'Mi pedido'}
+            {count > 0 ? `${t.myOrder} (${count})` : t.myOrder}
           </motion.button>
         </div>
       </div>
@@ -352,8 +390,14 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
           className="flex items-center gap-3 mb-6"
         >
           <div className="w-1 h-8 rounded-full" style={{ backgroundColor: primary }} />
-          <h2 className="text-2xl font-black text-slate-800">Nuestro Menú</h2>
-          <span className="ml-auto text-sm text-slate-400">{allItems.filter(i => i.is_available).length} platillos</span>
+          <h2 className="text-2xl font-black text-slate-800">{t.menu}</h2>
+          <span className="ml-auto text-sm text-slate-400">{allItems.filter(i => i.is_available).length} {t.dishes}</span>
+          <button
+            onClick={() => setLang(l => l === 'es' ? 'en' : 'es')}
+            className="border border-slate-200 text-slate-500 hover:bg-slate-50 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+          >
+            {lang === 'es' ? '🇺🇸 EN' : '🇲🇽 ES'}
+          </button>
         </motion.div>
 
         {/* Search (non-sticky version) */}
@@ -363,7 +407,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar platillos..."
+              placeholder={t.search}
               className="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 bg-white shadow-sm"
               style={{ '--tw-ring-color': primary } as any}
             />
@@ -384,7 +428,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
               style={selectedCat === 'all' ? { backgroundColor: primary } : {}}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Todos
+              {t.all}
             </button>
             {categories.map(cat => (
               <button
@@ -410,17 +454,19 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
             >
               <UtensilsCrossed className="w-12 h-12 mx-auto mb-4 text-slate-300" />
               <p className="font-semibold text-slate-500 text-lg">
-                {search ? 'No se encontraron platillos' : 'Sin platillos disponibles'}
+                {search ? t.notFound : t.noItems}
               </p>
               {search && (
                 <button onClick={() => setSearch('')} className="mt-3 text-sm underline" style={{ color: primary }}>
-                  Limpiar búsqueda
+                  {t.clearSearch}
                 </button>
               )}
             </motion.div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredItems.map((item, i) => (
+              {filteredItems.map((item, i) => {
+                const salePrice = discountedPrice(item)
+                return (
                 <motion.div
                   key={item.id}
                   layout
@@ -434,19 +480,29 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                 >
                   {/* Image */}
                   {item.image_url ? (
-                    <div className="w-32 h-32 shrink-0 overflow-hidden">
+                    <div className="w-32 h-32 shrink-0 overflow-hidden relative">
                       <img
                         src={item.image_url}
-                        alt={item.name}
+                        alt={itemName(item)}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
+                      {salePrice && (
+                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
+                          -{item.discount_percent}%
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <div
-                      className="w-24 h-full shrink-0 flex items-center justify-center opacity-20 group-hover:opacity-30 transition-opacity"
+                      className="w-24 h-full shrink-0 flex items-center justify-center opacity-20 group-hover:opacity-30 transition-opacity relative"
                       style={{ backgroundColor: primary + '15' }}
                     >
                       <UtensilsCrossed className="w-8 h-8" style={{ color: primary }} />
+                      {salePrice && (
+                        <span className="absolute top-2 left-1 bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
+                          -{item.discount_percent}%
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -454,44 +510,54 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                   <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
                     <div>
                       <h3 className="font-bold text-slate-800 group-hover:text-slate-900 transition-colors leading-snug">
-                        {item.name}
+                        {itemName(item)}
                       </h3>
-                      {item.description && (
-                        <p className="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
+                      {itemDesc(item) && (
+                        <p className="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">{itemDesc(item)}</p>
                       )}
                       <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                         {item.is_popular && (
                           <span className="flex items-center gap-1 text-xs bg-amber-50 text-amber-600 border border-amber-100 px-2 py-0.5 rounded-full font-medium">
-                            <Star className="w-3 h-3" /> Popular
+                            <Star className="w-3 h-3" /> {t.popular}
                           </span>
                         )}
                         {item.is_spicy && (
                           <span className="flex items-center gap-1 text-xs bg-red-50 text-red-500 border border-red-100 px-2 py-0.5 rounded-full font-medium">
-                            <Flame className="w-3 h-3" /> Picante
+                            <Flame className="w-3 h-3" /> {t.spicy}
                           </span>
                         )}
                         {(item.ingredients?.length ?? 0) > 0 && (
                           <span className="text-xs text-slate-400 border border-slate-100 px-2 py-0.5 rounded-full">
-                            Personalizable
+                            {t.customizable}
                           </span>
                         )}
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between mt-3">
-                      <p className="font-black text-slate-800 text-lg">{formatCurrency(item.price)}</p>
+                      <div>
+                        {salePrice ? (
+                          <>
+                            <p className="text-xs text-slate-400 line-through leading-none">{formatCurrency(item.price)}</p>
+                            <p className="font-black text-red-500 text-lg leading-tight">{formatCurrency(salePrice)}</p>
+                          </>
+                        ) : (
+                          <p className="font-black text-slate-800 text-lg">{formatCurrency(item.price)}</p>
+                        )}
+                      </div>
                       <motion.button
                         whileTap={{ scale: 0.88 }}
                         onClick={e => { e.stopPropagation(); setSelectedItem(item) }}
                         className="text-white px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 shadow-md transition-all"
                         style={{ backgroundColor: primary }}
                       >
-                        + Agregar
+                        {t.add}
                       </motion.button>
                     </div>
                   </div>
                 </motion.div>
-              ))}
+                )
+              })}
             </div>
           )}
         </AnimatePresence>

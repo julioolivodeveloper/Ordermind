@@ -105,8 +105,11 @@ export interface MenuItem {
   restaurant_id: string
   category_id?: string
   name: string
+  name_en?: string
   description?: string
+  description_en?: string
   price: number
+  discount_percent?: number
   image_url?: string
   is_available: boolean
   is_popular: boolean

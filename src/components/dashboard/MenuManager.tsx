@@ -17,6 +17,7 @@ const BLANK_ITEM = {
   name: '', description: '', price: '', image_url: '',
   is_available: true, is_popular: false, is_spicy: false,
   category_id: '', sort_order: 0,
+  discount_percent: '', name_en: '', description_en: '',
 }
 
 export function MenuManager({ restaurantId, initialCategories, initialItems }: Props) {
@@ -68,6 +69,8 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       is_available: item.is_available, is_popular: item.is_popular,
       is_spicy: item.is_spicy, category_id: item.category_id ?? '',
       sort_order: item.sort_order,
+      discount_percent: item.discount_percent ? String(item.discount_percent) : '',
+      name_en: item.name_en ?? '', description_en: item.description_en ?? '',
     })
     setItemModal(true)
   }
@@ -76,7 +79,12 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
     if (!itemForm.name || !itemForm.price) return
     setSaving(true)
     try {
-      const body = { ...itemForm, price: parseFloat(itemForm.price), restaurant_id: restaurantId }
+      const body = {
+        ...itemForm,
+        price: parseFloat(itemForm.price),
+        discount_percent: itemForm.discount_percent ? parseFloat(itemForm.discount_percent) : 0,
+        restaurant_id: restaurantId,
+      }
       if (editingItem) {
         const res = await fetch(`/api/dashboard/menu/items/${editingItem.id}`, {
           method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -211,11 +219,22 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <h3 className="font-semibold text-slate-800 text-sm">{item.name}</h3>
+                  {item.name_en && <p className="text-xs text-slate-400 mt-0.5 italic">{item.name_en}</p>}
                   {(item.category as any)?.name && (
                     <p className="text-xs text-slate-400 mt-0.5">{(item.category as any).name}</p>
                   )}
                 </div>
-                <span className="text-indigo-600 font-bold text-sm">{formatCurrency(item.price)}</span>
+                <div className="text-right shrink-0">
+                  {(item.discount_percent ?? 0) > 0 ? (
+                    <>
+                      <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-bold mb-0.5 block">-{item.discount_percent}%</span>
+                      <span className="text-xs text-slate-400 line-through block">{formatCurrency(item.price)}</span>
+                      <span className="text-indigo-600 font-bold text-sm">{formatCurrency(item.price * (1 - (item.discount_percent ?? 0) / 100))}</span>
+                    </>
+                  ) : (
+                    <span className="text-indigo-600 font-bold text-sm">{formatCurrency(item.price)}</span>
+                  )}
+                </div>
               </div>
               {item.description && (
                 <p className="text-xs text-slate-500 mb-3 line-clamp-2">{item.description}</p>
@@ -272,11 +291,28 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
               <input type="number" value={itemForm.price} onChange={e => setItemForm(f => ({ ...f, price: e.target.value }))} placeholder="0.00" step="0.01" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-              <select value={itemForm.category_id} onChange={e => setItemForm(f => ({ ...f, category_id: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="">Sin categoría</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-              </select>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Descuento (%)</label>
+              <input type="number" value={itemForm.discount_percent} onChange={e => setItemForm(f => ({ ...f, discount_percent: e.target.value }))} placeholder="0" min="0" max="99" step="1" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+            <select value={itemForm.category_id} onChange={e => setItemForm(f => ({ ...f, category_id: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">Sin categoría</option>
+              {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+            </select>
+          </div>
+          <div className="border-t border-slate-100 pt-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Traducción al inglés (opcional)</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nombre en inglés</label>
+                <input value={itemForm.name_en} onChange={e => setItemForm(f => ({ ...f, name_en: e.target.value }))} placeholder="Chicken taco" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Descripción en inglés</label>
+                <textarea value={itemForm.description_en} onChange={e => setItemForm(f => ({ ...f, description_en: e.target.value }))} rows={2} placeholder="With beans, avocado, tomato..." className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+              </div>
             </div>
           </div>
           <div>
