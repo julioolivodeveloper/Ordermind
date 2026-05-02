@@ -9,8 +9,10 @@ import {
 import { useCartStore } from '@/store/cart-store'
 import { IngredientModal } from './IngredientModal'
 import { CartDrawer } from './CartDrawer'
+import { PromotionBanners } from './PromotionBanners'
+import { ReviewSection } from './ReviewSection'
 import { formatCurrency } from '@/lib/utils'
-import type { Restaurant, MenuCategory, MenuItem } from '@/types'
+import type { Restaurant, MenuCategory, MenuItem, Promotion, Review } from '@/types'
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -33,9 +35,24 @@ function FacebookIcon({ className }: { className?: string }) {
 interface Props {
   restaurant: Restaurant
   categories: (MenuCategory & { menu_items: MenuItem[] })[]
+  promotions?: Promotion[]
+  reviews?: Review[]
 }
 
-export function PublicMenu({ restaurant, categories }: Props) {
+function isOpenNow(business_hours: Record<string, unknown> | undefined): boolean | null {
+  if (!business_hours || Object.keys(business_hours).length === 0) return null
+  const days = ['sun','mon','tue','wed','thu','fri','sat']
+  const now = new Date()
+  const dayKey = days[now.getDay()]
+  const hours = (business_hours as any)[dayKey]
+  if (!hours || !hours.enabled) return false
+  const [oh, om] = hours.open.split(':').map(Number)
+  const [ch, cm] = hours.close.split(':').map(Number)
+  const mins = now.getHours() * 60 + now.getMinutes()
+  return mins >= oh * 60 + om && mins < ch * 60 + cm
+}
+
+export function PublicMenu({ restaurant, categories, promotions = [], reviews = [] }: Props) {
   const { setRestaurant, itemCount, openCart } = useCartStore()
   const [selectedCat, setSelectedCat] = useState<string>('all')
   const [search, setSearch] = useState('')
@@ -43,6 +60,7 @@ export function PublicMenu({ restaurant, categories }: Props) {
   const [navVisible, setNavVisible] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const isOpen = isOpenNow(restaurant.business_hours)
 
   useEffect(() => { setRestaurant(restaurant.slug) }, [restaurant.slug])
 
@@ -247,6 +265,12 @@ export function PublicMenu({ restaurant, categories }: Props) {
             transition={{ delay: 0.35, duration: 0.5 }}
             className="flex flex-wrap items-center justify-center gap-3 mb-8"
           >
+            {isOpen !== null && (
+              <span className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-semibold backdrop-blur ${isOpen ? 'bg-green-500/20 text-green-300 border border-green-400/30' : 'bg-red-500/20 text-red-300 border border-red-400/30'}`}>
+                <span className={`w-2 h-2 rounded-full ${isOpen ? 'bg-green-400' : 'bg-red-400'}`} />
+                {isOpen ? 'Abierto ahora' : 'Cerrado'}
+              </span>
+            )}
             {restaurant.address && (
               <span className="flex items-center gap-1.5 text-white/70 text-sm bg-white/10 backdrop-blur px-3 py-1.5 rounded-full">
                 <MapPin className="w-3.5 h-3.5" />
@@ -309,6 +333,13 @@ export function PublicMenu({ restaurant, categories }: Props) {
           </motion.button>
         </div>
       </div>
+
+      {/* ── PROMOTIONS ── */}
+      {promotions.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 pt-8">
+          <PromotionBanners promotions={promotions} restaurant={restaurant} />
+        </div>
+      )}
 
       {/* ── MENU SECTION ── */}
       <div ref={menuRef} className="max-w-4xl mx-auto px-4 py-10">
@@ -566,6 +597,11 @@ export function PublicMenu({ restaurant, categories }: Props) {
           </div>
         </motion.section>
       )}
+
+      {/* ── REVIEWS ── */}
+      <div className="border-t border-slate-100 bg-white">
+        <ReviewSection reviews={reviews} restaurant={restaurant} />
+      </div>
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-slate-200 py-6 text-center text-slate-400 text-xs">

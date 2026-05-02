@@ -2,13 +2,15 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut } from 'lucide-react'
+import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut, Tag, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 
 const nav = [
   { href: '/dashboard/orders', label: 'Pedidos', icon: ClipboardList },
   { href: '/dashboard/menu', label: 'Menú', icon: UtensilsCrossed },
+  { href: '/dashboard/promotions', label: 'Promociones', icon: Tag },
+  { href: '/dashboard/reviews', label: 'Reseñas', icon: Star },
   { href: '/dashboard/finances', label: 'Finanzas', icon: BarChart3 },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]

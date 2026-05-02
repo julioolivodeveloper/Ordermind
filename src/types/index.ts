@@ -54,6 +54,9 @@ export interface Restaurant {
   business_hours: Record<string, unknown>
   custom_domain?: string
   delivery_zip_codes?: string[]
+  loyalty_enabled?: boolean
+  loyalty_points_per_dollar?: number
+  loyalty_redemption_points?: number
   notes?: string
   created_at: string
   updated_at: string
@@ -175,6 +178,42 @@ export interface Order {
   created_at: string
   updated_at: string
   order_items?: OrderItem[]
+}
+
+export interface Promotion {
+  id: string
+  restaurant_id: string
+  title: string
+  description?: string
+  badge_text?: string
+  image_url?: string
+  valid_until?: string
+  is_active: boolean
+  sort_order: number
+  created_at: string
+}
+
+export interface Review {
+  id: string
+  restaurant_id: string
+  order_id?: string
+  customer_name: string
+  customer_phone?: string
+  rating: number
+  comment?: string
+  is_visible: boolean
+  created_at: string
+}
+
+export interface LoyaltyPoints {
+  id: string
+  restaurant_id: string
+  customer_phone: string
+  customer_name?: string
+  points: number
+  total_spent: number
+  created_at: string
+  updated_at: string
 }
 
 export interface PaymentConnection {

@@ -146,11 +146,29 @@ function ImageUploader({
   )
 }
 
+const DAYS = [
+  { key: 'mon', label: 'Lunes' }, { key: 'tue', label: 'Martes' }, { key: 'wed', label: 'Miércoles' },
+  { key: 'thu', label: 'Jueves' }, { key: 'fri', label: 'Viernes' }, { key: 'sat', label: 'Sábado' }, { key: 'sun', label: 'Domingo' },
+]
+
+function defaultHours() {
+  return Object.fromEntries(DAYS.map(d => [d.key, { enabled: d.key !== 'sun', open: '09:00', close: '22:00' }]))
+}
+
 export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   const router = useRouter()
   const { toast } = useToast()
   const [zipInput, setZipInput] = useState('')
   const [zipCodes, setZipCodes] = useState<string[]>(restaurant.delivery_zip_codes ?? [])
+  const [hours, setHours] = useState<Record<string, { enabled: boolean; open: string; close: string }>>(
+    (restaurant.business_hours && Object.keys(restaurant.business_hours).length > 0)
+      ? restaurant.business_hours as any
+      : defaultHours()
+  )
+
+  function updateHour(day: string, field: 'enabled' | 'open' | 'close', value: any) {
+    setHours(prev => ({ ...prev, [day]: { ...prev[day], [field]: value } }))
+  }
 
   function addZip() {
     const z = zipInput.trim()
@@ -188,9 +206,12 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
     tax_rate: restaurant.tax_rate,
     tax_name: restaurant.tax_name,
     custom_domain: restaurant.custom_domain ?? '',
+    loyalty_enabled: restaurant.loyalty_enabled ?? false,
+    loyalty_points_per_dollar: restaurant.loyalty_points_per_dollar ?? 10,
+    loyalty_redemption_points: restaurant.loyalty_redemption_points ?? 100,
   })
   const [saving, setSaving] = useState(false)
-  const [tab, setTab] = useState<'brand' | 'general' | 'operations' | 'payments'>('brand')
+  const [tab, setTab] = useState<'brand' | 'general' | 'operations' | 'hours' | 'loyalty' | 'payments'>('brand')
 
   function f(key: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -203,7 +224,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
       const res = await fetch('/api/dashboard/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, delivery_zip_codes: zipCodes }),
+        body: JSON.stringify({ ...form, delivery_zip_codes: zipCodes, business_hours: hours }),
       })
       if (!res.ok) throw new Error()
       toast('¡Configuración guardada!')
@@ -219,6 +240,8 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
     { id: 'brand', label: '🎨 Marca' },
     { id: 'general', label: '📋 General' },
     { id: 'operations', label: '⚙️ Operaciones' },
+    { id: 'hours', label: '🕐 Horarios' },
+    { id: 'loyalty', label: '⭐ Lealtad' },
     { id: 'payments', label: '💳 Pagos' },
   ] as const
 
@@ -428,6 +451,55 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
               </>
             )}
           </>
+        )}
+
+        {tab === 'hours' && (
+          <div className="space-y-3">
+            <p className="text-xs text-slate-400">Configura los horarios en que tu restaurante acepta pedidos.</p>
+            {DAYS.map(day => (
+              <div key={day.key} className="flex items-center gap-3">
+                <label className="flex items-center gap-2 w-28 shrink-0">
+                  <input type="checkbox" checked={hours[day.key]?.enabled ?? false} onChange={e => updateHour(day.key, 'enabled', e.target.checked)} className="rounded accent-indigo-600 w-4 h-4" />
+                  <span className="text-sm font-medium text-slate-700">{day.label}</span>
+                </label>
+                {hours[day.key]?.enabled ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input type="time" value={hours[day.key]?.open ?? '09:00'} onChange={e => updateHour(day.key, 'open', e.target.value)} className={fieldClass + ' flex-1'} />
+                    <span className="text-slate-400 text-sm">—</span>
+                    <input type="time" value={hours[day.key]?.close ?? '22:00'} onChange={e => updateHour(day.key, 'close', e.target.value)} className={fieldClass + ' flex-1'} />
+                  </div>
+                ) : (
+                  <span className="text-sm text-slate-400 italic">Cerrado</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'loyalty' && (
+          <div className="space-y-5">
+            <label className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:border-indigo-200 cursor-pointer transition-colors">
+              <input type="checkbox" checked={form.loyalty_enabled} onChange={f('loyalty_enabled')} className="rounded w-4 h-4 accent-indigo-600" />
+              <div>
+                <p className="text-sm font-semibold text-slate-800">⭐ Programa de lealtad activo</p>
+                <p className="text-xs text-slate-500">Los clientes acumulan puntos al hacer pedidos y los canjean por descuentos.</p>
+              </div>
+            </label>
+            {form.loyalty_enabled && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Puntos por cada $1 gastado</label>
+                  <input type="number" min="1" value={form.loyalty_points_per_dollar} onChange={f('loyalty_points_per_dollar')} className={fieldClass} />
+                  <p className="text-xs text-slate-400 mt-1">Ej: 10 = el cliente gana 10 pts por cada dólar</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Puntos para canjear $1</label>
+                  <input type="number" min="1" value={form.loyalty_redemption_points} onChange={f('loyalty_redemption_points')} className={fieldClass} />
+                  <p className="text-xs text-slate-400 mt-1">Ej: 100 = 100 puntos = $1 de descuento</p>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {tab === 'payments' && (
