@@ -24,7 +24,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
   const {
     customer_name, customer_phone, customer_email,
-    order_type, payment_method, notes, delivery_address,
+    order_type, payment_method, payment_intent_id, payment_status,
+    notes, delivery_address,
     subtotal, tax_amount, delivery_fee, discount_amount, total,
     items,
   } = body
@@ -46,7 +47,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       discount_amount,
       total,
       payment_method,
-      payment_status: 'pending',
+      payment_status: payment_status ?? 'pending',
+      payment_intent_id: payment_intent_id ?? null,
       notes,
     })
     .select()

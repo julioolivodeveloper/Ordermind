@@ -57,6 +57,8 @@ export interface Restaurant {
   loyalty_enabled?: boolean
   loyalty_points_per_dollar?: number
   loyalty_redemption_points?: number
+  stripe_publishable_key?: string
+  stripe_connected?: boolean
   notes?: string
   created_at: string
   updated_at: string

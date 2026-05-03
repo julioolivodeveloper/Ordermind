@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useCartStore } from '@/store/cart-store'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { StripePaymentForm } from './StripePaymentForm'
 import type { Restaurant } from '@/types'
 
 export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
@@ -194,9 +195,10 @@ export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
           <h2 className="font-semibold text-slate-800 mb-3">Método de pago</h2>
           <div className="space-y-2">
             {[
-              { value: 'cash', label: '💵 Pago en efectivo' },
-              { value: 'card', label: '💳 Tarjeta al entregar' },
-            ].map(opt => (
+              { value: 'cash', label: '💵 Pago en efectivo', show: true },
+              { value: 'card', label: '💳 Tarjeta al entregar', show: true },
+              { value: 'stripe', label: '🔒 Tarjeta de crédito/débito (en línea)', show: !!restaurant.stripe_connected },
+            ].filter(o => o.show).map(opt => (
               <label key={opt.value} className={`flex items-center gap-3 border rounded-xl p-3 cursor-pointer transition-all ${form.payment_method === opt.value ? 'border-2' : 'border-slate-200'}`}
                 style={form.payment_method === opt.value ? { borderColor: restaurant.primary_color } : {}}>
                 <input type="radio" name="payment_method" value={opt.value} checked={form.payment_method === opt.value} onChange={f('payment_method')} className="hidden" />
@@ -247,14 +249,56 @@ export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full text-white py-4 rounded-2xl font-bold text-base transition-colors disabled:opacity-60"
-          style={{ backgroundColor: restaurant.primary_color }}
-        >
-          {loading ? 'Procesando pedido...' : `Realizar pedido — ${formatCurrency(total)}`}
-        </button>
+        {/* Stripe pago en línea */}
+        {form.payment_method === 'stripe' ? (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+            <h2 className="font-semibold text-slate-800">Datos de tarjeta</h2>
+            {(!form.customer_name || !form.customer_phone) ? (
+              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                Completa tu nombre y teléfono antes de ingresar los datos de tu tarjeta.
+              </p>
+            ) : (
+              <StripePaymentForm
+                restaurant={restaurant}
+                orderData={{
+                  customer_name: form.customer_name,
+                  customer_phone: form.customer_phone,
+                  customer_email: form.customer_email,
+                  order_type: form.order_type,
+                  notes: form.notes,
+                  delivery_address: form.order_type === 'delivery'
+                    ? { street: form.street, city: form.city, zip: form.zip, references: form.references }
+                    : null,
+                  subtotal: sub,
+                  tax_amount: tax,
+                  delivery_fee: deliveryFee,
+                  discount_amount: 0,
+                  total,
+                  items: items.map(i => ({
+                    menu_item_id: i.menu_item_id,
+                    item_name: i.item_name,
+                    item_price: i.item_price,
+                    quantity: i.quantity,
+                    modifications: i.modifications,
+                    notes: i.notes,
+                    subtotal: i.subtotal,
+                  })),
+                }}
+                onSuccess={orderId => { clearCart(); router.push(`/r/${restaurant.slug}/order/${orderId}`) }}
+                onError={msg => setError(msg)}
+              />
+            )}
+          </div>
+        ) : (
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full text-white py-4 rounded-2xl font-bold text-base transition-colors disabled:opacity-60"
+            style={{ backgroundColor: restaurant.primary_color }}
+          >
+            {loading ? 'Procesando pedido...' : `Realizar pedido — ${formatCurrency(total)}`}
+          </button>
+        )}
 
         <p className="text-center text-slate-400 text-xs pb-4">
           Al confirmar aceptas los términos del restaurante
