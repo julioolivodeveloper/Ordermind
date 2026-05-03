@@ -90,15 +90,17 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
           method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         })
         const updated = await res.json()
+        if (!res.ok) throw new Error(updated.error ?? 'Error al actualizar')
         setItems(prev => prev.map(i => i.id === editingItem.id ? { ...i, ...updated } : i))
-        toast('Platillo actualizado')
+        toast('Item updated')
       } else {
         const res = await fetch('/api/dashboard/menu/items', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         })
         const created = await res.json()
+        if (!res.ok) throw new Error(created.error ?? 'Error al crear')
         setItems(prev => [...prev, created])
-        toast('Platillo creado')
+        toast('Item created')
       }
       setItemModal(false)
     } catch {
