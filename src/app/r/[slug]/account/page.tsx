@@ -35,12 +35,33 @@ export default async function CustomerAccountPage({ params }: { params: Promise<
     .eq('email', user.email ?? '')
     .maybeSingle()
 
+  // Look up loyalty points using the phone from the customer record
+  let loyalty = null
+  if (customer?.phone) {
+    const { data: lp } = await admin
+      .from('loyalty_points')
+      .select('points, total_spent')
+      .eq('restaurant_id', restaurant.id)
+      .eq('customer_phone', customer.phone)
+      .maybeSingle()
+    loyalty = lp
+  }
+
+  // Also fetch restaurant loyalty settings to show redemption info
+  const { data: restaurantFull } = await admin
+    .from('restaurants')
+    .select('loyalty_enabled, loyalty_points_per_dollar, loyalty_redemption_points')
+    .eq('id', restaurant.id)
+    .single()
+
   return (
     <CustomerAccount
       restaurant={restaurant as any}
       user={{ email: user.email ?? '', id: user.id }}
       orders={(orders ?? []) as any[]}
       customer={customer as any}
+      loyalty={loyalty as any}
+      loyaltySettings={restaurantFull as any}
     />
   )
 }

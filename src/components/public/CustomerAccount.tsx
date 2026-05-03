@@ -3,11 +3,13 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Package, Clock, CheckCircle2, XCircle, ChefHat, Truck, LogOut, ChevronDown, ChevronRight } from 'lucide-react'
+import { Package, Clock, CheckCircle2, XCircle, ChefHat, Truck, LogOut, ChevronDown, ChevronRight, Star, Gift } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 interface Restaurant { id: string; name: string; slug: string; logo_url: string | null; primary_color: string }
 interface Customer { id: string; total_orders: number; total_spent: number; last_order_at: string | null }
+interface Loyalty { points: number; total_spent: number }
+interface LoyaltySettings { loyalty_enabled: boolean; loyalty_points_per_dollar: number; loyalty_redemption_points: number }
 interface Order {
   id: string; order_number: number; status: string; order_type: string
   total: number; subtotal: number; created_at: string
@@ -83,13 +85,64 @@ function OrderCard({ order, color, slug }: { order: Order; color: string; slug: 
   )
 }
 
+function LoyaltyCard({ loyalty, settings, color }: { loyalty: Loyalty; settings: LoyaltySettings; color: string }) {
+  const redeemAt = settings.loyalty_redemption_points ?? 100
+  const progress = Math.min((loyalty.points / redeemAt) * 100, 100)
+  const canRedeem = loyalty.points >= redeemAt
+  const remaining = Math.max(0, redeemAt - loyalty.points)
+
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: color + '20' }}>
+            <Star className="w-4 h-4" style={{ color }} />
+          </div>
+          <div>
+            <p className="text-white font-bold text-sm">Rewards points</p>
+            <p className="text-white/40 text-xs">Earn {settings.loyalty_points_per_dollar ?? 1} pt per $1 spent</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-white font-black text-2xl" style={{ color }}>{loyalty.points}</p>
+          <p className="text-white/40 text-xs">points</p>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="space-y-1.5">
+        <div className="flex justify-between text-xs text-white/40">
+          <span>Progress to next reward</span>
+          <span>{loyalty.points} / {redeemAt} pts</span>
+        </div>
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${progress}%`, backgroundColor: color }}
+          />
+        </div>
+        {canRedeem ? (
+          <div className="flex items-center gap-1.5 text-xs font-bold mt-2" style={{ color }}>
+            <Gift className="w-3.5 h-3.5" />
+            You have a reward ready to redeem at checkout!
+          </div>
+        ) : (
+          <p className="text-white/30 text-xs mt-1">{remaining} more points to earn a reward</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function CustomerAccount({
-  restaurant, user, orders, customer,
+  restaurant, user, orders, customer, loyalty, loyaltySettings,
 }: {
   restaurant: Restaurant
   user: { email: string; id: string }
   orders: Order[]
   customer: Customer | null
+  loyalty: Loyalty | null
+  loyaltySettings: LoyaltySettings | null
 }) {
   const router = useRouter()
   const color = restaurant.primary_color || '#a3e635'
@@ -99,6 +152,8 @@ export function CustomerAccount({
     await supabase.auth.signOut()
     router.push(`/r/${restaurant.slug}`)
   }
+
+  const showLoyalty = loyaltySettings?.loyalty_enabled && loyalty && loyalty.points > 0
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] pb-20">
@@ -139,12 +194,18 @@ export function CustomerAccount({
             <div className="flex gap-6 mt-4 pt-4 border-t border-white/8">
               <div>
                 <p className="text-white font-bold text-lg">{customer.total_orders}</p>
-                <p className="text-white/40 text-xs">Total orders</p>
+                <p className="text-white/40 text-xs">Orders</p>
               </div>
               <div>
                 <p className="text-white font-bold text-lg">{formatCurrency(customer.total_spent)}</p>
                 <p className="text-white/40 text-xs">Total spent</p>
               </div>
+              {loyalty && loyaltySettings?.loyalty_enabled && (
+                <div>
+                  <p className="text-white font-bold text-lg" style={{ color }}>{loyalty.points}</p>
+                  <p className="text-white/40 text-xs">Points</p>
+                </div>
+              )}
               {customer.last_order_at && (
                 <div>
                   <p className="text-white font-bold text-sm">{new Date(customer.last_order_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
@@ -154,6 +215,11 @@ export function CustomerAccount({
             </div>
           )}
         </div>
+
+        {/* Loyalty card */}
+        {showLoyalty && loyaltySettings && (
+          <LoyaltyCard loyalty={loyalty!} settings={loyaltySettings} color={color} />
+        )}
 
         {/* Orders */}
         <div>
