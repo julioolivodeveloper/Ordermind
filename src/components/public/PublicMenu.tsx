@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Phone, Globe, ShoppingCart,
   Search, Star, Flame, ChevronDown, Bike, UtensilsCrossed,
-  MessageCircle, X, Sparkles
+  MessageCircle, X, Sparkles, User
 } from 'lucide-react'
+import Link from 'next/link'
 import { useCartStore } from '@/store/cart-store'
 import { IngredientModal } from './IngredientModal'
 import { CartDrawer } from './CartDrawer'
@@ -170,6 +171,15 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
               >
                 {lang === 'es' ? 'EN' : 'ES'}
               </button>
+
+              {/* My account */}
+              <Link
+                href={`/r/${restaurant.slug}/account`}
+                className="shrink-0 border border-slate-200 text-slate-600 hover:bg-slate-50 p-2 rounded-xl transition-colors"
+                title="My account"
+              >
+                <User className="w-4 h-4" />
+              </Link>
 
               {/* Cart */}
               <motion.button

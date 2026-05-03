@@ -61,6 +61,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     await admin.rpc('increment_coupon_uses', { p_restaurant_id: restaurant.id, p_code: coupon_code.toUpperCase() }).maybeSingle()
   }
 
+  // Upsert customer record (fire and forget — don't block on failure)
+  if (customer_email) {
+    void admin.rpc('upsert_customer_from_order', {
+      p_restaurant_id: restaurant.id,
+      p_order_id: order.id,
+      p_email: customer_email,
+      p_name: customer_name ?? null,
+      p_phone: customer_phone ?? null,
+      p_total: total ?? 0,
+    })
+  }
+
   if (items?.length > 0) {
     const orderItems = items.map((item: any) => ({
       order_id: order.id,

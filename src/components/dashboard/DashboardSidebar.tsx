@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut, Tag, Star, CreditCard, ChefHat, Ticket } from 'lucide-react'
+import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut, Tag, Star, CreditCard, ChefHat, Ticket, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 
@@ -10,6 +10,7 @@ const nav = [
   { href: '/dashboard/orders', label: 'Orders', icon: ClipboardList },
   { href: '/dashboard/kitchen', label: 'Kitchen', icon: ChefHat },
   { href: '/dashboard/menu', label: 'Menu', icon: UtensilsCrossed },
+  { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/promotions', label: 'Promotions', icon: Tag },
   { href: '/dashboard/coupons', label: 'Coupons', icon: Ticket },
   { href: '/dashboard/reviews', label: 'Reviews', icon: Star },
