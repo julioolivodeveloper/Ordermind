@@ -2,18 +2,20 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut, Tag, Star, CreditCard } from 'lucide-react'
+import { ClipboardList, UtensilsCrossed, BarChart3, Settings, Eye, LogOut, Tag, Star, CreditCard, ChefHat, Ticket } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 
 const nav = [
-  { href: '/dashboard/orders', label: 'Pedidos', icon: ClipboardList },
-  { href: '/dashboard/menu', label: 'Menú', icon: UtensilsCrossed },
-  { href: '/dashboard/promotions', label: 'Promociones', icon: Tag },
-  { href: '/dashboard/reviews', label: 'Reseñas', icon: Star },
-  { href: '/dashboard/stripe', label: 'Pagos Stripe', icon: CreditCard },
-  { href: '/dashboard/finances', label: 'Finanzas', icon: BarChart3 },
-  { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
+  { href: '/dashboard/orders', label: 'Orders', icon: ClipboardList },
+  { href: '/dashboard/kitchen', label: 'Kitchen', icon: ChefHat },
+  { href: '/dashboard/menu', label: 'Menu', icon: UtensilsCrossed },
+  { href: '/dashboard/promotions', label: 'Promotions', icon: Tag },
+  { href: '/dashboard/coupons', label: 'Coupons', icon: Ticket },
+  { href: '/dashboard/reviews', label: 'Reviews', icon: Star },
+  { href: '/dashboard/stripe', label: 'Stripe Payments', icon: CreditCard },
+  { href: '/dashboard/finances', label: 'Finances', icon: BarChart3 },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
 export function DashboardSidebar({ profile }: { profile: Profile }) {

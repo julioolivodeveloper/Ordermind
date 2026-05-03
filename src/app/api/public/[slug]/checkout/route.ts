@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     order_type, payment_method, payment_intent_id, payment_status,
     notes, delivery_address,
     subtotal, tax_amount, delivery_fee, discount_amount, total,
-    items,
+    coupon_code, items,
   } = body
 
   const { data: order, error: orderError } = await admin
@@ -55,6 +55,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     .single()
 
   if (orderError) return NextResponse.json({ error: orderError.message }, { status: 400 })
+
+  // Increment coupon usage counter
+  if (coupon_code) {
+    await admin.rpc('increment_coupon_uses', { p_restaurant_id: restaurant.id, p_code: coupon_code.toUpperCase() }).maybeSingle()
+  }
 
   if (items?.length > 0) {
     const orderItems = items.map((item: any) => ({

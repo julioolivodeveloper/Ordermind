@@ -1,6 +1,20 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+
+function beep() {
+  try {
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain); gain.connect(ctx.destination)
+    osc.frequency.setValueAtTime(880, ctx.currentTime)
+    osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.12)
+    gain.gain.setValueAtTime(0.25, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4)
+    osc.start(); osc.stop(ctx.currentTime + 0.4)
+  } catch {}
+}
 import { formatCurrency, timeAgo } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 import { useToast } from '@/components/ui/Toast'
@@ -37,8 +51,12 @@ export function OrdersBoard({ initialOrders, restaurantId }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [updating, setUpdating] = useState<string | null>(null)
   const { toast } = useToast()
+  const ordersRef = useRef(orders)
+  ordersRef.current = orders
 
   useEffect(() => {
+    if (Notification.permission === 'default') Notification.requestPermission()
+
     const supabase = createClient()
     const channel = supabase
       .channel(`orders:${restaurantId}`)
@@ -53,7 +71,14 @@ export function OrdersBoard({ initialOrders, restaurantId }: Props) {
             .from('orders').select('*, order_items(*)').eq('id', payload.new.id).single()
           if (data) {
             setOrders(prev => [data as Order, ...prev])
-            toast(`Nuevo pedido #${data.order_number}`, 'info')
+            toast(`New order #${data.order_number}`, 'info')
+            beep()
+            if (Notification.permission === 'granted') {
+              new Notification(`🆕 New order #${data.order_number}`, {
+                body: `${data.customer_name} · $${data.total?.toFixed(2)}`,
+                icon: '/favicon.ico',
+              })
+            }
           }
         } else if (payload.eventType === 'UPDATE') {
           setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o))
