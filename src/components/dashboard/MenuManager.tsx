@@ -468,17 +468,6 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                   className="mt-2 w-full border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-500 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  USDZ URL <span className="text-slate-400 font-normal">(iPhone AR nativo — opcional)</span>
-                </label>
-                <input
-                  value={itemForm.model_usdz_url}
-                  onChange={e => setItemForm(f => ({ ...f, model_usdz_url: e.target.value }))}
-                  placeholder="https://…/model.usdz"
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
             </div>
           </div>
           <div className="flex gap-6">
