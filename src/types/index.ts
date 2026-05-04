@@ -113,6 +113,8 @@ export interface MenuItem {
   price: number
   discount_percent?: number
   image_url?: string
+  model_url?: string
+  model_usdz_url?: string
   is_available: boolean
   is_popular: boolean
   is_spicy: boolean

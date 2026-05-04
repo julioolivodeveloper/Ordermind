@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Phone, Globe, ShoppingCart,
   Search, Star, Flame, ChevronDown, Bike, UtensilsCrossed,
-  MessageCircle, X, Sparkles, User
+  MessageCircle, X, Sparkles, User, Box
 } from 'lucide-react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart-store'
 import { IngredientModal } from './IngredientModal'
 import { CartDrawer } from './CartDrawer'
+import { ModelViewerModal } from './ModelViewerModal'
 import { PromotionBanners } from './PromotionBanners'
 import { ReviewSection } from './ReviewSection'
 import { formatCurrency } from '@/lib/utils'
@@ -79,6 +80,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
   const [selectedCat, setSelectedCat] = useState<string>('all')
   const [search, setSearch] = useState('')
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
+  const [item3D, setItem3D] = useState<MenuItem | null>(null)
   const [navVisible, setNavVisible] = useState(false)
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const heroRef = useRef<HTMLDivElement>(null)
@@ -544,7 +546,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-center justify-between mt-3 gap-2">
                       <div>
                         {salePrice ? (
                           <>
@@ -555,14 +557,28 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                           <p className="font-black text-slate-800 text-lg">{formatCurrency(item.price)}</p>
                         )}
                       </div>
-                      <motion.button
-                        whileTap={{ scale: 0.88 }}
-                        onClick={e => { e.stopPropagation(); setSelectedItem(item) }}
-                        className="text-white px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 shadow-md transition-all"
-                        style={{ backgroundColor: primary }}
-                      >
-                        {t.add}
-                      </motion.button>
+                      <div className="flex items-center gap-1.5">
+                        {item.model_url && (
+                          <motion.button
+                            whileTap={{ scale: 0.88 }}
+                            onClick={e => { e.stopPropagation(); setItem3D(item) }}
+                            title="Ver en 3D"
+                            className="flex items-center gap-1 border px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all hover:bg-slate-50"
+                            style={{ borderColor: primary + '60', color: primary }}
+                          >
+                            <Box className="w-3 h-3" />
+                            3D
+                          </motion.button>
+                        )}
+                        <motion.button
+                          whileTap={{ scale: 0.88 }}
+                          onClick={e => { e.stopPropagation(); setSelectedItem(item) }}
+                          className="text-white px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 shadow-md transition-all"
+                          style={{ backgroundColor: primary }}
+                        >
+                          {t.add}
+                        </motion.button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -690,6 +706,16 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
       {/* Modals */}
       {selectedItem && (
         <IngredientModal item={selectedItem} restaurant={restaurant} onClose={() => setSelectedItem(null)} />
+      )}
+      {item3D?.model_url && (
+        <ModelViewerModal
+          open={!!item3D}
+          onClose={() => setItem3D(null)}
+          itemName={itemName(item3D)}
+          modelUrl={item3D.model_url}
+          modelUsdzUrl={item3D.model_usdz_url}
+          color={primary}
+        />
       )}
       <CartDrawer restaurant={restaurant} />
     </div>

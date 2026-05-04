@@ -18,6 +18,7 @@ const BLANK_ITEM = {
   is_available: true, is_popular: false, is_spicy: false,
   category_id: '', sort_order: 0,
   discount_percent: '', name_en: '', description_en: '',
+  model_url: '', model_usdz_url: '',
 }
 
 export function MenuManager({ restaurantId, initialCategories, initialItems }: Props) {
@@ -71,6 +72,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       sort_order: item.sort_order,
       discount_percent: item.discount_percent ? String(item.discount_percent) : '',
       name_en: item.name_en ?? '', description_en: item.description_en ?? '',
+      model_url: item.model_url ?? '', model_usdz_url: item.model_usdz_url ?? '',
     })
     setItemModal(true)
   }
@@ -339,6 +341,19 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
               />
             </label>
+          </div>
+          <div className="border-t border-slate-100 pt-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">3D Model (optional)</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">GLB URL <span className="text-slate-400 font-normal">(Android + web)</span></label>
+                <input value={itemForm.model_url} onChange={e => setItemForm(f => ({ ...f, model_url: e.target.value }))} placeholder="https://…/model.glb" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">USDZ URL <span className="text-slate-400 font-normal">(iPhone AR)</span></label>
+                <input value={itemForm.model_usdz_url} onChange={e => setItemForm(f => ({ ...f, model_usdz_url: e.target.value }))} placeholder="https://…/model.usdz" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
           </div>
           <div className="flex gap-6">
             {([['is_available', '✓ Disponible'], ['is_popular', '⭐ Popular'], ['is_spicy', '🌶️ Picante']] as [keyof typeof itemForm, string][]).map(([key, label]) => (
