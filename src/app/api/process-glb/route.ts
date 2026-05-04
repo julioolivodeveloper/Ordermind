@@ -6,28 +6,25 @@ export const maxDuration = 60
 
 const TARGET_METERS = 0.15
 
+// Accepts JSON { url, path } — downloads GLB from url, rescales, re-uploads to same path
 export async function POST(request: Request) {
   try {
-    let formData: FormData
-    try {
-      formData = await request.formData()
-    } catch {
-      return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+    const body = await request.json().catch(() => null)
+    if (!body?.url || !body?.path) {
+      return NextResponse.json({ error: 'Missing url or path' }, { status: 400 })
     }
 
-    const file = formData.get('file') as File | null
-    const restaurantId = formData.get('restaurantId') as string | null
+    const { url, path } = body as { url: string; path: string }
 
-    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
-    if (!restaurantId) return NextResponse.json({ error: 'No restaurantId provided' }, { status: 400 })
-    if (!file.name.toLowerCase().endsWith('.glb')) {
-      return NextResponse.json({ error: 'File must be a .glb' }, { status: 400 })
+    // Download GLB from Supabase public URL
+    const fetchRes = await fetch(url)
+    if (!fetchRes.ok) {
+      return NextResponse.json({ error: 'Could not download GLB' }, { status: 422 })
     }
-
-    const arrayBuffer = await file.arrayBuffer()
+    const arrayBuffer = await fetchRes.arrayBuffer()
     let uploadBytes: Uint8Array = new Uint8Array(arrayBuffer)
 
-    // Try to rescale with gltf-transform; fall back to original on any error
+    // Rescale with gltf-transform
     try {
       const { NodeIO, getBounds } = await import('@gltf-transform/core')
       const { center } = await import('@gltf-transform/functions')
@@ -58,12 +55,12 @@ export async function POST(request: Request) {
         uploadBytes = await io.writeBinary(document)
       }
     } catch (e) {
-      console.error('[process-glb] gltf-transform failed, uploading original:', e)
+      console.error('[process-glb] gltf-transform failed:', e)
+      return NextResponse.json({ error: 'GLB processing failed', detail: String(e) }, { status: 500 })
     }
 
-    // Upload to Supabase Storage using service role key (bypasses RLS)
+    // Re-upload processed GLB to same path (overwrites original)
     const supabase = createAdminClient()
-    const path = `${restaurantId}/${Date.now()}.glb`
     const { error: storageError } = await supabase.storage
       .from('models')
       .upload(path, Buffer.from(uploadBytes), {
@@ -72,7 +69,6 @@ export async function POST(request: Request) {
       })
 
     if (storageError) {
-      console.error('[process-glb] storage upload failed:', storageError)
       return NextResponse.json({ error: storageError.message }, { status: 500 })
     }
 

@@ -59,15 +59,32 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   async function handleModelUpload(file: File) {
     setUploadingModel(true)
     try {
+      // Step 1: upload raw GLB directly to Supabase (no Vercel size limit)
       const supabase = createClient()
       const path = `${restaurantId}/${Date.now()}.glb`
-      const { error } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('models')
         .upload(path, file, { upsert: true, contentType: 'model/gltf-binary' })
-      if (error) throw new Error(error.message)
-      const { data } = supabase.storage.from('models').getPublicUrl(path)
-      setItemForm(f => ({ ...f, model_url: data.publicUrl }))
-      toast('Modelo 3D subido')
+      if (uploadError) throw new Error(uploadError.message)
+      const { data: urlData } = supabase.storage.from('models').getPublicUrl(path)
+
+      // Step 2: ask the server to rescale it in place (server downloads → processes → re-uploads)
+      const processRes = await fetch('/api/process-glb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlData.publicUrl, path }),
+      })
+      const processData = await processRes.json()
+      if (!processRes.ok) {
+        // Rescaling failed but the original is already uploaded — use it as-is
+        console.warn('[3D] rescaling failed:', processData.error)
+        setItemForm(f => ({ ...f, model_url: urlData.publicUrl }))
+        toast('Modelo subido (sin reescalar)')
+        return
+      }
+
+      setItemForm(f => ({ ...f, model_url: processData.url }))
+      toast('Modelo 3D subido y reescalado')
     } catch (err: any) {
       toast(err.message ?? 'Error al subir modelo 3D', 'error')
     } finally {
