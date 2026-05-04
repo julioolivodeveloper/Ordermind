@@ -5,9 +5,34 @@ import { cn } from "@/lib/utils";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ordermind.app'
+
 export const metadata: Metadata = {
-  title: 'Ordermind',
-  description: 'Sistema de pedidos online para restaurantes',
+  metadataBase: new URL(SITE_URL),
+  title: 'Ordermind — Software para Restaurantes',
+  description: 'El sistema completo para gestionar tu restaurante online. Menú digital, pedidos, pagos y más.',
+  openGraph: {
+    title: 'Ordermind — Software para Restaurantes',
+    description: 'El sistema completo para gestionar tu restaurante online. Menú digital, pedidos, pagos y más.',
+    url: SITE_URL,
+    siteName: 'Ordermind',
+    images: [
+      {
+        url: '/dashboard-preview.png',
+        width: 1200,
+        height: 630,
+        alt: 'Ordermind — Panel de administración para restaurantes',
+      },
+    ],
+    locale: 'es_MX',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ordermind — Software para Restaurantes',
+    description: 'El sistema completo para gestionar tu restaurante online.',
+    images: ['/dashboard-preview.png'],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
