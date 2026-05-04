@@ -392,7 +392,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
       )}
 
       {/* ── MENU SECTION ── */}
-      <div ref={menuRef} className="max-w-4xl mx-auto px-4 py-10">
+      <div ref={menuRef} className="max-w-6xl mx-auto px-4 py-10">
 
         {/* Section header */}
         <motion.div
@@ -475,113 +475,122 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
               )}
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {filteredItems.map((item, i) => {
                 const salePrice = discountedPrice(item)
+                const catName = categories.find(c => c.id === item.category_id)?.name
                 return (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: Math.min(i * 0.05, 0.4) }}
-                  whileHover={{ y: -3 }}
-                  onClick={() => setSelectedItem(item)}
-                  className="group bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex cursor-pointer hover:shadow-lg hover:border-slate-200 transition-all"
-                >
-                  {/* Image */}
-                  {item.image_url ? (
-                    <div className="w-32 h-32 shrink-0 overflow-hidden relative">
-                      <img
-                        src={item.image_url}
-                        alt={itemName(item)}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      {salePrice && (
-                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
-                          -{item.discount_percent}%
-                        </span>
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: Math.min(i * 0.04, 0.3) }}
+                    onClick={() => setSelectedItem(item)}
+                    className="group bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-slate-100 cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                  >
+                    {/* Image */}
+                    <div className="relative overflow-hidden bg-slate-100" style={{ aspectRatio: '4/3' }}>
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={itemName(item)}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ background: `linear-gradient(135deg, ${primary}25, ${primary}08)` }}
+                        >
+                          <UtensilsCrossed className="w-10 h-10" style={{ color: primary + '60' }} />
+                        </div>
                       )}
-                    </div>
-                  ) : (
-                    <div
-                      className="w-24 h-full shrink-0 flex items-center justify-center opacity-20 group-hover:opacity-30 transition-opacity relative"
-                      style={{ backgroundColor: primary + '15' }}
-                    >
-                      <UtensilsCrossed className="w-8 h-8" style={{ color: primary }} />
-                      {salePrice && (
-                        <span className="absolute top-2 left-1 bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
-                          -{item.discount_percent}%
-                        </span>
-                      )}
-                    </div>
-                  )}
 
-                  {/* Content */}
-                  <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
-                    <div>
-                      <h3 className="font-bold text-slate-800 group-hover:text-slate-900 transition-colors leading-snug">
+                      {/* Bottom gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+                      {/* Discount badge */}
+                      {salePrice && (
+                        <div className="absolute top-2 left-2 bg-red-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-lg">
+                          -{item.discount_percent}%
+                        </div>
+                      )}
+
+                      {/* 3D badge */}
+                      {item.model_url && (
+                        <motion.button
+                          whileTap={{ scale: 0.85 }}
+                          onClick={e => { e.stopPropagation(); setItem3D(item) }}
+                          className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-full text-[10px] font-bold flex items-center gap-0.5 hover:bg-black/70 transition-colors"
+                        >
+                          <Box className="w-2.5 h-2.5" />
+                          3D
+                        </motion.button>
+                      )}
+
+                      {/* Popular ribbon */}
+                      {item.is_popular && (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-0.5 text-[10px] font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-full shadow">
+                          <Star className="w-2.5 h-2.5" fill="currentColor" />
+                          {t.popular}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex flex-col flex-1 p-3 md:p-4">
+                      {catName && (
+                        <p className="text-[10px] font-bold uppercase tracking-wider mb-1 truncate" style={{ color: primary }}>
+                          {catName}
+                        </p>
+                      )}
+
+                      <h3 className="font-bold text-slate-800 text-sm md:text-[15px] leading-snug line-clamp-2">
                         {itemName(item)}
                       </h3>
-                      {itemDesc(item) && (
-                        <p className="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">{itemDesc(item)}</p>
-                      )}
-                      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                        {item.is_popular && (
-                          <span className="flex items-center gap-1 text-xs bg-amber-50 text-amber-600 border border-amber-100 px-2 py-0.5 rounded-full font-medium">
-                            <Star className="w-3 h-3" /> {t.popular}
-                          </span>
-                        )}
-                        {item.is_spicy && (
-                          <span className="flex items-center gap-1 text-xs bg-red-50 text-red-500 border border-red-100 px-2 py-0.5 rounded-full font-medium">
-                            <Flame className="w-3 h-3" /> {t.spicy}
-                          </span>
-                        )}
-                        {(item.ingredients?.length ?? 0) > 0 && (
-                          <span className="text-xs text-slate-400 border border-slate-100 px-2 py-0.5 rounded-full">
-                            {t.customizable}
-                          </span>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between mt-3 gap-2">
-                      <div>
-                        {salePrice ? (
-                          <>
-                            <p className="text-xs text-slate-400 line-through leading-none">{formatCurrency(item.price)}</p>
-                            <p className="font-black text-red-500 text-lg leading-tight">{formatCurrency(salePrice)}</p>
-                          </>
-                        ) : (
-                          <p className="font-black text-slate-800 text-lg">{formatCurrency(item.price)}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {item.model_url && (
-                          <motion.button
-                            whileTap={{ scale: 0.88 }}
-                            onClick={e => { e.stopPropagation(); setItem3D(item) }}
-                            title="Ver en 3D"
-                            className="flex items-center gap-1 border px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all hover:bg-slate-50"
-                            style={{ borderColor: primary + '60', color: primary }}
-                          >
-                            <Box className="w-3 h-3" />
-                            3D
-                          </motion.button>
-                        )}
+                      {itemDesc(item) && (
+                        <p className="text-slate-400 text-[11px] md:text-xs leading-relaxed line-clamp-2 mt-1 flex-1">
+                          {itemDesc(item)}
+                        </p>
+                      )}
+
+                      {item.is_spicy && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-red-500 font-semibold mt-1.5">
+                          <Flame className="w-2.5 h-2.5" /> {t.spicy}
+                        </span>
+                      )}
+
+                      {/* Price + Add */}
+                      <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100">
+                        <div>
+                          {salePrice ? (
+                            <>
+                              <span className="text-[10px] text-slate-400 line-through block leading-none">
+                                {formatCurrency(item.price)}
+                              </span>
+                              <span className="font-black text-red-500 text-base md:text-lg leading-tight">
+                                {formatCurrency(salePrice)}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="font-black text-slate-800 text-base md:text-lg">
+                              {formatCurrency(item.price)}
+                            </span>
+                          )}
+                        </div>
                         <motion.button
-                          whileTap={{ scale: 0.88 }}
+                          whileTap={{ scale: 0.85 }}
                           onClick={e => { e.stopPropagation(); setSelectedItem(item) }}
-                          className="text-white px-4 py-1.5 rounded-xl text-xs font-bold hover:brightness-110 shadow-md transition-all"
+                          className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xl text-white shadow-lg hover:brightness-110 transition-all shrink-0"
                           style={{ backgroundColor: primary }}
                         >
-                          {t.add}
+                          +
                         </motion.button>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
                 )
               })}
             </div>
