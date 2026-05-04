@@ -40,9 +40,12 @@ export async function POST(request: Request) {
   if (body.discount_percent !== undefined) row.discount_percent = parseFloat(body.discount_percent) || 0
   if (body.name_en !== undefined) row.name_en = body.name_en || null
   if (body.description_en !== undefined) row.description_en = body.description_en || null
-  // Columnas opcionales (de migración 007)
+  // Columnas opcionales (de migración 007 y 009/010)
   if (body.model_url !== undefined) row.model_url = body.model_url || null
   if (body.model_usdz_url !== undefined) row.model_usdz_url = body.model_usdz_url || null
+  if (body.model_scale_cm !== undefined) row.model_scale_cm = parseInt(body.model_scale_cm) || 18
+  if (body.model_width_cm !== undefined) row.model_width_cm = parseInt(body.model_width_cm) || 18
+  if (body.model_height_cm !== undefined) row.model_height_cm = parseInt(body.model_height_cm) || 18
 
   const { data, error } = await admin
     .from('menu_items')

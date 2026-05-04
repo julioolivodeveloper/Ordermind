@@ -26,7 +26,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // Solo actualizar campos que vienen en el body
   const allowed = ['name','description','price','image_url','is_available','is_popular',
     'is_spicy','category_id','sort_order','discount_percent','name_en','description_en',
-    'model_url','model_usdz_url']
+    'model_url','model_usdz_url','model_scale_cm','model_width_cm','model_height_cm']
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key] === '' ? null : body[key]
