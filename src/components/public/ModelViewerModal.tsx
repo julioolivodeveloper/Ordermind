@@ -92,7 +92,6 @@ export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzU
                 </div>
               ) : React.createElement('model-viewer', {
                   src: modelUrl,
-                  'ios-src': modelUsdzUrl,
                   alt: itemName,
 
                   // AR
