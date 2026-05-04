@@ -59,13 +59,14 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   async function handleModelUpload(file: File) {
     setUploadingModel(true)
     try {
-      const form = new FormData()
-      form.append('file', file)
-      form.append('restaurantId', restaurantId)
-      const res = await fetch('/api/process-glb', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Error al subir modelo 3D')
-      setItemForm(f => ({ ...f, model_url: data.url }))
+      const supabase = createClient()
+      const path = `${restaurantId}/${Date.now()}.glb`
+      const { error } = await supabase.storage
+        .from('models')
+        .upload(path, file, { upsert: true, contentType: 'model/gltf-binary' })
+      if (error) throw new Error(error.message)
+      const { data } = supabase.storage.from('models').getPublicUrl(path)
+      setItemForm(f => ({ ...f, model_url: data.publicUrl }))
       toast('Modelo 3D subido')
     } catch (err: any) {
       toast(err.message ?? 'Error al subir modelo 3D', 'error')
