@@ -36,6 +36,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingModel, setUploadingModel] = useState(false)
+  const [modelUrlNeedsRescale, setModelUrlNeedsRescale] = useState(false)
 
   async function handleImageUpload(file: File) {
     setUploading(true)
@@ -94,12 +95,14 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
 
   function openNewItem() {
     setEditingItem(null)
+    setModelUrlNeedsRescale(false)
     setItemForm(BLANK_ITEM)
     setItemModal(true)
   }
 
   function openEditItem(item: MenuItem) {
     setEditingItem(item)
+    setModelUrlNeedsRescale(false)
     setItemForm({
       name: item.name, description: item.description ?? '',
       price: String(item.price), image_url: item.image_url ?? '',
@@ -117,8 +120,30 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
     if (!itemForm.name || !itemForm.price) return
     setSaving(true)
     try {
+      // Rescale GLB if user pasted a URL manually
+      let model_url = itemForm.model_url
+      if (modelUrlNeedsRescale && model_url && (model_url.endsWith('.glb') || model_url.includes('.glb?'))) {
+        setUploadingModel(true)
+        try {
+          const res = await fetch('/api/process-glb', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: model_url, path: `${restaurantId}/${Date.now()}.glb` }),
+          })
+          const data = await res.json()
+          if (res.ok) {
+            model_url = data.url
+            setItemForm(f => ({ ...f, model_url: data.url }))
+          }
+        } catch { /* use URL as-is */ } finally {
+          setUploadingModel(false)
+          setModelUrlNeedsRescale(false)
+        }
+      }
+
       const body = {
         ...itemForm,
+        model_url,
         price: parseFloat(itemForm.price),
         discount_percent: itemForm.discount_percent ? parseFloat(itemForm.discount_percent) : 0,
         restaurant_id: restaurantId,
@@ -411,28 +436,12 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                     />
                   </label>
                 )}
-                {/* Fallback: paste URL manually — rescales on blur if it's a GLB URL */}
+                {/* Fallback: paste URL manually — rescaled automatically on save */}
                 <input
                   value={itemForm.model_url}
-                  onChange={e => setItemForm(f => ({ ...f, model_url: e.target.value }))}
-                  onBlur={async e => {
-                    const url = e.target.value.trim()
-                    if (!url.endsWith('.glb') && !url.includes('.glb?')) return
-                    setUploadingModel(true)
-                    try {
-                      const res = await fetch('/api/process-glb', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url, path: `${restaurantId}/${Date.now()}.glb` }),
-                      })
-                      const data = await res.json()
-                      if (res.ok) {
-                        setItemForm(f => ({ ...f, model_url: data.url }))
-                        toast('Modelo reescalado')
-                      }
-                    } catch { /* use URL as-is */ } finally {
-                      setUploadingModel(false)
-                    }
+                  onChange={e => {
+                    setItemForm(f => ({ ...f, model_url: e.target.value }))
+                    setModelUrlNeedsRescale(true)
                   }}
                   placeholder="O pega una URL .glb directamente"
                   className="mt-2 w-full border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-500 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
