@@ -101,14 +101,10 @@ export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzU
                   'ar-scale': 'fixed',
                   'ar-placement': 'floor',
 
-                  // Fix 1: camera orbit controls clipping distances
-                  // orbit starts 2m away, min 0.5m, max 10m — frustum won't clip
-                  'camera-orbit': '0deg 75deg 2m',
-                  'min-camera-orbit': 'auto auto 0.5m',
-                  'max-camera-orbit': 'auto auto 10m',
-
-                  // Fix 2: scale down so large-bounding-box models don't exceed the frustum
-                  scale: '0.5 0.5 0.5',
+                  // Auto-fit: camera distance adapts to model bounds automatically
+                  'camera-orbit': '0deg 75deg auto',
+                  'min-camera-orbit': 'auto auto auto',
+                  'max-camera-orbit': 'auto auto auto',
 
                   // Fix 4: suppress interaction prompt that can conflict in AR session
                   'interaction-prompt': 'none',

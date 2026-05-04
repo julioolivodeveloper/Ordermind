@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const TARGET_METERS = 0.15
+const TARGET_METERS = 0.18
 
 // Accepts JSON { url, path } — downloads GLB from url, rescales, re-uploads to same path
 export async function POST(request: Request) {
@@ -27,7 +27,6 @@ export async function POST(request: Request) {
     // Rescale with gltf-transform
     try {
       const { NodeIO, getBounds } = await import('@gltf-transform/core')
-      const { center } = await import('@gltf-transform/functions')
 
       const io = new NodeIO()
       const document = await io.readBinary(uploadBytes)
@@ -35,8 +34,6 @@ export async function POST(request: Request) {
       const scene = root.getDefaultScene() ?? root.listScenes()[0]
 
       if (scene) {
-        await document.transform(center({ pivot: 'below' }))
-
         const bounds = getBounds(scene)
         const maxDim = Math.max(
           bounds.max[0] - bounds.min[0],
@@ -44,9 +41,18 @@ export async function POST(request: Request) {
           bounds.max[2] - bounds.min[2],
         )
 
-        if (maxDim > 0 && Math.abs(maxDim - TARGET_METERS) > 0.001) {
+        if (maxDim > 0.0001 && Math.abs(maxDim - TARGET_METERS) > 0.001) {
           const s = TARGET_METERS / maxDim
-          for (const node of scene.listChildren()) {
+
+          // Scale direct scene children; fallback to all parentless nodes
+          let targets = scene.listChildren()
+          if (targets.length === 0) {
+            targets = root.listNodes().filter(
+              n => n.listParents().every(p => p === scene || p === root)
+            )
+          }
+
+          for (const node of targets) {
             const [sx, sy, sz] = node.getScale()
             node.setScale([sx * s, sy * s, sz * s])
           }
