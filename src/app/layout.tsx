@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ordermind.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ordermindsystem.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
