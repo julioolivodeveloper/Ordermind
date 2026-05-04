@@ -418,7 +418,6 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                   onBlur={async e => {
                     const url = e.target.value.trim()
                     if (!url.endsWith('.glb') && !url.includes('.glb?')) return
-                    if (url.includes('supabase') && url.includes('/models/')) return // already processed
                     setUploadingModel(true)
                     try {
                       const res = await fetch('/api/process-glb', {
