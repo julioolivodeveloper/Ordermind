@@ -64,8 +64,10 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       form.append('file', file)
       const processRes = await fetch('/api/process-glb', { method: 'POST', body: form })
       if (!processRes.ok) {
-        const err = await processRes.json().catch(() => ({}))
-        throw new Error(err.error ?? 'Error al procesar el modelo 3D')
+        const text = await processRes.text().catch(() => '')
+        let errMsg = 'Error al procesar el modelo 3D'
+        try { errMsg = JSON.parse(text).error ?? errMsg } catch { /* non-JSON response */ }
+        throw new Error(errMsg)
       }
       const processedBlob = await processRes.blob()
       const processedFile = new File([processedBlob], 'model.glb', { type: 'model/gltf-binary' })
