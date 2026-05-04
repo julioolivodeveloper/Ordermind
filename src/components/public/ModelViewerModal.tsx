@@ -92,25 +92,38 @@ export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzU
                 </div>
               ) : React.createElement('model-viewer', {
                   src: modelUrl,
-                  // Fix 1: scene-viewer first → Quick Look second → WebXR last
-                  // iOS ignores scene-viewer and jumps to quick-look; Android uses scene-viewer
                   'ios-src': modelUsdzUrl,
                   alt: itemName,
+
+                  // AR
                   ar: true,
-                  'ar-modes': 'scene-viewer quick-look webxr',   // Fix 1
-                  'ar-scale': 'fixed',                           // Fix 2
-                  'ar-placement': 'floor',                       // Fix 2
+                  'ar-modes': 'scene-viewer quick-look webxr',
+                  'ar-scale': 'fixed',
+                  'ar-placement': 'floor',
+
+                  // Fix 1: camera orbit controls clipping distances
+                  // orbit starts 2m away, min 0.5m, max 10m — frustum won't clip
+                  'camera-orbit': '0deg 75deg 2m',
+                  'min-camera-orbit': 'auto auto 0.5m',
+                  'max-camera-orbit': 'auto auto 10m',
+
+                  // Fix 2: scale down so large-bounding-box models don't exceed the frustum
+                  scale: '0.5 0.5 0.5',
+
+                  // Fix 4: suppress interaction prompt that can conflict in AR session
+                  'interaction-prompt': 'none',
+
                   'auto-rotate': true,
                   'camera-controls': true,
                   'shadow-intensity': '0.5',
-                  exposure: '1',                                 // Fix 4
-                  'environment-image': 'neutral',                // Fix 4
+                  exposure: '1',
+                  'environment-image': 'neutral',
                   loading: 'eager',
                   style: {
                     width: '100%',
                     height: '100%',
-                    backgroundColor: 'transparent',              // Fix 5
-                    '--poster-color': 'transparent',             // Fix 5: prevent black poster flash
+                    backgroundColor: 'transparent',
+                    '--poster-color': 'transparent',
                   } as React.CSSProperties,
                 })}
             </div>
