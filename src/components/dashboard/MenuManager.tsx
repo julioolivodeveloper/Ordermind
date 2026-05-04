@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/Toast'
 import { formatCurrency } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import type { MenuCategory, MenuItem, ItemIngredient } from '@/types'
+import { Box } from 'lucide-react'
 
 interface Props {
   restaurantId: string
@@ -36,6 +37,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [ingForm, setIngForm] = useState({ name: '', is_default: true, extra_cost: 0 })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadingModel, setUploadingModel] = useState(false)
 
   async function handleImageUpload(file: File) {
     setUploading(true)
@@ -51,6 +53,38 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       toast('Error al subir imagen', 'error')
     } finally {
       setUploading(false)
+    }
+  }
+
+  async function handleModelUpload(file: File) {
+    setUploadingModel(true)
+    try {
+      // Step 1: process GLB through the rescale API
+      const form = new FormData()
+      form.append('file', file)
+      const processRes = await fetch('/api/process-glb', { method: 'POST', body: form })
+      if (!processRes.ok) {
+        const err = await processRes.json().catch(() => ({}))
+        throw new Error(err.error ?? 'Error al procesar el modelo 3D')
+      }
+      const processedBlob = await processRes.blob()
+      const processedFile = new File([processedBlob], 'model.glb', { type: 'model/gltf-binary' })
+
+      // Step 2: upload processed GLB to Supabase Storage
+      const supabase = createClient()
+      const path = `${restaurantId}/${Date.now()}.glb`
+      const { error } = await supabase.storage
+        .from('models')
+        .upload(path, processedFile, { upsert: true, contentType: 'model/gltf-binary' })
+      if (error) throw error
+
+      const { data } = supabase.storage.from('models').getPublicUrl(path)
+      setItemForm(f => ({ ...f, model_url: data.publicUrl }))
+      toast('Modelo 3D procesado y subido')
+    } catch (err: any) {
+      toast(err.message ?? 'Error al subir modelo 3D', 'error')
+    } finally {
+      setUploadingModel(false)
     }
   }
 
@@ -343,15 +377,56 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
             </label>
           </div>
           <div className="border-t border-slate-100 pt-3">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">3D Model (optional)</p>
+            <div className="flex items-center gap-2 mb-3">
+              <Box className="w-4 h-4 text-slate-400" />
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">3D Model (optional)</p>
+            </div>
             <div className="space-y-3">
+              {/* GLB upload — auto-rescaled to 0.15m for AR */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">GLB URL <span className="text-slate-400 font-normal">(Android + web)</span></label>
-                <input value={itemForm.model_url} onChange={e => setItemForm(f => ({ ...f, model_url: e.target.value }))} placeholder="https://…/model.glb" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Modelo GLB <span className="text-slate-400 font-normal">(se reescala automáticamente a 0.15m para AR)</span>
+                </label>
+                {itemForm.model_url ? (
+                  <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2">
+                    <Box className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <span className="text-xs text-indigo-700 truncate flex-1">{itemForm.model_url.split('/').pop()}</span>
+                    <button
+                      type="button"
+                      onClick={() => setItemForm(f => ({ ...f, model_url: '' }))}
+                      className="text-indigo-400 hover:text-red-500 text-xs shrink-0 transition-colors"
+                    >✕</button>
+                  </div>
+                ) : (
+                  <label className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded-xl px-4 py-3 text-sm cursor-pointer transition-colors ${uploadingModel ? 'border-indigo-300 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'}`}>
+                    <span>{uploadingModel ? 'Procesando y subiendo…' : '📦 Seleccionar archivo .glb'}</span>
+                    <input
+                      type="file"
+                      accept=".glb"
+                      className="hidden"
+                      disabled={uploadingModel}
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handleModelUpload(f) }}
+                    />
+                  </label>
+                )}
+                {/* Fallback: paste URL manually */}
+                <input
+                  value={itemForm.model_url}
+                  onChange={e => setItemForm(f => ({ ...f, model_url: e.target.value }))}
+                  placeholder="O pega una URL .glb directamente"
+                  className="mt-2 w-full border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-500 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">USDZ URL <span className="text-slate-400 font-normal">(iPhone AR)</span></label>
-                <input value={itemForm.model_usdz_url} onChange={e => setItemForm(f => ({ ...f, model_usdz_url: e.target.value }))} placeholder="https://…/model.usdz" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  USDZ URL <span className="text-slate-400 font-normal">(iPhone AR nativo — opcional)</span>
+                </label>
+                <input
+                  value={itemForm.model_usdz_url}
+                  onChange={e => setItemForm(f => ({ ...f, model_usdz_url: e.target.value }))}
+                  placeholder="https://…/model.usdz"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
             </div>
           </div>
