@@ -1,8 +1,7 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Maximize2, Box, Smartphone } from 'lucide-react'
-
 
 interface Props {
   open: boolean
@@ -16,21 +15,32 @@ interface Props {
 export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzUrl, color = '#a3e635' }: Props) {
   const [scriptLoaded, setScriptLoaded] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
+  const scriptInjected = useRef(false)
 
   useEffect(() => {
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent))
   }, [])
 
-  // Load model-viewer script from CDN once when modal opens
+  // Inject model-viewer script into <head> once; reuse if already present
   useEffect(() => {
     if (!open) return
-    if (document.querySelector('script[data-model-viewer]')) {
-      setScriptLoaded(true)
+    const existing = document.querySelector('script[data-model-viewer]')
+    if (existing) {
+      // Script already in DOM — if it already fired onload the element is defined
+      if (customElements.get('model-viewer')) {
+        setScriptLoaded(true)
+      } else {
+        existing.addEventListener('load', () => setScriptLoaded(true), { once: true })
+      }
       return
     }
+    if (scriptInjected.current) return
+    scriptInjected.current = true
+
     const script = document.createElement('script')
     script.type = 'module'
-    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js'
+    // Fix 3: use 3.4.0 as requested for stability
+    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js'
     script.dataset.modelViewer = 'true'
     script.onload = () => setScriptLoaded(true)
     document.head.appendChild(script)
@@ -73,8 +83,8 @@ export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzU
               </button>
             </div>
 
-            {/* Viewer */}
-            <div className="flex-1 relative bg-[#0a0a0a]">
+            {/* Viewer — Fix 5: explicit transparent bg on both wrapper and model-viewer */}
+            <div className="flex-1 relative" style={{ background: 'transparent' }}>
               {!scriptLoaded ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                   <div className="w-8 h-8 border-2 border-white/10 rounded-full animate-spin" style={{ borderTopColor: color }} />
@@ -82,17 +92,26 @@ export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzU
                 </div>
               ) : React.createElement('model-viewer', {
                   src: modelUrl,
+                  // Fix 1: scene-viewer first → Quick Look second → WebXR last
+                  // iOS ignores scene-viewer and jumps to quick-look; Android uses scene-viewer
                   'ios-src': modelUsdzUrl,
                   alt: itemName,
                   ar: true,
-                  'ar-modes': 'webxr scene-viewer quick-look',
+                  'ar-modes': 'scene-viewer quick-look webxr',   // Fix 1
+                  'ar-scale': 'fixed',                           // Fix 2
+                  'ar-placement': 'floor',                       // Fix 2
                   'auto-rotate': true,
                   'camera-controls': true,
-                  'shadow-intensity': '1',
-                  exposure: '1',
-                  'environment-image': 'neutral',
+                  'shadow-intensity': '0.5',
+                  exposure: '1',                                 // Fix 4
+                  'environment-image': 'neutral',                // Fix 4
                   loading: 'eager',
-                  style: { width: '100%', height: '100%', backgroundColor: 'transparent' },
+                  style: {
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'transparent',              // Fix 5
+                    '--poster-color': 'transparent',             // Fix 5: prevent black poster flash
+                  } as React.CSSProperties,
                 })}
             </div>
 
