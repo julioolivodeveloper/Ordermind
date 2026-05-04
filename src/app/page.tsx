@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { MarketingCarousel } from '@/components/home/MarketingCarousel'
 import {
   CheckCircle2, Zap, Shield, UtensilsCrossed, CreditCard,
   Bike, LayoutDashboard, Tag, Cloud, Headphones, Lock,
@@ -224,6 +225,9 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* ── CAROUSEL ── */}
+      <MarketingCarousel />
 
       {/* ── FEATURES ── */}
       <section className="bg-white py-20 px-6 md:px-12">
