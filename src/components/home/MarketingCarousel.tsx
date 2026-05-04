@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const SLIDES = [
-  '/slides/slide-01.jpg',
-  '/slides/slide-02.jpg',
-  '/slides/slide-03.jpg',
-  '/slides/slide-04.jpg',
-  '/slides/slide-05.jpg',
-  '/slides/slide-06.jpg',
+  'https://xkjqgejxgtnunxdoljom.supabase.co/storage/v1/object/sign/slides/0815FFD6-5F94-4322-9807-8BA7D501DEE5.PNG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84YjczMjZmOS1mMmJkLTQzYTAtOTZlNi0yYTQxMTQzODk1ZWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzbGlkZXMvMDgxNUZGRDYtNUY5NC00MzIyLTk4MDctOEJBN0Q1MDFERUU1LlBORyIsImlhdCI6MTc3NzkyMDI4NCwiZXhwIjoxODA5NDU2Mjg0fQ.CCHARw1Iv92d25Lw_RTk7n2tys5CB06v41gkxYcvF1w',
+  'https://xkjqgejxgtnunxdoljom.supabase.co/storage/v1/object/sign/slides/12139490-C13D-46C8-AF88-110835D2D068.PNG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84YjczMjZmOS1mMmJkLTQzYTAtOTZlNi0yYTQxMTQzODk1ZWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzbGlkZXMvMTIxMzk0OTAtQzEzRC00NkM4LUFGODgtMTEwODM1RDJEMDY4LlBORyIsImlhdCI6MTc3NzkyMDMxNywiZXhwIjoxODA5NDU2MzE3fQ.JH9kK8B-NNBYpBDbJMZH0mLxOtba1O21MG6Vbxl-_rQ',
+  'https://xkjqgejxgtnunxdoljom.supabase.co/storage/v1/object/sign/slides/5DAC51B4-2932-45A6-B448-34157071FB08.PNG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84YjczMjZmOS1mMmJkLTQzYTAtOTZlNi0yYTQxMTQzODk1ZWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzbGlkZXMvNURBQzUxQjQtMjkzMi00NUE2LUI0NDgtMzQxNTcwNzFGQjA4LlBORyIsImlhdCI6MTc3NzkyMDMzNSwiZXhwIjoxODA5NDU2MzM1fQ.xWIeIRazC0VW-xs1pu2RNEjq-vxjjm_fAmg2W2I5mYI',
+  'https://xkjqgejxgtnunxdoljom.supabase.co/storage/v1/object/sign/slides/6C5E5C77-EA74-4239-AD6E-3838BE817EF6.PNG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84YjczMjZmOS1mMmJkLTQzYTAtOTZlNi0yYTQxMTQzODk1ZWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzbGlkZXMvNkM1RTVDNzctRUE3NC00MjM5LUFENkUtMzgzOEJFODE3RUY2LlBORyIsImlhdCI6MTc3NzkyMDM1MSwiZXhwIjoxODA5NDU2MzUxfQ.NgXXQpBLB0JslNqiSygkG_IJKjYlLHqDwqNN9D0CmGk',
+  'https://xkjqgejxgtnunxdoljom.supabase.co/storage/v1/object/sign/slides/7F35B1A6-6AD7-4CB9-9B62-28442FFD9189.PNG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84YjczMjZmOS1mMmJkLTQzYTAtOTZlNi0yYTQxMTQzODk1ZWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzbGlkZXMvN0YzNUIxQTYtNkFENy00Q0I5LTlCNjItMjg0NDJGRkQ5MTg5LlBORyIsImlhdCI6MTc3NzkyMDM3MywiZXhwIjoxODA5NDU2MzczfQ.K_bFV9OrDLGM2_9w19CFcXk0COcbEk5OG9epI8SWKZs',
+  'https://xkjqgejxgtnunxdoljom.supabase.co/storage/v1/object/sign/slides/F128564A-CEBC-4250-8FE1-7A360F0F9E06.PNG?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84YjczMjZmOS1mMmJkLTQzYTAtOTZlNi0yYTQxMTQzODk1ZWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzbGlkZXMvRjEyODU2NEEtQ0VCQy00MjUwLThGRTEtN0EzNjBGMEY5RTA2LlBORyIsImlhdCI6MTc3NzkyMDM5MSwiZXhwIjoxODA5NDU2MzkxfQ.wFoONg7qV2OcgdFXRwZqnHtTpA0AmrOWYbkq1hg9ANg',
 ]
 
 const INTERVAL = 4500
