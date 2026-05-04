@@ -80,7 +80,7 @@ export function MarketingCarousel() {
   const nextIndex = (index + 1) % SLIDES.length
 
   return (
-    <section className="bg-[#0a0a0a] pt-8 pb-4 px-4 md:px-12">
+    <section className="bg-[#0a0a0a] pt-2 pb-4 px-4 md:px-12">
 
       {/* Desktop: two slides side by side */}
       <div className="hidden lg:grid lg:grid-cols-2 gap-5 max-w-5xl mx-auto">
