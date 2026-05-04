@@ -1,14 +1,19 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart-store'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { StripePaymentForm } from './StripePaymentForm'
+import { createClient } from '@/lib/supabase/client'
+import { User, CheckCircle2, LogIn } from 'lucide-react'
+import Link from 'next/link'
 import type { Restaurant } from '@/types'
 
 export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
   const router = useRouter()
   const { items, subtotal, clearCart } = useCartStore()
+  const [sessionUser, setSessionUser] = useState<{ email: string } | null>(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
   const [form, setForm] = useState({
     customer_name: '', customer_phone: '', customer_email: '',
     order_type: restaurant.pickup_enabled ? 'pickup' : restaurant.delivery_enabled ? 'delivery' : 'dine_in',
@@ -18,6 +23,33 @@ export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user?.email) { setProfileLoaded(true); return }
+      setSessionUser({ email: user.email })
+      try {
+        const res = await fetch(`/api/public/${restaurant.slug}/me`)
+        const data = await res.json()
+        if (data.customer || data.userEmail) {
+          setForm(prev => ({
+            ...prev,
+            customer_name: data.customer?.name || prev.customer_name,
+            customer_phone: data.customer?.phone || prev.customer_phone,
+            customer_email: data.userEmail || prev.customer_email,
+            ...(data.lastAddress ? {
+              street: data.lastAddress.street || prev.street,
+              city: data.lastAddress.city || prev.city,
+              zip: data.lastAddress.zip || prev.zip,
+              references: data.lastAddress.references || prev.references,
+            } : {}),
+          }))
+        }
+      } catch { /* use empty form */ }
+      setProfileLoaded(true)
+    })
+  }, [restaurant.slug])
+
   const [couponCode, setCouponCode] = useState('')
   const [coupon, setCoupon] = useState<{ code: string; discount: number; type: string; amount: number } | null>(null)
   const [couponLoading, setCouponLoading] = useState(false)
@@ -121,6 +153,37 @@ export function CheckoutForm({ restaurant }: { restaurant: Restaurant }) {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-xl mx-auto px-4 py-6 space-y-5">
+
+        {/* Session banner */}
+        {profileLoaded && (
+          sessionUser ? (
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+              <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-green-800">Sesión iniciada</p>
+                <p className="text-xs text-green-600 truncate">{sessionUser.email} · Datos autocompletados</p>
+              </div>
+              <Link href={`/r/${restaurant.slug}/account`} className="text-green-600 hover:text-green-800 transition-colors">
+                <User className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : (
+            <Link
+              href={`/r/${restaurant.slug}/login?next=/r/${restaurant.slug}/checkout`}
+              className="flex items-center gap-3 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl px-4 py-3 transition-colors group"
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: restaurant.primary_color + '15' }}>
+                <LogIn className="w-4 h-4" style={{ color: restaurant.primary_color }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-slate-700">Inicia sesión para agilizar tu pedido</p>
+                <p className="text-xs text-slate-400">Autocompletamos tu nombre, teléfono y dirección</p>
+              </div>
+              <span className="text-xs font-bold shrink-0" style={{ color: restaurant.primary_color }}>Entrar →</span>
+            </Link>
+          )
+        )}
+
         {/* Customer info */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
           <h2 className="font-semibold text-slate-800">Tus datos</h2>
