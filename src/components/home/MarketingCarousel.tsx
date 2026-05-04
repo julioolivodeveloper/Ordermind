@@ -77,10 +77,64 @@ export function MarketingCarousel() {
     return () => window.removeEventListener('keydown', onKey)
   }, [paginate])
 
+  const nextIndex = (index + 1) % SLIDES.length
+
   return (
-    <section className="bg-[#0a0a0a] py-16 px-4 md:px-12">
-      <div className="max-w-2xl mx-auto">
-        {/* Carousel frame */}
+    <section className="bg-[#0a0a0a] pt-8 pb-4 px-4 md:px-12">
+
+      {/* Desktop: two slides side by side */}
+      <div className="hidden lg:grid lg:grid-cols-2 gap-5 max-w-5xl mx-auto">
+        {[index, nextIndex].map((slideIdx, col) => (
+          <div
+            key={col}
+            className="relative overflow-hidden rounded-3xl shadow-2xl shadow-lime-500/10 border border-white/8 select-none"
+            style={{ aspectRatio: '1 / 1' }}
+          >
+            <AnimatePresence initial={false} custom={dir} mode="popLayout">
+              <motion.img
+                key={`${col}-${slideIdx}`}
+                src={SLIDES[slideIdx]}
+                alt={`Ordermind slide ${slideIdx + 1}`}
+                custom={dir}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="absolute inset-0 w-full h-full object-cover will-change-transform"
+              />
+            </AnimatePresence>
+
+            {col === 0 && (
+              <button
+                onClick={() => paginate(-1)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/70 hover:scale-110 transition-all"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            {col === 1 && (
+              <>
+                <button
+                  onClick={() => paginate(1)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/70 hover:scale-110 transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-white/10 z-20">
+                  <motion.div
+                    className="h-full bg-[#a3e635]"
+                    style={{ width: `${progress * 100}%` }}
+                    transition={{ ease: 'linear' }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Mobile: single slide carousel */}
+      <div className="lg:hidden max-w-2xl mx-auto">
         <div
           className="relative overflow-hidden rounded-3xl shadow-2xl shadow-lime-500/10 border border-white/8 cursor-grab active:cursor-grabbing select-none"
           style={{ aspectRatio: '1 / 1' }}
@@ -108,11 +162,9 @@ export function MarketingCarousel() {
             />
           </AnimatePresence>
 
-          {/* Gradient sides for depth */}
           <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
           <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
 
-          {/* Arrow buttons */}
           <button
             onClick={() => paginate(-1)}
             className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/70 hover:scale-110 transition-all"
@@ -126,7 +178,6 @@ export function MarketingCarousel() {
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* Progress bar */}
           <div className="absolute bottom-0 inset-x-0 h-0.5 bg-white/10 z-20">
             <motion.div
               className="h-full bg-[#a3e635]"
@@ -135,26 +186,26 @@ export function MarketingCarousel() {
             />
           </div>
         </div>
+      </div>
 
-        {/* Dot indicators */}
-        <div className="flex items-center justify-center gap-2.5 mt-5">
-          {SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => { setPage([i, i > index ? 1 : -1]); startTime.current = Date.now(); setProgress(0) }}
-              className="relative flex items-center justify-center"
-            >
-              <motion.div
-                animate={{
-                  width: i === index ? 24 : 6,
-                  backgroundColor: i === index ? '#a3e635' : 'rgba(255,255,255,0.25)',
-                }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="h-1.5 rounded-full"
-              />
-            </button>
-          ))}
-        </div>
+      {/* Dot indicators */}
+      <div className="flex items-center justify-center gap-2.5 mt-4">
+        {SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setPage([i, i > index ? 1 : -1]); startTime.current = Date.now(); setProgress(0) }}
+            className="relative flex items-center justify-center"
+          >
+            <motion.div
+              animate={{
+                width: i === index ? 24 : 6,
+                backgroundColor: i === index ? '#a3e635' : 'rgba(255,255,255,0.25)',
+              }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="h-1.5 rounded-full"
+            />
+          </button>
+        ))}
       </div>
     </section>
   )

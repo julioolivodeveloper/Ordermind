@@ -230,7 +230,7 @@ export default function Home() {
       <MarketingCarousel />
 
       {/* ── FEATURES ── */}
-      <section className="bg-white py-20 px-6 md:px-12">
+      <section className="bg-white pt-10 pb-16 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
             {features.map((f, i) => (
