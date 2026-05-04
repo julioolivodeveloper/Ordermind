@@ -116,6 +116,8 @@ export interface MenuItem {
   model_url?: string
   model_usdz_url?: string
   model_scale_cm?: number
+  model_width_cm?: number
+  model_height_cm?: number
   is_available: boolean
   is_popular: boolean
   is_spicy: boolean

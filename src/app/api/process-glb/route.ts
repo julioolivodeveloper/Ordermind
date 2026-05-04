@@ -4,9 +4,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const DEFAULT_TARGET_CM = 18
+const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(v, max))
 
-// Accepts JSON { url, path, targetCm? } — downloads GLB from url, rescales, re-uploads to same path
+// Accepts JSON { url, path, widthCm?, heightCm?, targetCm? }
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null)
@@ -14,10 +14,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing url or path' }, { status: 400 })
     }
 
-    const { url, path, targetCm } = body as { url: string; path: string; targetCm?: number }
-    const TARGET_METERS = Math.max(1, Math.min(targetCm ?? DEFAULT_TARGET_CM, 200)) / 100
+    const { url, path, widthCm, heightCm, targetCm } = body as {
+      url: string; path: string
+      widthCm?: number; heightCm?: number; targetCm?: number
+    }
 
-    // Download GLB from Supabase public URL
+    const targetW = clamp(widthCm  ?? targetCm ?? 18, 1, 300) / 100
+    const targetH = clamp(heightCm ?? targetCm ?? 18, 1, 300) / 100
+
+    // Download GLB
     const fetchRes = await fetch(url)
     if (!fetchRes.ok) {
       return NextResponse.json({ error: 'Could not download GLB' }, { status: 422 })
@@ -36,16 +41,16 @@ export async function POST(request: Request) {
 
       if (scene) {
         const bounds = getBounds(scene)
-        const maxDim = Math.max(
-          bounds.max[0] - bounds.min[0],
-          bounds.max[1] - bounds.min[1],
-          bounds.max[2] - bounds.min[2],
-        )
+        const modelW = bounds.max[0] - bounds.min[0]  // X axis = width
+        const modelH = bounds.max[1] - bounds.min[1]  // Y axis = height
+        const modelD = bounds.max[2] - bounds.min[2]  // Z axis = depth
 
-        if (maxDim > 0.0001 && Math.abs(maxDim - TARGET_METERS) > 0.001) {
-          const s = TARGET_METERS / maxDim
+        if (Math.max(modelW, modelH, modelD) > 0.0001) {
+          // Non-uniform scale: X/Z to target width, Y to target height
+          const sX = modelW > 0.0001 ? targetW / modelW : 1
+          const sY = modelH > 0.0001 ? targetH / modelH : 1
+          const sZ = modelD > 0.0001 ? targetW / modelD : 1  // depth follows width
 
-          // Scale direct scene children; fallback to all parentless nodes
           let targets = scene.listChildren()
           if (targets.length === 0) {
             targets = root.listNodes().filter(
@@ -55,7 +60,7 @@ export async function POST(request: Request) {
 
           for (const node of targets) {
             const [sx, sy, sz] = node.getScale()
-            node.setScale([sx * s, sy * s, sz * s])
+            node.setScale([sx * sX, sy * sY, sz * sZ])
           }
         }
 
@@ -66,7 +71,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'GLB processing failed', detail: String(e) }, { status: 500 })
     }
 
-    // Re-upload processed GLB to same path (overwrites original)
+    // Re-upload processed GLB
     const supabase = createAdminClient()
     const { error: storageError } = await supabase.storage
       .from('models')

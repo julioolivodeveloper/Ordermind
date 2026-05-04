@@ -18,7 +18,7 @@ const BLANK_ITEM = {
   is_available: true, is_popular: false, is_spicy: false,
   category_id: '', sort_order: 0,
   discount_percent: '', name_en: '', description_en: '',
-  model_url: '', model_usdz_url: '', model_scale_cm: '18',
+  model_url: '', model_usdz_url: '', model_scale_cm: '18', model_width_cm: '18', model_height_cm: '18',
 }
 
 export function MenuManager({ restaurantId, initialCategories, initialItems }: Props) {
@@ -71,7 +71,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       const processRes = await fetch('/api/process-glb', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: urlData.publicUrl, path, targetCm: parseInt(itemForm.model_scale_cm) || 18 }),
+        body: JSON.stringify({ url: urlData.publicUrl, path, widthCm: parseInt(itemForm.model_width_cm) || 18, heightCm: parseInt(itemForm.model_height_cm) || 18 }),
       })
       const processData = await processRes.json()
       if (!processRes.ok) {
@@ -113,6 +113,8 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       name_en: item.name_en ?? '', description_en: item.description_en ?? '',
       model_url: item.model_url ?? '', model_usdz_url: item.model_usdz_url ?? '',
       model_scale_cm: String(item.model_scale_cm ?? 18),
+      model_width_cm: String(item.model_width_cm ?? 18),
+      model_height_cm: String(item.model_height_cm ?? 18),
     })
     setItemModal(true)
   }
@@ -129,7 +131,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
           const res = await fetch('/api/process-glb', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: model_url, path: `${restaurantId}/${Date.now()}.glb`, targetCm: parseInt(itemForm.model_scale_cm) || 18 }),
+            body: JSON.stringify({ url: model_url, path: `${restaurantId}/${Date.now()}.glb`, widthCm: parseInt(itemForm.model_width_cm) || 18, heightCm: parseInt(itemForm.model_height_cm) || 18 }),
           })
           const data = await res.json()
           if (res.ok) {
@@ -148,6 +150,8 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
         price: parseFloat(itemForm.price),
         discount_percent: itemForm.discount_percent ? parseFloat(itemForm.discount_percent) : 0,
         model_scale_cm: parseInt(itemForm.model_scale_cm) || 18,
+        model_width_cm: parseInt(itemForm.model_width_cm) || 18,
+        model_height_cm: parseInt(itemForm.model_height_cm) || 18,
         restaurant_id: restaurantId,
       }
       if (editingItem) {
@@ -411,22 +415,32 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">3D Model (optional)</p>
             </div>
             <div className="space-y-3">
-              {/* Real-world size */}
+              {/* Real-world dimensions */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Tamaño real del platillo <span className="text-slate-400 font-normal">(centímetros — ancho o largo máximo)</span>
+                  Dimensiones reales del platillo
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="1"
-                    max="200"
-                    value={itemForm.model_scale_cm}
-                    onChange={e => setItemForm(f => ({ ...f, model_scale_cm: e.target.value }))}
-                    className="w-24 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <span className="text-slate-400 text-sm">cm</span>
-                  <span className="text-slate-400 text-xs">(ej: hamburguesa = 12, pizza = 30, taco = 15)</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-500 text-xs font-medium">Ancho</span>
+                    <input
+                      type="number" min="1" max="300"
+                      value={itemForm.model_width_cm}
+                      onChange={e => setItemForm(f => ({ ...f, model_width_cm: e.target.value }))}
+                      className="w-20 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <span className="text-slate-400 text-xs">cm</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-500 text-xs font-medium">Alto</span>
+                    <input
+                      type="number" min="1" max="300"
+                      value={itemForm.model_height_cm}
+                      onChange={e => setItemForm(f => ({ ...f, model_height_cm: e.target.value }))}
+                      className="w-20 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <span className="text-slate-400 text-xs">cm</span>
+                  </div>
                 </div>
               </div>
 
