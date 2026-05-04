@@ -4,9 +4,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const TARGET_METERS = 0.18
+const DEFAULT_TARGET_CM = 18
 
-// Accepts JSON { url, path } — downloads GLB from url, rescales, re-uploads to same path
+// Accepts JSON { url, path, targetCm? } — downloads GLB from url, rescales, re-uploads to same path
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null)
@@ -14,7 +14,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing url or path' }, { status: 400 })
     }
 
-    const { url, path } = body as { url: string; path: string }
+    const { url, path, targetCm } = body as { url: string; path: string; targetCm?: number }
+    const TARGET_METERS = Math.max(1, Math.min(targetCm ?? DEFAULT_TARGET_CM, 200)) / 100
 
     // Download GLB from Supabase public URL
     const fetchRes = await fetch(url)
