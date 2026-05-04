@@ -59,32 +59,13 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   async function handleModelUpload(file: File) {
     setUploadingModel(true)
     try {
-      // Step 1: try to process GLB through the rescale API
-      let uploadFile = file
-      try {
-        const form = new FormData()
-        form.append('file', file)
-        const processRes = await fetch('/api/process-glb', { method: 'POST', body: form })
-        if (processRes.ok) {
-          const blob = await processRes.blob()
-          uploadFile = new File([blob], 'model.glb', { type: 'model/gltf-binary' })
-        } else {
-          console.warn('[3D] process-glb returned error, uploading original')
-        }
-      } catch (e) {
-        console.warn('[3D] process-glb unreachable, uploading original:', e)
-      }
-
-      // Step 2: upload to Supabase Storage
-      const supabase = createClient()
-      const path = `${restaurantId}/${Date.now()}.glb`
-      const { error } = await supabase.storage
-        .from('models')
-        .upload(path, uploadFile, { upsert: true, contentType: 'model/gltf-binary' })
-      if (error) throw new Error(error.message)
-
-      const { data } = supabase.storage.from('models').getPublicUrl(path)
-      setItemForm(f => ({ ...f, model_url: data.publicUrl }))
+      const form = new FormData()
+      form.append('file', file)
+      form.append('restaurantId', restaurantId)
+      const res = await fetch('/api/process-glb', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error al subir modelo 3D')
+      setItemForm(f => ({ ...f, model_url: data.url }))
       toast('Modelo 3D subido')
     } catch (err: any) {
       toast(err.message ?? 'Error al subir modelo 3D', 'error')
