@@ -98,7 +98,7 @@ export function ModelViewerModal({ open, onClose, itemName, modelUrl, modelUsdzU
                   // AR
                   ar: true,
                   'ar-modes': 'scene-viewer quick-look webxr',
-                  'ar-scale': 'fixed',
+                  'ar-scale': 'auto',
                   'ar-placement': 'floor',
 
                   // Auto-fit: camera distance adapts to model bounds automatically
