@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { RefreshCw, CreditCard, Package, CheckCircle2, AlertCircle, Unlink } from 'lucide-react'
+import { RefreshCw, CreditCard, Package, CheckCircle2, AlertCircle, Unlink, Monitor } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 interface Connection {
@@ -26,7 +26,7 @@ function SquareIcon({ className }: { className?: string }) {
 
 export function SquareDashboard({ connection, isSandbox }: Props) {
   const router = useRouter()
-  const [tab, setTab] = useState<'overview' | 'transactions' | 'catalog'>('overview')
+  const [tab, setTab] = useState<'overview' | 'transactions' | 'catalog' | 'terminal'>('overview')
   const [transactions, setTransactions] = useState<any[] | null>(null)
   const [txLoading, setTxLoading] = useState(false)
   const [txError, setTxError] = useState('')
@@ -37,6 +37,11 @@ export function SquareDashboard({ connection, isSandbox }: Props) {
   const [manualToken, setManualToken] = useState('')
   const [manualLoading, setManualLoading] = useState(false)
   const [manualError, setManualError] = useState('')
+  const [devices, setDevices] = useState<any[] | null>(null)
+  const [devicesLoading, setDevicesLoading] = useState(false)
+  const [devicesError, setDevicesError] = useState('')
+  const [savedDeviceId, setSavedDeviceId] = useState((connection as any).terminal_device_id ?? '')
+  const [savingDevice, setSavingDevice] = useState(false)
 
   async function loadTransactions() {
     setTxLoading(true); setTxError('')
@@ -92,10 +97,37 @@ export function SquareDashboard({ connection, isSandbox }: Props) {
     }
   }
 
+  async function loadDevices() {
+    setDevicesLoading(true); setDevicesError('')
+    try {
+      const res = await fetch('/api/square/terminal')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setDevices(data.devices)
+      if (data.terminal_device_id) setSavedDeviceId(data.terminal_device_id)
+    } catch (e: any) {
+      setDevicesError(e.message)
+    } finally {
+      setDevicesLoading(false)
+    }
+  }
+
+  async function handleSaveDevice(deviceId: string) {
+    setSavingDevice(true)
+    await fetch('/api/square/terminal', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ terminal_device_id: deviceId }),
+    })
+    setSavedDeviceId(deviceId)
+    setSavingDevice(false)
+  }
+
   const tabs = [
     { id: 'overview', label: 'Conexión', icon: SquareIcon },
     { id: 'transactions', label: 'Transacciones', icon: CreditCard },
     { id: 'catalog', label: 'Catálogo', icon: Package },
+    { id: 'terminal', label: 'Terminal', icon: Monitor },
   ] as const
 
   const statusColor = { COMPLETED: 'text-emerald-400', FAILED: 'text-red-400', CANCELED: 'text-slate-400' }
@@ -114,7 +146,11 @@ export function SquareDashboard({ connection, isSandbox }: Props) {
         {tabs.map(t => (
           <button
             key={t.id}
-            onClick={() => { setTab(t.id as any); if (t.id === 'transactions' && !transactions) loadTransactions() }}
+            onClick={() => {
+              setTab(t.id as any)
+              if (t.id === 'transactions' && !transactions) loadTransactions()
+              if (t.id === 'terminal' && !devices) loadDevices()
+            }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${tab === t.id ? 'bg-[#a3e635] text-black' : 'text-white/40 hover:text-white'}`}
           >
             <t.icon className="w-4 h-4" />
@@ -239,6 +275,96 @@ export function SquareDashboard({ connection, isSandbox }: Props) {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Terminal */}
+      {tab === 'terminal' && (
+        <div className="space-y-4">
+          <div className="bg-white/5 border border-white/8 rounded-2xl p-5">
+            <h3 className="text-white font-bold text-sm mb-1">Terminal Square física</h3>
+            <p className="text-white/40 text-sm mb-4 leading-relaxed">
+              Selecciona el dispositivo Square Terminal de tu restaurante. Al cobrar una orden, la terminal mostrará el monto y el cliente toca o inserta su tarjeta.
+            </p>
+
+            {savedDeviceId && (
+              <div className="flex items-center gap-2 bg-[#a3e635]/10 border border-[#a3e635]/20 rounded-xl px-4 py-3 mb-4">
+                <CheckCircle2 className="w-4 h-4 text-[#a3e635] shrink-0" />
+                <div>
+                  <p className="text-[#a3e635] text-sm font-semibold">Terminal activa</p>
+                  <p className="text-white/40 text-xs font-mono">{savedDeviceId}</p>
+                </div>
+              </div>
+            )}
+
+            {devicesError && (
+              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <p className="text-red-400 text-sm">{devicesError}</p>
+              </div>
+            )}
+
+            {devicesLoading && (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-[#a3e635]/40 border-t-[#a3e635] rounded-full animate-spin" />
+              </div>
+            )}
+
+            {devices && devices.length === 0 && (
+              <div className="text-center py-8 text-white/30 text-sm">
+                <Monitor className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                <p>Sin terminales registradas</p>
+                <p className="text-xs mt-1">Registra tu Square Terminal en el Panel de Square</p>
+              </div>
+            )}
+
+            {devices && devices.length > 0 && (
+              <div className="space-y-2">
+                {devices.map((device: any) => (
+                  <div
+                    key={device.id}
+                    className={`flex items-center justify-between rounded-xl border p-4 transition-all ${
+                      savedDeviceId === device.id
+                        ? 'border-[#a3e635]/40 bg-[#a3e635]/5'
+                        : 'border-white/8 bg-white/3 hover:border-white/20'
+                    }`}
+                  >
+                    <div>
+                      <p className="text-white text-sm font-semibold">{device.attributes?.name ?? 'Terminal'}</p>
+                      <p className="text-white/30 text-xs font-mono mt-0.5">{device.id}</p>
+                      <p className="text-white/30 text-xs capitalize">{device.status?.category?.toLowerCase() ?? ''}</p>
+                    </div>
+                    {savedDeviceId === device.id ? (
+                      <span className="text-[#a3e635] text-xs font-bold">Seleccionada</span>
+                    ) : (
+                      <button
+                        onClick={() => handleSaveDevice(device.id)}
+                        disabled={savingDevice}
+                        className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+                      >
+                        Usar esta
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={loadDevices}
+              disabled={devicesLoading}
+              className="flex items-center gap-2 text-white/40 hover:text-white text-xs mt-4 transition-colors"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${devicesLoading ? 'animate-spin' : ''}`} />
+              Actualizar dispositivos
+            </button>
+          </div>
+
+          <div className="bg-white/5 border border-white/8 rounded-2xl p-4">
+            <p className="text-white/40 text-xs leading-relaxed">
+              ¿No tienes una Square Terminal? Puedes adquirirla en <span className="text-white/60">squareup.com/hardware</span>. También es compatible con Square Reader (lector de tarjetas).
+            </p>
+          </div>
         </div>
       )}
 

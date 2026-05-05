@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { printReceipt } from '@/lib/printReceipt'
 
 function beep() {
   try {
@@ -44,12 +45,17 @@ const COLUMNS: OrderStatus[] = ['new', 'confirmed', 'preparing', 'ready', 'on_th
 interface Props {
   initialOrders: Order[]
   restaurantId: string
+  restaurantName?: string
+  restaurantAddress?: string | null
+  restaurantPhone?: string | null
+  squareTerminalDeviceId?: string | null
 }
 
-export function OrdersBoard({ initialOrders, restaurantId }: Props) {
+export function OrdersBoard({ initialOrders, restaurantId, restaurantName = '', restaurantAddress, restaurantPhone, squareTerminalDeviceId }: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [terminalStatus, setTerminalStatus] = useState<Record<string, 'pending' | 'completed' | 'error'>>({})
   const { toast } = useToast()
   const ordersRef = useRef(orders)
   ordersRef.current = orders
@@ -125,6 +131,56 @@ export function OrdersBoard({ initialOrders, restaurantId }: Props) {
     }
   }
 
+  function handlePrint(order: Order) {
+    printReceipt(order as any, {
+      name: restaurantName,
+      address: restaurantAddress,
+      phone: restaurantPhone,
+    })
+  }
+
+  async function handleTerminalCharge(order: Order) {
+    if (!squareTerminalDeviceId) return
+    setTerminalStatus(s => ({ ...s, [order.id]: 'pending' }))
+    try {
+      const res = await fetch('/api/square/terminal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          amountCents: Math.round((order.total ?? 0) * 100),
+          deviceId: squareTerminalDeviceId,
+          note: `Orden #${order.order_number} — ${order.customer_name}`,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error al enviar a terminal')
+      toast(`Terminal activa — cobra $${order.total?.toFixed(2)} en el dispositivo`, 'info')
+
+      // Poll status every 3s until completed or failed
+      const checkoutId = data.checkout_id
+      const poll = setInterval(async () => {
+        const r = await fetch(`/api/square/terminal/${checkoutId}`)
+        const d = await r.json()
+        if (d.status === 'COMPLETED') {
+          clearInterval(poll)
+          setTerminalStatus(s => ({ ...s, [order.id]: 'completed' }))
+          toast(`Pago completado en terminal — Orden #${order.order_number}`, 'success' as any)
+        } else if (['CANCELED', 'CANCEL_REQUESTED'].includes(d.status)) {
+          clearInterval(poll)
+          setTerminalStatus(s => ({ ...s, [order.id]: 'error' }))
+          toast('Pago cancelado en terminal', 'error')
+        }
+      }, 3000)
+      // Stop polling after 3 minutes
+      setTimeout(() => clearInterval(poll), 180000)
+    } catch (e: any) {
+      setTerminalStatus(s => ({ ...s, [order.id]: 'error' }))
+      toast(e.message, 'error')
+    }
+  }
+
   const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status))
   const doneOrders = orders.filter(o => ['completed', 'cancelled'].includes(o.status))
 
@@ -188,7 +244,7 @@ export function OrdersBoard({ initialOrders, restaurantId }: Props) {
                         )}
                         <p className="text-xs text-slate-500">Pago: {payLabel[order.payment_method]}</p>
                         {order.customer_phone && <p className="text-xs text-slate-500">Tel: {order.customer_phone}</p>}
-                        <div className="flex gap-2 mt-2">
+                        <div className="flex gap-2 mt-2 flex-wrap">
                           {nextStatus[order.status] && (
                             <button
                               onClick={e => { e.stopPropagation(); handleAdvance(order) }}
@@ -198,6 +254,13 @@ export function OrdersBoard({ initialOrders, restaurantId }: Props) {
                               {updating === order.id ? '...' : nextLabel[order.status]}
                             </button>
                           )}
+                          <button
+                            onClick={e => { e.stopPropagation(); handlePrint(order) }}
+                            className="text-slate-600 hover:text-slate-800 text-xs px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                            title="Imprimir recibo"
+                          >
+                            🖨️
+                          </button>
                           {!['completed', 'cancelled', 'on_the_way'].includes(order.status) && (
                             <button
                               onClick={e => { e.stopPropagation(); handleCancel(order) }}
@@ -207,6 +270,21 @@ export function OrdersBoard({ initialOrders, restaurantId }: Props) {
                             </button>
                           )}
                         </div>
+                        {squareTerminalDeviceId && !['completed', 'cancelled'].includes(order.status) && order.payment_status !== 'paid' && (
+                          <button
+                            onClick={e => { e.stopPropagation(); handleTerminalCharge(order) }}
+                            disabled={terminalStatus[order.id] === 'pending'}
+                            className="w-full mt-2 bg-black hover:bg-slate-800 text-white text-xs py-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            {terminalStatus[order.id] === 'pending' ? (
+                              <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Esperando terminal...</>
+                            ) : terminalStatus[order.id] === 'completed' ? (
+                              '✓ Cobrado en terminal'
+                            ) : (
+                              <>⬛ Cobrar en terminal Square</>
+                            )}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

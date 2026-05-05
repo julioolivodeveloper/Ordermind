@@ -1,25 +1,43 @@
 import { requireRestaurantAccess, formatCurrency, timeAgo } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { OrdersBoard } from '@/components/dashboard/OrdersBoard'
 
 export default async function OrdersPage() {
   const profile = await requireRestaurantAccess()
   const supabase = await createClient()
+  const admin = createAdminClient()
 
   const restaurantId = profile.restaurant_id
 
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*, order_items(*)')
-    .eq('restaurant_id', restaurantId)
-    .order('created_at', { ascending: false })
-    .limit(100)
+  const [ordersRes, restaurantRes, squareRes] = await Promise.all([
+    supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('restaurant_id', restaurantId)
+      .order('created_at', { ascending: false })
+      .limit(100),
+    supabase
+      .from('restaurants')
+      .select('name, address, phone')
+      .eq('id', restaurantId)
+      .single(),
+    admin
+      .from('square_connections')
+      .select('terminal_device_id')
+      .eq('restaurant_id', restaurantId)
+      .maybeSingle(),
+  ])
+
+  const orders = ordersRes.data
+  const restaurant = restaurantRes.data
+  const squareTerminalDeviceId = squareRes.data?.terminal_device_id ?? null
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const todayOrders = orders?.filter(o => new Date(o.created_at) >= today) ?? []
+  const todayOrders = (orders ?? []).filter(o => new Date(o.created_at) >= today)
   const todayRevenue = todayOrders.reduce((s, o) => s + (o.total || 0), 0)
-  const pending = orders?.filter(o => ['new', 'confirmed', 'preparing'].includes(o.status)).length ?? 0
+  const pending = (orders ?? []).filter(o => ['new', 'confirmed', 'preparing'].includes(o.status)).length
 
   return (
     <div className="p-6 bg-[#111111] min-h-full">
@@ -51,7 +69,14 @@ export default async function OrdersPage() {
         </div>
       </div>
 
-      <OrdersBoard initialOrders={orders ?? []} restaurantId={restaurantId!} />
+      <OrdersBoard
+        initialOrders={orders ?? []}
+        restaurantId={restaurantId!}
+        restaurantName={restaurant?.name ?? ''}
+        restaurantAddress={restaurant?.address ?? null}
+        restaurantPhone={restaurant?.phone ?? null}
+        squareTerminalDeviceId={squareTerminalDeviceId}
+      />
     </div>
   )
 }
