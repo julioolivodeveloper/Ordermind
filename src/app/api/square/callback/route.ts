@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   }
 
   // Verify CSRF state
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const savedState = cookieStore.get('square_oauth_state')?.value
 
   if (!savedState || savedState !== state) {
