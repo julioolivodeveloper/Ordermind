@@ -1,6 +1,7 @@
 import { requireRestaurantAccess } from '@/lib/auth'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { ToastProvider } from '@/components/ui/Toast'
+import { AgentChat } from '@/components/dashboard/AgentChat'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireRestaurantAccess()
@@ -25,6 +26,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex h-screen bg-[#111111]">
         <DashboardSidebar profile={profile} />
         <main className="flex-1 overflow-auto">{children}</main>
+        <AgentChat />
       </div>
     </ToastProvider>
   )
