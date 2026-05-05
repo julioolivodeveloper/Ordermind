@@ -31,6 +31,7 @@ export interface Restaurant {
   owner_id?: string
   primary_color: string
   secondary_color: string
+  menu_bg_color?: string
   phone?: string
   email?: string
   address?: string

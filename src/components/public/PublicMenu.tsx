@@ -129,13 +129,14 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
   const count = itemCount()
   const primary = restaurant.primary_color || '#f97316'
   const secondary = restaurant.secondary_color || '#ef4444'
+  const menuBg = restaurant.menu_bg_color || '#f8fafc'
 
   function scrollToMenu() {
     menuRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen font-sans" style={{ backgroundColor: menuBg }}>
 
       {/* ── Sticky Nav (appears after hero scrolls away) ── */}
       <AnimatePresence>

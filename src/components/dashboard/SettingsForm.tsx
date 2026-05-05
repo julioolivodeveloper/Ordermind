@@ -193,6 +193,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
     facebook: restaurant.facebook ?? '',
     primary_color: restaurant.primary_color,
     secondary_color: restaurant.secondary_color ?? '#1f2937',
+    menu_bg_color: restaurant.menu_bg_color ?? '#f8fafc',
     logo_url: restaurant.logo_url ?? '',
     cover_url: restaurant.cover_url ?? '',
     language: restaurant.language,
@@ -281,14 +282,19 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
               </div>
               <div className="flex flex-col gap-4">
                 <ColorSwatch
-                  label="Color principal"
+                  label="Color de botones"
                   value={form.primary_color}
                   onChange={c => setForm(f => ({ ...f, primary_color: c }))}
                 />
                 <ColorSwatch
-                  label="Color secundario"
+                  label="Color secundario (encabezado)"
                   value={form.secondary_color}
                   onChange={c => setForm(f => ({ ...f, secondary_color: c }))}
+                />
+                <ColorSwatch
+                  label="Fondo del menú"
+                  value={form.menu_bg_color}
+                  onChange={c => setForm(f => ({ ...f, menu_bg_color: c }))}
                 />
               </div>
             </div>
@@ -308,7 +314,7 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
             {/* Live preview */}
             <div className="rounded-2xl overflow-hidden border border-slate-200">
               <p className="text-xs font-medium text-slate-500 px-4 py-2 bg-slate-50 border-b border-slate-100">
-                Vista previa del encabezado
+                Vista previa
               </p>
               <div
                 className="p-6 flex items-center gap-4"
@@ -325,6 +331,15 @@ export function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
                   <p className="text-white font-black text-lg">{form.name}</p>
                   {form.description && <p className="text-white/70 text-sm">{form.description}</p>}
                 </div>
+              </div>
+              <div className="p-4 flex items-center gap-3" style={{ backgroundColor: form.menu_bg_color }}>
+                <div className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow" style={{ backgroundColor: form.primary_color }}>
+                  Ordenar
+                </div>
+                <div className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow" style={{ backgroundColor: form.primary_color }}>
+                  Ver menú
+                </div>
+                <p className="text-xs ml-auto opacity-50">Fondo del menú</p>
               </div>
             </div>
           </>
