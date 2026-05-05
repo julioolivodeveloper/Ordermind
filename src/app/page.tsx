@@ -282,10 +282,10 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-[#635BFF]/50 hover:bg-[#635BFF]/5 transition-all"
             >
-              {/* Stripe logo SVG */}
-              <svg viewBox="0 0 60 25" className="h-10 w-auto" fill="none">
-                <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.96 20.3c-1.96 0-3.14-.83-3.91-1.42l-.02 6.44-4.06.86V6.37h3.58l.19 1.38c.71-.9 1.95-1.71 3.77-1.71 3.25 0 6.24 2.97 6.24 7.12 0 4.44-2.75 7.14-5.79 7.14zm-.69-10.83c-1.02 0-1.65.4-2.07.96l.07 5.08c.41.52 1.04.9 2 .9 1.64 0 2.75-1.55 2.75-3.49s-1.1-3.45-2.75-3.45zM28.67 6.4v13.83h-4.07V6.4h4.07zm0-3.72c0 1.15-.88 2.06-2.03 2.06-1.16 0-2.04-.91-2.04-2.06C24.6.91 25.48 0 26.64 0c1.15 0 2.03.91 2.03 2.68zM20.96 7.55l-.25-1.18h-3.58v13.83h4.06V9.96c.96-1.27 2.59-.92 3.1-.77V6.37c-.52-.18-2.43-.44-3.33 1.18zM11.53 6.4H7.46v13.83h4.07V6.4zm0-3.72c0 1.15-.88 2.06-2.04 2.06C8.34 4.74 7.46 3.83 7.46 2.68 7.46.91 8.34 0 9.49 0s2.04.91 2.04 2.68zM3.4 8.88l-.04-2.51H0v13.83h4.07V9.97c.96-.88 2.28-.79 2.8-.72V6.37C6.27 6.2 4.22 5.97 3.4 8.88z" fill="#635BFF"/>
-              </svg>
+              {/* Stripe logo */}
+              <span className="text-4xl font-black tracking-tight" style={{ color: '#635BFF', fontFamily: 'Arial, sans-serif' }}>
+                stripe
+              </span>
               <div className="text-center">
                 <p className="text-white font-bold">Stripe</p>
                 <p className="text-slate-400 text-sm mt-1">Pagos globales, suscripciones y más</p>
