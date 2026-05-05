@@ -60,9 +60,9 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   }
 
   async function handleModelUpload(file: File) {
-    const maxMB = 300
+    const maxMB = 50
     if (file.size > maxMB * 1024 * 1024) {
-      toast(`El archivo pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. El máximo es ${maxMB} MB.`, 'error')
+      toast(`El archivo pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. El máximo es ${maxMB} MB. Optimiza el modelo con gltf.report o Blender antes de subir.`, 'error')
       return
     }
     setUploadingModel(true)
