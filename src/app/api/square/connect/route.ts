@@ -8,10 +8,12 @@ const SQUARE_BASE =
     : 'https://connect.squareupsandbox.com'
 
 const SCOPES = [
-  'ORDERS_READ',
-  'ITEMS_READ',
-  'PAYMENTS_READ',
   'MERCHANT_PROFILE_READ',
+  'PAYMENTS_READ',
+  'PAYMENTS_WRITE',
+  'ORDERS_READ',
+  'ORDERS_WRITE',
+  'ITEMS_READ',
 ].join(' ')
 
 export async function GET() {
