@@ -25,6 +25,7 @@ export default async function SquarePage({
         connectedAt={connection?.created_at}
         error={sp.error ?? null}
         justConnected={sp.connected === 'true'}
+        isSandbox={process.env.SQUARE_ENVIRONMENT !== 'production'}
       />
     </div>
   )

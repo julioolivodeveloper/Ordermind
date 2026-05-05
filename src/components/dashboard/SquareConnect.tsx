@@ -9,6 +9,7 @@ interface Props {
   connectedAt?: string | null
   error?: string | null
   justConnected?: boolean
+  isSandbox?: boolean
 }
 
 function SquareIcon({ className }: { className?: string }) {
@@ -20,10 +21,33 @@ function SquareIcon({ className }: { className?: string }) {
   )
 }
 
-export function SquareConnect({ connected, merchantId, connectedAt, error, justConnected }: Props) {
+export function SquareConnect({ connected, merchantId, connectedAt, error, justConnected, isSandbox }: Props) {
   const router = useRouter()
   const [disconnecting, setDisconnecting] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
+  const [manualToken, setManualToken] = useState('')
+  const [manualLoading, setManualLoading] = useState(false)
+
+  async function handleManualConnect() {
+    if (!manualToken.trim()) return
+    setManualLoading(true)
+    setLocalError(null)
+    try {
+      const res = await fetch('/api/square/manual-connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: manualToken.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setManualToken('')
+      router.refresh()
+    } catch (err: any) {
+      setLocalError(err.message ?? 'Error al conectar')
+    } finally {
+      setManualLoading(false)
+    }
+  }
 
   async function handleDisconnect() {
     if (!confirm('¿Seguro que quieres desconectar Square? Los pagos con Square dejarán de funcionar.')) return
@@ -138,6 +162,29 @@ export function SquareConnect({ connected, merchantId, connectedAt, error, justC
             <p className="text-white/20 text-xs text-center">
               Serás redirigido a Square para autorizar el acceso. Puedes desconectar en cualquier momento.
             </p>
+
+            {/* Sandbox manual token input */}
+            {isSandbox && (
+              <div className="mt-4 pt-4 border-t border-white/8">
+                <p className="text-amber-400 text-xs font-semibold mb-2">🧪 Modo sandbox — conectar con token manual</p>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={manualToken}
+                    onChange={e => setManualToken(e.target.value)}
+                    placeholder="Pega tu Access Token de prueba"
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-amber-400/50"
+                  />
+                  <button
+                    onClick={handleManualConnect}
+                    disabled={manualLoading || !manualToken.trim()}
+                    className="bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-black font-bold text-xs px-4 py-2 rounded-xl transition-all shrink-0"
+                  >
+                    {manualLoading ? '...' : 'Conectar'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
