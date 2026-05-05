@@ -585,67 +585,70 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
 
                     {/* Content */}
                     <div className="flex flex-col flex-1 p-3 md:p-4">
-                      {catName && (
-                        <p className="text-[10px] font-bold uppercase tracking-wider mb-1 truncate" style={{ color: primary }}>
-                          {catName}
-                        </p>
-                      )}
+                      {/* Top: grows to fill space */}
+                      <div className="flex-1">
+                        {catName && (
+                          <p className="text-[10px] font-bold uppercase tracking-wider mb-1 truncate" style={{ color: primary }}>
+                            {catName}
+                          </p>
+                        )}
+                        <h3 className="font-bold text-slate-800 text-sm md:text-[15px] leading-snug line-clamp-2">
+                          {itemName(item)}
+                        </h3>
+                        {itemDesc(item) && (
+                          <p className="text-slate-400 text-[11px] md:text-xs leading-relaxed line-clamp-2 mt-1">
+                            {itemDesc(item)}
+                          </p>
+                        )}
+                        {item.is_spicy && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-red-500 font-semibold mt-1.5">
+                            <Flame className="w-2.5 h-2.5" /> {t.spicy}
+                          </span>
+                        )}
+                      </div>
 
-                      <h3 className="font-bold text-slate-800 text-sm md:text-[15px] leading-snug line-clamp-2">
-                        {itemName(item)}
-                      </h3>
+                      {/* Bottom: always pinned */}
+                      <div className="mt-3 space-y-2.5">
+                        {/* 3D button */}
+                        {item.model_url && (
+                          <motion.button
+                            whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setItem3D(item) }}
+                            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold border transition-all hover:brightness-110"
+                            style={{ backgroundColor: primary + '15', color: primary, borderColor: primary + '40' }}
+                          >
+                            <Box className="w-3.5 h-3.5" />
+                            Ver en 3D / AR
+                          </motion.button>
+                        )}
 
-                      {itemDesc(item) && (
-                        <p className="text-slate-400 text-[11px] md:text-xs leading-relaxed line-clamp-2 mt-1 flex-1">
-                          {itemDesc(item)}
-                        </p>
-                      )}
-
-                      {item.is_spicy && (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] text-red-500 font-semibold mt-1.5">
-                          <Flame className="w-2.5 h-2.5" /> {t.spicy}
-                        </span>
-                      )}
-
-                      {/* 3D button */}
-                      {item.model_url && (
-                        <motion.button
-                          whileTap={{ scale: 0.97 }}
-                          onClick={e => { e.stopPropagation(); setItem3D(item) }}
-                          className="w-full flex items-center justify-center gap-2 mt-3 py-2 rounded-xl text-xs font-bold border transition-all hover:brightness-110"
-                          style={{ backgroundColor: primary + '15', color: primary, borderColor: primary + '40' }}
-                        >
-                          <Box className="w-3.5 h-3.5" />
-                          Ver en 3D / AR
-                        </motion.button>
-                      )}
-
-                      {/* Price + Add */}
-                      <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100">
-                        <div>
-                          {salePrice ? (
-                            <>
-                              <span className="text-[10px] text-slate-400 line-through block leading-none">
+                        {/* Price + Add */}
+                        <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+                          <div>
+                            {salePrice ? (
+                              <>
+                                <span className="text-[10px] text-slate-400 line-through block leading-none">
+                                  {formatCurrency(item.price)}
+                                </span>
+                                <span className="font-black text-red-500 text-base md:text-lg leading-tight">
+                                  {formatCurrency(salePrice)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="font-black text-slate-800 text-base md:text-lg">
                                 {formatCurrency(item.price)}
                               </span>
-                              <span className="font-black text-red-500 text-base md:text-lg leading-tight">
-                                {formatCurrency(salePrice)}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="font-black text-slate-800 text-base md:text-lg">
-                              {formatCurrency(item.price)}
-                            </span>
-                          )}
+                            )}
+                          </div>
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
+                            onClick={e => { e.stopPropagation(); setSelectedItem(item) }}
+                            className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xl text-white shadow-lg hover:brightness-110 transition-all shrink-0"
+                            style={{ backgroundColor: primary }}
+                          >
+                            +
+                          </motion.button>
                         </div>
-                        <motion.button
-                          whileTap={{ scale: 0.85 }}
-                          onClick={e => { e.stopPropagation(); setSelectedItem(item) }}
-                          className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xl text-white shadow-lg hover:brightness-110 transition-all shrink-0"
-                          style={{ backgroundColor: primary }}
-                        >
-                          +
-                        </motion.button>
                       </div>
                     </div>
                   </motion.div>
