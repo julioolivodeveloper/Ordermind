@@ -151,9 +151,20 @@ export interface MenuItem {
   sort_order: number
   created_at: string
   updated_at: string
+  is_combo?: boolean
   category?: MenuCategory
   ingredients?: ItemIngredient[]
   option_groups?: ItemOptionGroup[]
+  combo_items?: ComboItem[]
+}
+
+export interface ComboItem {
+  id: string
+  combo_id: string
+  component_id: string
+  quantity: number
+  sort_order: number
+  component?: { id: string; name: string; price: number; image_url?: string }
 }
 
 export interface Modification {

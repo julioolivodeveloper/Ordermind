@@ -37,6 +37,10 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [optionModal, setOptionModal] = useState<MenuItem | null>(null)
   const [groupForm, setGroupForm] = useState({ name: '', required: false, max_selections: 1 })
   const [optionForm, setOptionForm] = useState<Record<string, { name: string; extra_cost: string }>>({})
+  const [comboModal, setComboModal] = useState(false)
+  const [editingCombo, setEditingCombo] = useState<MenuItem | null>(null)
+  const [comboForm, setComboForm] = useState({ name: '', description: '', price: '', category_id: '', image_url: '' })
+  const [comboComponentIds, setComboComponentIds] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingModel, setUploadingModel] = useState(false)
@@ -349,6 +353,46 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
     syncOptionModal({ ...optionModal, option_groups: updatedGroups })
   }
 
+  function openNewCombo() {
+    setEditingCombo(null)
+    setComboForm({ name: '', description: '', price: '', category_id: '', image_url: '' })
+    setComboComponentIds([])
+    setComboModal(true)
+  }
+
+  function openEditCombo(item: MenuItem) {
+    setEditingCombo(item)
+    setComboForm({ name: item.name, description: item.description ?? '', price: String(item.price), category_id: item.category_id ?? '', image_url: item.image_url ?? '' })
+    setComboComponentIds((item.combo_items ?? []).map(ci => ci.component_id))
+    setComboModal(true)
+  }
+
+  function toggleComboComponent(id: string) {
+    setComboComponentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  async function handleSaveCombo() {
+    if (!comboForm.name || !comboForm.price || comboComponentIds.length < 2) {
+      toast('Agrega nombre, precio y al menos 2 platillos', 'error')
+      return
+    }
+    setSaving(true)
+    try {
+      const payload = { ...comboForm, price: parseFloat(comboForm.price), restaurant_id: restaurantId, component_ids: comboComponentIds }
+      if (editingCombo) {
+        await fetch(`/api/dashboard/menu/combos/${editingCombo.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        setItems(prev => prev.map(i => i.id === editingCombo.id ? { ...i, ...comboForm, price: parseFloat(comboForm.price) } : i))
+        toast('Combo actualizado')
+      } else {
+        const res = await fetch('/api/dashboard/menu/combos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        const created = await res.json()
+        setItems(prev => [...prev, { ...created, is_combo: true, combo_items: [] }])
+        toast('Combo creado')
+      }
+      setComboModal(false)
+    } catch { toast('Error al guardar', 'error') } finally { setSaving(false) }
+  }
+
   return (
     <div>
       {/* Actions */}
@@ -358,6 +402,9 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
         </button>
         <button onClick={openNewItem} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
           + Nuevo Platillo
+        </button>
+        <button onClick={openNewCombo} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+          🍱 Crear Combo
         </button>
       </div>
 
@@ -427,6 +474,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                 <p className="text-xs text-slate-500 mb-3 line-clamp-2">{item.description}</p>
               )}
               <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                {item.is_combo && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">🍱 Combo</span>}
                 {item.is_popular && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">⭐ Popular</span>}
                 {item.is_spicy && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">🌶️ Picante</span>}
                 {(item.ingredients?.length ?? 0) > 0 && (
@@ -439,15 +487,23 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                 <button onClick={() => handleToggleAvailable(item)} className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors border ${item.is_available ? 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100' : 'border-slate-200 text-slate-500 bg-slate-50 hover:bg-slate-100'}`}>
                   {item.is_available ? 'Disponible' : 'No disp.'}
                 </button>
-                <button onClick={() => setIngredientModal(item)} className="border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
-                  Ing.
-                </button>
-                <button onClick={() => setOptionModal(item)} className="border border-purple-200 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
-                  Combos
-                </button>
-                <button onClick={() => openEditItem(item)} className="border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
-                  Editar
-                </button>
+                {item.is_combo ? (
+                  <button onClick={() => openEditCombo(item)} className="border border-orange-200 text-orange-600 hover:bg-orange-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
+                    Editar
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => setIngredientModal(item)} className="border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
+                      Ing.
+                    </button>
+                    <button onClick={() => setOptionModal(item)} className="border border-purple-200 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
+                      Opciones
+                    </button>
+                    <button onClick={() => openEditItem(item)} className="border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
+                      Editar
+                    </button>
+                  </>
+                )}
                 <button onClick={() => handleDeleteItem(item)} className="text-red-400 hover:text-red-600 hover:bg-red-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
                   ✕
                 </button>
@@ -782,6 +838,78 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Combo Modal */}
+      <Modal open={comboModal} onClose={() => setComboModal(false)} title={editingCombo ? 'Editar Combo' : 'Crear Combo'} size="md">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del combo *</label>
+              <input value={comboForm.name} onChange={e => setComboForm(f => ({ ...f, name: e.target.value }))} placeholder="Combo Hamburguesa + Papas" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Precio del combo ($) *</label>
+              <input type="number" value={comboForm.price} onChange={e => setComboForm(f => ({ ...f, price: e.target.value }))} placeholder="0.00" step="0.01" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select value={comboForm.category_id} onChange={e => setComboForm(f => ({ ...f, category_id: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <option value="">Sin categoría</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+              </select>
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+              <input value={comboForm.description} onChange={e => setComboForm(f => ({ ...f, description: e.target.value }))} placeholder="Incluye hamburguesa, papas y soda" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+          </div>
+
+          {/* Component selector */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Platillos que incluye *
+              <span className="text-slate-400 font-normal ml-1">({comboComponentIds.length} seleccionados, mín. 2)</span>
+            </label>
+            <div className="border border-slate-200 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+              {items.filter(i => !i.is_combo).map(item => {
+                const selected = comboComponentIds.includes(item.id)
+                return (
+                  <label key={item.id} className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-b border-slate-100 last:border-0 ${selected ? 'bg-orange-50' : 'hover:bg-slate-50'}`}>
+                    <input type="checkbox" checked={selected} onChange={() => toggleComboComponent(item.id)} className="rounded w-4 h-4 accent-orange-500" />
+                    {item.image_url && <img src={item.image_url} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{item.name}</p>
+                      {item.category && <p className="text-xs text-slate-400">{item.category.icon} {item.category.name}</p>}
+                    </div>
+                    <span className="text-sm font-semibold text-slate-600 shrink-0">{formatCurrency(item.price)}</span>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Price summary */}
+          {comboComponentIds.length >= 2 && comboForm.price && (
+            <div className="bg-orange-50 rounded-xl px-4 py-3 text-sm">
+              <div className="flex justify-between text-slate-600">
+                <span>Precio individual total:</span>
+                <span>{formatCurrency(items.filter(i => comboComponentIds.includes(i.id)).reduce((s, i) => s + i.price, 0))}</span>
+              </div>
+              <div className="flex justify-between font-bold text-orange-700 mt-1">
+                <span>Precio combo:</span>
+                <span>{formatCurrency(parseFloat(comboForm.price) || 0)}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-1">
+            <button onClick={() => setComboModal(false)} className="flex-1 border border-slate-200 text-slate-700 py-2.5 rounded-xl text-sm font-medium">Cancelar</button>
+            <button onClick={handleSaveCombo} disabled={saving} className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-2.5 rounded-xl text-sm font-medium">
+              {saving ? 'Guardando...' : editingCombo ? 'Guardar cambios' : 'Crear combo'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   )
