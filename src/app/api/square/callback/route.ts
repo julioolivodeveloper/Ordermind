@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import type { NextRequest } from 'next/server'
 
 const SQUARE_BASE =
   process.env.SQUARE_ENVIRONMENT === 'production'
@@ -26,9 +27,8 @@ export async function GET(req: Request) {
   }
 
   // Verify CSRF state
-  const cookieStore = await cookies()
+  const cookieStore = cookies()
   const savedState = cookieStore.get('square_oauth_state')?.value
-  cookieStore.delete('square_oauth_state')
 
   if (!savedState || savedState !== state) {
     return NextResponse.redirect(`${DASHBOARD_URL}?error=invalid_state`)

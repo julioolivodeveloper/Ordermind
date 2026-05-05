@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
 const SQUARE_BASE =
@@ -18,19 +17,12 @@ const SCOPES = [
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'))
 
-  // CSRF state token
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+  if (!user) return NextResponse.redirect(`${siteUrl}/login`)
+
   const state = crypto.randomBytes(16).toString('hex')
-
-  const cookieStore = await cookies()
-  cookieStore.set('square_oauth_state', state, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 600,
-    path: '/',
-  })
 
   const params = new URLSearchParams({
     client_id: process.env.SQUARE_CLIENT_ID!,
@@ -39,5 +31,15 @@ export async function GET() {
     state,
   })
 
-  return NextResponse.redirect(`${SQUARE_BASE}/oauth2/authorize?${params}`)
+  // Set cookie on the redirect response itself
+  const response = NextResponse.redirect(`${SQUARE_BASE}/oauth2/authorize?${params}`)
+  response.cookies.set('square_oauth_state', state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 600,
+    path: '/',
+  })
+
+  return response
 }
