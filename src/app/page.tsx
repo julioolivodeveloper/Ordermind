@@ -273,7 +273,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Stripe */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -320,6 +320,28 @@ export default function Home() {
                 ))}
               </div>
             </motion.div>
+
+            {/* Efectivo */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-[#a3e635]/50 hover:bg-[#a3e635]/5 transition-all"
+            >
+              <div className="w-12 h-12 rounded-xl bg-[#a3e635]/15 border border-[#a3e635]/30 flex items-center justify-center">
+                <span className="text-2xl">💵</span>
+              </div>
+              <div className="text-center">
+                <p className="text-white font-bold">Efectivo / Caja</p>
+                <p className="text-slate-400 text-sm mt-1">El cliente paga al recoger o al entregar</p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 mt-1">
+                {['Pickup', 'Delivery', 'Dine-in'].map(m => (
+                  <span key={m} className="text-xs bg-white/10 text-slate-300 px-2.5 py-1 rounded-full">{m}</span>
+                ))}
+              </div>
+            </motion.div>
           </div>
 
           <motion.p
@@ -329,7 +351,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-center text-slate-600 text-xs mt-8"
           >
-            Todos los pagos son procesados directamente por Stripe o Square — Ordermind nunca toca tu dinero.
+            Los pagos con tarjeta son procesados directamente por Stripe o Square — Ordermind nunca toca tu dinero.
           </motion.p>
         </div>
       </section>
