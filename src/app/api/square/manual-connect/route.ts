@@ -47,6 +47,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No se pudo obtener el Merchant ID' }, { status: 400 })
   }
 
+  // Fetch first location
+  const locRes = await fetch(`${SQUARE_BASE}/v2/locations`, {
+    headers: { 'Authorization': `Bearer ${access_token}`, 'Square-Version': '2024-01-18' },
+  })
+  const locData = await locRes.json()
+  const location_id = locData.locations?.[0]?.id ?? null
+
   const admin = createAdminClient()
   const { error: dbError } = await admin
     .from('square_connections')
@@ -55,6 +62,7 @@ export async function POST(req: Request) {
         restaurant_id: profile.restaurant_id,
         user_id: user.id,
         merchant_id,
+        location_id,
         access_token,
         refresh_token: null,
         expires_at: null,

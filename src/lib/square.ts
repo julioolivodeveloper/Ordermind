@@ -96,7 +96,7 @@ export async function getSquareConnection(restaurantId: string) {
   const admin = createAdminClient()
   const { data } = await admin
     .from('square_connections')
-    .select('merchant_id, created_at, expires_at')
+    .select('merchant_id, location_id, created_at, expires_at')
     .eq('restaurant_id', restaurantId)
     .single()
   return data ?? null

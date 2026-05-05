@@ -1,6 +1,7 @@
 import { requireRestaurantAccess } from '@/lib/auth'
 import { getSquareConnection } from '@/lib/square'
 import { SquareConnect } from '@/components/dashboard/SquareConnect'
+import { SquareDashboard } from '@/components/dashboard/SquareDashboard'
 
 export default async function SquarePage({
   searchParams,
@@ -9,6 +10,7 @@ export default async function SquarePage({
 }) {
   const profile = await requireRestaurantAccess()
   const sp = await searchParams
+  const isSandbox = process.env.SQUARE_ENVIRONMENT !== 'production'
 
   const connection = await getSquareConnection(profile.restaurant_id!)
 
@@ -16,17 +18,19 @@ export default async function SquarePage({
     <div className="p-6 max-w-2xl bg-[#111111] min-h-full">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Square Payments</h1>
-        <p className="text-white/40 text-sm mt-1">Conecta tu cuenta de Square para aceptar pagos con tarjeta</p>
+        <p className="text-white/40 text-sm mt-1">Conecta Square para pagos, catálogo y transacciones</p>
       </div>
 
-      <SquareConnect
-        connected={!!connection}
-        merchantId={connection?.merchant_id}
-        connectedAt={connection?.created_at}
-        error={sp.error ?? null}
-        justConnected={sp.connected === 'true'}
-        isSandbox={process.env.SQUARE_ENVIRONMENT !== 'production'}
-      />
+      {connection ? (
+        <SquareDashboard connection={connection as any} isSandbox={isSandbox} />
+      ) : (
+        <SquareConnect
+          connected={false}
+          error={sp.error ?? null}
+          justConnected={sp.connected === 'true'}
+          isSandbox={isSandbox}
+        />
+      )}
     </div>
   )
 }
