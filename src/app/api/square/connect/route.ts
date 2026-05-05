@@ -29,6 +29,7 @@ export async function GET() {
     scope: SCOPES,
     session: 'false',
     state,
+    redirect_uri: process.env.SQUARE_REDIRECT_URL!,
   })
 
   // Set cookie on the redirect response itself
