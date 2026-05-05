@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useCartStore } from '@/store/cart-store'
 import { formatCurrency } from '@/lib/utils'
 import type { MenuItem, Restaurant, Modification } from '@/types'
+import { ModelViewerModal } from '@/components/public/ModelViewerModal'
 
 interface Props {
   item: MenuItem
@@ -14,6 +15,8 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
   const { addItem, openCart } = useCartStore()
   const [quantity, setQuantity] = useState(1)
   const [notes, setNotes] = useState('')
+  const [showModel, setShowModel] = useState(false)
+  const [showImage, setShowImage] = useState(false)
   const [modifications, setModifications] = useState<Modification[]>(() =>
     (item.ingredients ?? [])
       .filter(i => !i.is_default)
@@ -69,6 +72,7 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
   }
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
@@ -88,6 +92,33 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
             <div>
               <h2 className="text-xl font-bold text-slate-800">{item.name}</h2>
               {item.description && <p className="text-slate-500 text-sm mt-1">{item.description}</p>}
+            {(item.image_url || (item as any).model_url) && (
+              <div className="flex gap-2 mt-3">
+                {item.image_url && (
+                  <button
+                    onClick={() => setShowImage(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Ver imagen
+                  </button>
+                )}
+                {(item as any).model_url && (
+                  <button
+                    onClick={() => setShowModel(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border text-white transition-colors"
+                    style={{ backgroundColor: restaurant.primary_color, borderColor: restaurant.primary_color }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V7" />
+                    </svg>
+                    Ver en 3D
+                  </button>
+                )}
+              </div>
+            )}
             </div>
             <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 ml-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,5 +213,35 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
         </div>
       </div>
     </div>
+
+    {/* Image lightbox */}
+    {showImage && item.image_url && (
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={() => setShowImage(false)}>
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+        <div className="relative max-w-2xl w-full" onClick={e => e.stopPropagation()}>
+          <button
+            onClick={() => setShowImage(false)}
+            className="absolute -top-10 right-0 text-white/70 hover:text-white p-2"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img src={item.image_url} alt={item.name} className="w-full rounded-2xl shadow-2xl object-contain max-h-[80vh]" />
+        </div>
+      </div>
+    )}
+
+    {/* 3D model viewer */}
+    {(item as any).model_url && (
+      <ModelViewerModal
+        open={showModel}
+        onClose={() => setShowModel(false)}
+        itemName={item.name}
+        modelUrl={(item as any).model_url}
+        color={restaurant.primary_color}
+      />
+    )}
+  </>
   )
 }
