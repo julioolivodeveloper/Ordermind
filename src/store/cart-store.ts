@@ -37,7 +37,8 @@ export const useCartStore = create<CartStore>()(
         const items = get().items
         const existing = items.findIndex(i =>
           i.menu_item_id === item.menu_item_id &&
-          JSON.stringify(i.modifications) === JSON.stringify(item.modifications)
+          JSON.stringify(i.modifications) === JSON.stringify(item.modifications) &&
+          JSON.stringify(i.selected_options) === JSON.stringify(item.selected_options)
         )
         if (existing >= 0) {
           const updated = [...items]

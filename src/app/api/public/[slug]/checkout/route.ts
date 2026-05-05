@@ -81,6 +81,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       item_price: item.item_price,
       quantity: item.quantity,
       modifications: item.modifications ?? [],
+      selected_options: item.selected_options ?? [],
       notes: item.notes,
       subtotal: item.subtotal,
     }))

@@ -4,7 +4,7 @@ import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/components/ui/Toast'
 import { formatCurrency } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
-import type { MenuCategory, MenuItem, ItemIngredient } from '@/types'
+import type { MenuCategory, MenuItem, ItemIngredient, ItemOptionGroup, ItemOption } from '@/types'
 import { Box } from 'lucide-react'
 
 interface Props {
@@ -34,6 +34,9 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [catForm, setCatForm] = useState({ name: '', icon: '🍽️' })
   const [editingCat, setEditingCat] = useState<MenuCategory | null>(null)
   const [ingForm, setIngForm] = useState({ name: '', is_default: true, extra_cost: 0 })
+  const [optionModal, setOptionModal] = useState<MenuItem | null>(null)
+  const [groupForm, setGroupForm] = useState({ name: '', required: false, max_selections: 1 })
+  const [optionForm, setOptionForm] = useState<Record<string, { name: string; extra_cost: string }>>({})
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingModel, setUploadingModel] = useState(false)
@@ -289,6 +292,63 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
     setIngredientModal(prev => prev ? { ...prev, ingredients: updated } : null)
   }
 
+  function syncOptionModal(updated: MenuItem) {
+    setItems(prev => prev.map(i => i.id === updated.id ? updated : i))
+    setOptionModal(updated)
+  }
+
+  async function handleAddOptionGroup() {
+    if (!optionModal || !groupForm.name) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/dashboard/menu/option-groups', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...groupForm, menu_item_id: optionModal.id }),
+      })
+      const created: ItemOptionGroup = await res.json()
+      const updated = { ...optionModal, option_groups: [...(optionModal.option_groups ?? []), { ...created, options: [] }] }
+      syncOptionModal(updated)
+      setGroupForm({ name: '', required: false, max_selections: 1 })
+      toast('Grupo creado')
+    } catch { toast('Error', 'error') } finally { setSaving(false) }
+  }
+
+  async function handleDeleteOptionGroup(group: ItemOptionGroup) {
+    if (!optionModal) return
+    await fetch(`/api/dashboard/menu/option-groups/${group.id}`, { method: 'DELETE' })
+    const updated = { ...optionModal, option_groups: (optionModal.option_groups ?? []).filter(g => g.id !== group.id) }
+    syncOptionModal(updated)
+  }
+
+  async function handleAddOption(group: ItemOptionGroup) {
+    if (!optionModal) return
+    const f = optionForm[group.id]
+    if (!f?.name) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/dashboard/menu/options', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group_id: group.id, name: f.name, extra_cost: parseFloat(f.extra_cost) || 0 }),
+      })
+      const created: ItemOption = await res.json()
+      const updatedGroups = (optionModal.option_groups ?? []).map(g =>
+        g.id === group.id ? { ...g, options: [...(g.options ?? []), created] } : g
+      )
+      syncOptionModal({ ...optionModal, option_groups: updatedGroups })
+      setOptionForm(prev => ({ ...prev, [group.id]: { name: '', extra_cost: '' } }))
+      toast('Opción agregada')
+    } catch { toast('Error', 'error') } finally { setSaving(false) }
+  }
+
+  async function handleDeleteOption(group: ItemOptionGroup, option: ItemOption) {
+    if (!optionModal) return
+    await fetch(`/api/dashboard/menu/options/${option.id}`, { method: 'DELETE' })
+    const updatedGroups = (optionModal.option_groups ?? []).map(g =>
+      g.id === group.id ? { ...g, options: (g.options ?? []).filter(o => o.id !== option.id) } : g
+    )
+    syncOptionModal({ ...optionModal, option_groups: updatedGroups })
+  }
+
   return (
     <div>
       {/* Actions */}
@@ -381,6 +441,9 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
                 </button>
                 <button onClick={() => setIngredientModal(item)} className="border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
                   Ing.
+                </button>
+                <button onClick={() => setOptionModal(item)} className="border border-purple-200 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
+                  Combos
                 </button>
                 <button onClick={() => openEditItem(item)} className="border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs px-2 py-1.5 rounded-lg transition-colors">
                   Editar
@@ -575,6 +638,104 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* Option Groups Modal */}
+      <Modal open={!!optionModal} onClose={() => setOptionModal(null)} title={`Combos y opciones: ${optionModal?.name ?? ''}`} size="md">
+        {optionModal && (
+          <div className="space-y-5">
+            {/* Existing groups */}
+            {(optionModal.option_groups ?? []).length === 0 && (
+              <p className="text-sm text-slate-400 text-center py-4">Sin grupos aún. Crea uno abajo.</p>
+            )}
+            {(optionModal.option_groups ?? []).map(group => (
+              <div key={group.id} className="border border-slate-200 rounded-xl overflow-hidden">
+                <div className="flex items-center justify-between bg-slate-50 px-4 py-2.5">
+                  <div>
+                    <span className="text-sm font-semibold text-slate-800">{group.name}</span>
+                    <span className="text-xs text-slate-500 ml-2">
+                      {group.required ? '· Requerido' : '· Opcional'}
+                      {' · '}
+                      {group.max_selections === 1 ? 'Elige 1' : `Elige hasta ${group.max_selections}`}
+                    </span>
+                  </div>
+                  <button onClick={() => handleDeleteOptionGroup(group)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
+                </div>
+                <div className="p-3 space-y-2">
+                  {(group.options ?? []).map(opt => (
+                    <div key={opt.id} className="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-3 py-2">
+                      <span className="text-sm text-slate-700">{opt.name}</span>
+                      <div className="flex items-center gap-3">
+                        {opt.extra_cost > 0 && <span className="text-xs text-slate-500">+{formatCurrency(opt.extra_cost)}</span>}
+                        <button onClick={() => handleDeleteOption(group, opt)} className="text-red-300 hover:text-red-500 text-xs">✕</button>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Add option row */}
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      value={optionForm[group.id]?.name ?? ''}
+                      onChange={e => setOptionForm(prev => ({ ...prev, [group.id]: { ...prev[group.id], name: e.target.value } }))}
+                      placeholder="Ej: Solo hamburguesa, Con papas..."
+                      className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    />
+                    <input
+                      type="number"
+                      value={optionForm[group.id]?.extra_cost ?? ''}
+                      onChange={e => setOptionForm(prev => ({ ...prev, [group.id]: { ...prev[group.id], extra_cost: e.target.value } }))}
+                      placeholder="+ $0"
+                      step="0.50"
+                      className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    />
+                    <button
+                      onClick={() => handleAddOption(group)}
+                      disabled={saving || !optionForm[group.id]?.name}
+                      className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                    >
+                      + Agregar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* New group form */}
+            <div className="border-t border-slate-100 pt-4">
+              <h4 className="text-sm font-semibold text-slate-700 mb-3">Nuevo grupo de opciones</h4>
+              <div className="space-y-3">
+                <input
+                  value={groupForm.name}
+                  onChange={e => setGroupForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Ej: Elige tu combo, Tamaño, Bebida..."
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+                <div className="flex gap-4 items-center">
+                  <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input type="checkbox" checked={groupForm.required} onChange={e => setGroupForm(f => ({ ...f, required: e.target.checked }))} className="rounded" />
+                    Selección obligatoria
+                  </label>
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <span>Máx. opciones:</span>
+                    <select
+                      value={groupForm.max_selections}
+                      onChange={e => setGroupForm(f => ({ ...f, max_selections: parseInt(e.target.value) }))}
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none"
+                    >
+                      {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <button
+                  onClick={handleAddOptionGroup}
+                  disabled={saving || !groupForm.name}
+                  className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white py-2.5 rounded-xl text-sm font-medium"
+                >
+                  {saving ? 'Creando...' : 'Crear grupo'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Ingredients Modal */}

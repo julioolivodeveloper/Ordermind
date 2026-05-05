@@ -103,6 +103,32 @@ export interface ItemIngredient {
   sort_order: number
 }
 
+export interface ItemOption {
+  id: string
+  group_id: string
+  name: string
+  extra_cost: number
+  sort_order: number
+}
+
+export interface ItemOptionGroup {
+  id: string
+  menu_item_id: string
+  name: string
+  required: boolean
+  max_selections: number
+  sort_order: number
+  options: ItemOption[]
+}
+
+export interface SelectedOption {
+  group_id: string
+  group_name: string
+  option_id: string
+  option_name: string
+  extra_cost: number
+}
+
 export interface MenuItem {
   id: string
   restaurant_id: string
@@ -127,6 +153,7 @@ export interface MenuItem {
   updated_at: string
   category?: MenuCategory
   ingredients?: ItemIngredient[]
+  option_groups?: ItemOptionGroup[]
 }
 
 export interface Modification {
@@ -143,6 +170,7 @@ export interface CartItem {
   image_url?: string
   quantity: number
   modifications: Modification[]
+  selected_options: SelectedOption[]
   notes?: string
   subtotal: number
 }

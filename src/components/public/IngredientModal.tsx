@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useCartStore } from '@/store/cart-store'
 import { formatCurrency } from '@/lib/utils'
-import type { MenuItem, Restaurant, Modification } from '@/types'
+import type { MenuItem, Restaurant, Modification, SelectedOption } from '@/types'
 import { ModelViewerModal } from '@/components/public/ModelViewerModal'
 
 interface Props {
@@ -17,6 +17,7 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
   const [notes, setNotes] = useState('')
   const [showModel, setShowModel] = useState(false)
   const [showImage, setShowImage] = useState(false)
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOption[]>([])
   const [modifications, setModifications] = useState<Modification[]>(() =>
     (item.ingredients ?? [])
       .filter(i => !i.is_default)
@@ -50,13 +51,39 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
     }
   }
 
-  const extrasTotal = modifications
-    .filter(m => m.type === 'add')
-    .reduce((s, m) => s + m.extra_cost, 0)
+  const optionGroups = item.option_groups ?? []
+
+  function isOptionSelected(optionId: string) {
+    return selectedOptions.some(o => o.option_id === optionId)
+  }
+
+  function toggleOption(groupId: string, groupName: string, optionId: string, optionName: string, extraCost: number, maxSelections: number) {
+    if (isOptionSelected(optionId)) {
+      setSelectedOptions(prev => prev.filter(o => o.option_id !== optionId))
+    } else {
+      setSelectedOptions(prev => {
+        const inGroup = prev.filter(o => o.group_id === groupId)
+        const rest = prev.filter(o => o.group_id !== groupId)
+        if (maxSelections === 1) {
+          return [...rest, { group_id: groupId, group_name: groupName, option_id: optionId, option_name: optionName, extra_cost: extraCost }]
+        }
+        if (inGroup.length >= maxSelections) return prev
+        return [...prev, { group_id: groupId, group_name: groupName, option_id: optionId, option_name: optionName, extra_cost: extraCost }]
+      })
+    }
+  }
+
+  const requiredGroups = optionGroups.filter(g => g.required)
+  const allRequiredSelected = requiredGroups.every(g => selectedOptions.some(o => o.group_id === g.id))
+
+  const extrasTotal =
+    modifications.filter(m => m.type === 'add').reduce((s, m) => s + m.extra_cost, 0) +
+    selectedOptions.reduce((s, o) => s + o.extra_cost, 0)
   const unitPrice = item.price + extrasTotal
   const totalPrice = unitPrice * quantity
 
   function handleAdd() {
+    if (!allRequiredSelected) return
     addItem({
       menu_item_id: item.id,
       item_name: item.name,
@@ -64,6 +91,7 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
       image_url: item.image_url,
       quantity,
       modifications,
+      selected_options: selectedOptions,
       notes: notes || undefined,
       subtotal: totalPrice,
     })
@@ -126,6 +154,51 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
               </svg>
             </button>
           </div>
+
+          {/* Option groups (combos) */}
+          {optionGroups.map(group => (
+            <div key={group.id} className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-sm font-semibold text-slate-700">{group.name}</h3>
+                {group.required ? (
+                  <span className="text-xs bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-medium">Requerido</span>
+                ) : (
+                  <span className="text-xs bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full">Opcional</span>
+                )}
+                {group.max_selections > 1 && (
+                  <span className="text-xs text-slate-400">Elige hasta {group.max_selections}</span>
+                )}
+              </div>
+              <div className="space-y-2">
+                {(group.options ?? []).map(opt => {
+                  const selected = isOptionSelected(opt.id)
+                  const isRadio = group.max_selections === 1
+                  return (
+                    <label
+                      key={opt.id}
+                      className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selected ? 'border-2 bg-opacity-5' : 'border-slate-200 hover:border-slate-300'}`}
+                      style={selected ? { borderColor: restaurant.primary_color, backgroundColor: restaurant.primary_color + '10' } : {}}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type={isRadio ? 'radio' : 'checkbox'}
+                          name={isRadio ? `group-${group.id}` : undefined}
+                          checked={selected}
+                          onChange={() => toggleOption(group.id, group.name, opt.id, opt.name, opt.extra_cost, group.max_selections)}
+                          className="w-4 h-4"
+                          style={{ accentColor: restaurant.primary_color }}
+                        />
+                        <span className="text-sm text-slate-700 font-medium">{opt.name}</span>
+                      </div>
+                      {opt.extra_cost > 0 && (
+                        <span className="text-sm font-medium text-slate-500">+ {formatCurrency(opt.extra_cost)}</span>
+                      )}
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
 
           {/* Default ingredients - can remove */}
           {defaultIngredients.length > 0 && (
@@ -205,10 +278,11 @@ export function IngredientModal({ item, restaurant, onClose }: Props) {
           </div>
           <button
             onClick={handleAdd}
-            className="w-full text-white py-3.5 rounded-xl font-semibold text-sm transition-colors"
+            disabled={!allRequiredSelected}
+            className="w-full text-white py-3.5 rounded-xl font-semibold text-sm transition-colors disabled:opacity-50"
             style={{ backgroundColor: restaurant.primary_color }}
           >
-            Agregar al pedido — {formatCurrency(totalPrice)}
+            {!allRequiredSelected ? 'Selecciona las opciones requeridas' : `Agregar al pedido — ${formatCurrency(totalPrice)}`}
           </button>
         </div>
       </div>
