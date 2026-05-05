@@ -19,7 +19,7 @@ export default async function OrdersPage() {
       .limit(100),
     supabase
       .from('restaurants')
-      .select('name, address, phone')
+      .select('name, address, phone, stripe_terminal_reader_id')
       .eq('id', restaurantId)
       .single(),
     admin
@@ -32,6 +32,7 @@ export default async function OrdersPage() {
   const orders = ordersRes.data
   const restaurant = restaurantRes.data
   const squareTerminalDeviceId = squareRes.data?.terminal_device_id ?? null
+  const stripeTerminalReaderId = restaurant?.stripe_terminal_reader_id ?? null
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -76,6 +77,7 @@ export default async function OrdersPage() {
         restaurantAddress={restaurant?.address ?? null}
         restaurantPhone={restaurant?.phone ?? null}
         squareTerminalDeviceId={squareTerminalDeviceId}
+        stripeTerminalReaderId={stripeTerminalReaderId}
       />
     </div>
   )

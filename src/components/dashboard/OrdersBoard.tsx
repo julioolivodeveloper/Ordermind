@@ -49,13 +49,15 @@ interface Props {
   restaurantAddress?: string | null
   restaurantPhone?: string | null
   squareTerminalDeviceId?: string | null
+  stripeTerminalReaderId?: string | null
 }
 
-export function OrdersBoard({ initialOrders, restaurantId, restaurantName = '', restaurantAddress, restaurantPhone, squareTerminalDeviceId }: Props) {
+export function OrdersBoard({ initialOrders, restaurantId, restaurantName = '', restaurantAddress, restaurantPhone, squareTerminalDeviceId, stripeTerminalReaderId }: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [updating, setUpdating] = useState<string | null>(null)
   const [terminalStatus, setTerminalStatus] = useState<Record<string, 'pending' | 'completed' | 'error'>>({})
+  const [stripeTerminalStatus, setStripeTerminalStatus] = useState<Record<string, 'pending' | 'completed' | 'error'>>({})
   const { toast } = useToast()
   const ordersRef = useRef(orders)
   ordersRef.current = orders
@@ -181,6 +183,44 @@ export function OrdersBoard({ initialOrders, restaurantId, restaurantName = '', 
     }
   }
 
+  async function handleStripeTerminalCharge(order: Order) {
+    if (!stripeTerminalReaderId) return
+    setStripeTerminalStatus(s => ({ ...s, [order.id]: 'pending' }))
+    try {
+      const res = await fetch('/api/stripe/terminal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          amountCents: Math.round((order.total ?? 0) * 100),
+          readerId: stripeTerminalReaderId,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error al enviar a lector Stripe')
+      toast(`Lector Stripe activo — cobra $${order.total?.toFixed(2)}`, 'info')
+
+      const poll = setInterval(async () => {
+        const r = await fetch(`/api/stripe/terminal/${stripeTerminalReaderId}`)
+        const d = await r.json()
+        if (d.status === 'succeeded') {
+          clearInterval(poll)
+          setStripeTerminalStatus(s => ({ ...s, [order.id]: 'completed' }))
+          toast(`Pago completado en lector Stripe — Orden #${order.order_number}`, 'success' as any)
+        } else if (d.status === 'failed') {
+          clearInterval(poll)
+          setStripeTerminalStatus(s => ({ ...s, [order.id]: 'error' }))
+          toast('Pago fallido en lector Stripe', 'error')
+        }
+      }, 3000)
+      setTimeout(() => clearInterval(poll), 180000)
+    } catch (e: any) {
+      setStripeTerminalStatus(s => ({ ...s, [order.id]: 'error' }))
+      toast(e.message, 'error')
+    }
+  }
+
   const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status))
   const doneOrders = orders.filter(o => ['completed', 'cancelled'].includes(o.status))
 
@@ -270,6 +310,21 @@ export function OrdersBoard({ initialOrders, restaurantId, restaurantName = '', 
                             </button>
                           )}
                         </div>
+                        {stripeTerminalReaderId && !['completed', 'cancelled'].includes(order.status) && order.payment_status !== 'paid' && (
+                          <button
+                            onClick={e => { e.stopPropagation(); handleStripeTerminalCharge(order) }}
+                            disabled={stripeTerminalStatus[order.id] === 'pending'}
+                            className="w-full mt-2 bg-[#635BFF] hover:bg-[#5851db] text-white text-xs py-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            {stripeTerminalStatus[order.id] === 'pending' ? (
+                              <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />Esperando lector...</>
+                            ) : stripeTerminalStatus[order.id] === 'completed' ? (
+                              '✓ Cobrado en lector Stripe'
+                            ) : (
+                              <>stripe Cobrar en lector</>
+                            )}
+                          </button>
+                        )}
                         {squareTerminalDeviceId && !['completed', 'cancelled'].includes(order.status) && order.payment_status !== 'paid' && (
                           <button
                             onClick={e => { e.stopPropagation(); handleTerminalCharge(order) }}

@@ -8,7 +8,7 @@ export default async function StripePage() {
 
   const { data: restaurant } = await admin
     .from('restaurants')
-    .select('stripe_connected, stripe_publishable_key')
+    .select('stripe_connected, stripe_publishable_key, stripe_terminal_reader_id')
     .eq('id', profile.restaurant_id!)
     .single()
 
@@ -21,6 +21,7 @@ export default async function StripePage() {
       <StripeConnect
         stripeConnected={restaurant?.stripe_connected ?? false}
         stripePublishableKey={restaurant?.stripe_publishable_key ?? undefined}
+        stripeTerminalReaderId={restaurant?.stripe_terminal_reader_id ?? null}
       />
     </div>
   )

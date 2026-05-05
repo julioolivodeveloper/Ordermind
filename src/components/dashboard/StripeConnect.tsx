@@ -1,14 +1,15 @@
 'use client'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CreditCard, Check, X, Eye, EyeOff, ExternalLink, AlertCircle, Unplug } from 'lucide-react'
+import { CreditCard, Check, X, Eye, EyeOff, ExternalLink, AlertCircle, Unplug, Monitor, RefreshCw } from 'lucide-react'
 
 interface Props {
   stripeConnected: boolean
   stripePublishableKey?: string
+  stripeTerminalReaderId?: string | null
 }
 
-export function StripeConnect({ stripeConnected, stripePublishableKey }: Props) {
+export function StripeConnect({ stripeConnected, stripePublishableKey, stripeTerminalReaderId: initialReaderId }: Props) {
   const [connected, setConnected] = useState(stripeConnected)
   const [pubKey, setPubKey] = useState(stripePublishableKey ?? '')
   const [form, setForm] = useState({ publishableKey: '', secretKey: '' })
@@ -48,6 +49,39 @@ export function StripeConnect({ stripeConnected, stripePublishableKey }: Props) 
     setConnected(false)
     setPubKey('')
     setMode(null)
+  }
+
+  const [readers, setReaders] = useState<any[] | null>(null)
+  const [readersLoading, setReadersLoading] = useState(false)
+  const [readersError, setReadersError] = useState('')
+  const [savedReaderId, setSavedReaderId] = useState(initialReaderId ?? '')
+  const [savingReader, setSavingReader] = useState(false)
+  const [showTerminal, setShowTerminal] = useState(false)
+
+  async function loadReaders() {
+    setReadersLoading(true); setReadersError('')
+    try {
+      const res = await fetch('/api/stripe/terminal')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setReaders(data.readers)
+      if (data.terminal_reader_id) setSavedReaderId(data.terminal_reader_id)
+    } catch (e: any) {
+      setReadersError(e.message)
+    } finally {
+      setReadersLoading(false)
+    }
+  }
+
+  async function handleSaveReader(readerId: string) {
+    setSavingReader(true)
+    await fetch('/api/stripe/terminal', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ terminal_reader_id: readerId }),
+    })
+    setSavedReaderId(readerId)
+    setSavingReader(false)
   }
 
   const fieldClass = "w-full border border-white/10 bg-white/5 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#a3e635]/50"
@@ -197,6 +231,118 @@ export function StripeConnect({ stripeConnected, stripePublishableKey }: Props) 
               <p className="text-xs text-white/50">{item.label}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Terminal física */}
+      {connected && (
+        <div className="bg-white/5 border border-white/8 rounded-2xl overflow-hidden">
+          <button
+            onClick={() => { setShowTerminal(v => !v); if (!showTerminal && !readers) loadReaders() }}
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/3 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Monitor className="w-4 h-4 text-[#635BFF]" />
+              <div className="text-left">
+                <p className="text-white text-sm font-semibold">Terminal física Stripe</p>
+                {savedReaderId
+                  ? <p className="text-[#a3e635] text-xs">Lector configurado</p>
+                  : <p className="text-white/30 text-xs">Sin lector configurado</p>}
+              </div>
+            </div>
+            <span className="text-white/30 text-xs">{showTerminal ? '▲' : '▼'}</span>
+          </button>
+
+          <AnimatePresence>
+            {showTerminal && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden border-t border-white/8"
+              >
+                <div className="p-5 space-y-4">
+                  <p className="text-white/40 text-sm">
+                    Selecciona el lector Stripe conectado a tu cuenta. El cliente toca o inserta su tarjeta directamente en el dispositivo.
+                  </p>
+
+                  {savedReaderId && (
+                    <div className="flex items-center gap-2 bg-[#635BFF]/10 border border-[#635BFF]/20 rounded-xl px-4 py-3">
+                      <Check className="w-4 h-4 text-[#635BFF] shrink-0" />
+                      <div>
+                        <p className="text-white text-sm font-semibold">Lector activo</p>
+                        <p className="text-white/40 text-xs font-mono">{savedReaderId}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {readersError && (
+                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                      <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                      <p className="text-red-400 text-sm">{readersError}</p>
+                    </div>
+                  )}
+
+                  {readersLoading && (
+                    <div className="flex justify-center py-6">
+                      <div className="w-5 h-5 border-2 border-[#635BFF]/40 border-t-[#635BFF] rounded-full animate-spin" />
+                    </div>
+                  )}
+
+                  {readers && readers.length === 0 && (
+                    <div className="text-center py-6 text-white/30 text-sm">
+                      <Monitor className="w-7 h-7 mx-auto mb-2 opacity-30" />
+                      <p>Sin lectores registrados</p>
+                      <p className="text-xs mt-1">Registra tu lector en el Dashboard de Stripe</p>
+                    </div>
+                  )}
+
+                  {readers && readers.length > 0 && (
+                    <div className="space-y-2">
+                      {readers.map((reader: any) => (
+                        <div
+                          key={reader.id}
+                          className={`flex items-center justify-between rounded-xl border p-4 transition-all ${
+                            savedReaderId === reader.id
+                              ? 'border-[#635BFF]/40 bg-[#635BFF]/5'
+                              : 'border-white/8 bg-white/3 hover:border-white/20'
+                          }`}
+                        >
+                          <div>
+                            <p className="text-white text-sm font-semibold">{reader.label || reader.device_type}</p>
+                            <p className="text-white/30 text-xs font-mono mt-0.5">{reader.id}</p>
+                            <p className={`text-xs mt-0.5 capitalize ${reader.status === 'online' ? 'text-green-400' : 'text-white/30'}`}>
+                              {reader.status}
+                            </p>
+                          </div>
+                          {savedReaderId === reader.id ? (
+                            <span className="text-[#635BFF] text-xs font-bold">Seleccionado</span>
+                          ) : (
+                            <button
+                              onClick={() => handleSaveReader(reader.id)}
+                              disabled={savingReader}
+                              className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+                            >
+                              Usar este
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={loadReaders}
+                    disabled={readersLoading}
+                    className="flex items-center gap-2 text-white/30 hover:text-white text-xs transition-colors"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${readersLoading ? 'animate-spin' : ''}`} />
+                    Actualizar lectores
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </div>
