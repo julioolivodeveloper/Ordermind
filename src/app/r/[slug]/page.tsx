@@ -23,7 +23,7 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
     { data: promotions },
     { data: reviews },
   ] = await Promise.all([
-    supabase.from('menu_categories').select('*, menu_items(*, ingredients:item_ingredients(*), option_groups:item_option_groups(*, options:item_options(*)), combo_items:combo_items(*, component:component_id(id, name, price, image_url)))').eq('restaurant_id', restaurant.id).eq('is_active', true).order('sort_order'),
+    supabase.from('menu_categories').select('*, menu_items(*, ingredients:item_ingredients(*), option_groups:item_option_groups(*, options:item_options(*)), combo_items:combo_items(id, component_id, quantity, sort_order))').eq('restaurant_id', restaurant.id).eq('is_active', true).order('sort_order'),
     admin.from('promotions').select('*').eq('restaurant_id', restaurant.id).eq('is_active', true).order('sort_order'),
     admin.from('reviews').select('*').eq('restaurant_id', restaurant.id).eq('is_visible', true).order('created_at', { ascending: false }).limit(20),
   ])

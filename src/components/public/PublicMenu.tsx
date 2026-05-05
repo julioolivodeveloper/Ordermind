@@ -776,7 +776,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
 
       {/* Modals */}
       {selectedItem && (
-        <IngredientModal item={selectedItem} restaurant={restaurant} onClose={() => setSelectedItem(null)} />
+        <IngredientModal item={selectedItem} restaurant={restaurant} allItems={allItems} onClose={() => setSelectedItem(null)} />
       )}
       {item3D?.model_url && (
         <ModelViewerModal
