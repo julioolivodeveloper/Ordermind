@@ -9,10 +9,10 @@ const SQUARE_BASE =
     ? 'https://connect.squareup.com'
     : 'https://connect.squareupsandbox.com'
 
-const DASHBOARD_URL = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/dashboard/square`
-
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
+  const reqUrl = new URL(req.url)
+  const DASHBOARD_URL = `${reqUrl.origin}/dashboard/square`
+  const { searchParams } = reqUrl
   const code = searchParams.get('code')
   const state = searchParams.get('state')
   const error = searchParams.get('error')
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       client_secret: process.env.SQUARE_CLIENT_SECRET,
       grant_type: 'authorization_code',
       code,
-      redirect_url: process.env.SQUARE_REDIRECT_URL,
+      redirect_uri: process.env.SQUARE_REDIRECT_URL,
     }),
   })
 
