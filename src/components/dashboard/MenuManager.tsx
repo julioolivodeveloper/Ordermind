@@ -41,6 +41,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [editingCombo, setEditingCombo] = useState<MenuItem | null>(null)
   const [comboForm, setComboForm] = useState({ name: '', description: '', price: '', category_id: '', image_url: '' })
   const [comboComponentIds, setComboComponentIds] = useState<string[]>([])
+  const [uploadingCombo, setUploadingCombo] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingModel, setUploadingModel] = useState(false)
@@ -351,6 +352,23 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       g.id === group.id ? { ...g, options: (g.options ?? []).filter(o => o.id !== option.id) } : g
     )
     syncOptionModal({ ...optionModal, option_groups: updatedGroups })
+  }
+
+  async function handleComboImageUpload(file: File) {
+    setUploadingCombo(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `${restaurantId}/${Date.now()}-combo.${ext}`
+      const { error } = await supabase.storage.from('menu-images').upload(path, file, { upsert: true })
+      if (error) throw error
+      const { data } = supabase.storage.from('menu-images').getPublicUrl(path)
+      setComboForm(f => ({ ...f, image_url: data.publicUrl }))
+    } catch {
+      toast('Error al subir imagen', 'error')
+    } finally {
+      setUploadingCombo(false)
+    }
   }
 
   function openNewCombo() {
@@ -862,6 +880,19 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
             <div className="col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
               <input value={comboForm.description} onChange={e => setComboForm(f => ({ ...f, description: e.target.value }))} placeholder="Incluye hamburguesa, papas y soda" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Imagen del combo</label>
+              {comboForm.image_url && (
+                <div className="relative mb-2">
+                  <img src={comboForm.image_url} alt="" className="w-full h-36 object-cover rounded-xl border border-slate-200" />
+                  <button type="button" onClick={() => setComboForm(f => ({ ...f, image_url: '' }))} className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">✕</button>
+                </div>
+              )}
+              <label className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded-xl px-4 py-3 text-sm cursor-pointer transition-colors ${uploadingCombo ? 'border-orange-300 bg-orange-50' : 'border-slate-200 hover:border-orange-300 hover:bg-slate-50'}`}>
+                <span>{uploadingCombo ? 'Subiendo...' : '📷 Seleccionar imagen'}</span>
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingCombo} onChange={e => { const f = e.target.files?.[0]; if (f) handleComboImageUpload(f) }} />
+              </label>
             </div>
           </div>
 
