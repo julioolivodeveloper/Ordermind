@@ -70,10 +70,10 @@ export default async function RestaurantsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link
-                      href={`/admin/restaurants/${r.id}`}
-                      className="text-sm text-indigo-600 hover:text-indigo-800 font-medium hover:underline"
+                      href={`/admin/restaurants/${r.id}/orders`}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
                     >
-                      Gestionar
+                      Dashboard →
                     </Link>
                   </td>
                 </tr>

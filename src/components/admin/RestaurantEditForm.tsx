@@ -93,64 +93,40 @@ export function RestaurantEditForm({ restaurant, plans, owner, stats }: Props) {
       setForm(prev => ({ ...prev, [val]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }))
   }
 
-  return (
-    <div className="p-8 max-w-3xl">
-      <button onClick={() => router.back()} className="text-slate-500 hover:text-slate-800 text-sm flex items-center gap-1 mb-4 transition-colors">
-        ← Regresar
-      </button>
+  const inp = 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-all'
 
+  return (
+    <div className="p-8 max-w-3xl bg-[#111111] min-h-full">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-800">{restaurant.name}</h1>
-            <Badge status={restaurant.status} label={statusLabel[restaurant.status]} />
-          </div>
-          <p className="text-slate-400 text-sm mt-1">
-            /r/{restaurant.slug} · Creado {new Date(restaurant.created_at).toLocaleDateString('es-MX')}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <a
-            href={`/admin/restaurants/${restaurant.id}/menu`}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-          >
-            Gestionar menú
-          </a>
-          <a
-            href={`/r/${restaurant.slug}`}
-            target="_blank"
-            className="text-indigo-600 text-sm font-medium hover:underline flex items-center gap-1"
-          >
-            Ver menú ↗
-          </a>
-        </div>
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-bold text-white">{restaurant.name}</h1>
+        <Badge status={restaurant.status} label={statusLabel[restaurant.status]} />
       </div>
 
       {/* Stats rápidas */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-slate-50 rounded-xl border border-slate-100 p-4">
-          <p className="text-xs text-slate-500">Total pedidos</p>
-          <p className="text-2xl font-bold text-slate-800 mt-1">{stats.totalOrders}</p>
+        <div className="bg-white/5 rounded-2xl border border-white/8 p-4">
+          <p className="text-xs text-white/40">Total pedidos</p>
+          <p className="text-2xl font-bold text-white mt-1">{stats.totalOrders}</p>
         </div>
-        <div className="bg-orange-50 rounded-xl border border-orange-100 p-4">
-          <p className="text-xs text-slate-500">Ingresos hoy</p>
-          <p className="text-2xl font-bold text-orange-600 mt-1">{formatCurrency(stats.todayRevenue)}</p>
+        <div className="bg-[#a3e635]/10 rounded-2xl border border-[#a3e635]/20 p-4">
+          <p className="text-xs text-white/40">Ingresos hoy</p>
+          <p className="text-2xl font-bold text-[#a3e635] mt-1">{formatCurrency(stats.todayRevenue)}</p>
         </div>
       </div>
 
       <div className="space-y-6">
         {/* Info general */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
-          <h2 className="font-semibold text-slate-800 border-b border-slate-100 pb-3">Configuración</h2>
+        <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold text-white border-b border-white/8 pb-3">Configuración</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
-              <input value={form.name} onChange={f('name')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Nombre</label>
+              <input value={form.name} onChange={f('name')} className={inp} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Estado</label>
-              <select value={form.status} onChange={e => handleStatusChange(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Estado</label>
+              <select value={form.status} onChange={e => handleStatusChange(e.target.value)} className={inp + ' bg-[#1a1a1a]'}>
                 <option value="active">Activo</option>
                 <option value="demo">Demo</option>
                 <option value="suspended">Suspendido</option>
@@ -158,83 +134,83 @@ export function RestaurantEditForm({ restaurant, plans, owner, stats }: Props) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Plan</label>
-              <select value={form.plan_id} onChange={f('plan_id')} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Plan</label>
+              <select value={form.plan_id} onChange={f('plan_id')} className={inp + ' bg-[#1a1a1a]'}>
                 <option value="">Sin plan</option>
                 {plans.map(p => <option key={p.id} value={p.id}>{p.name} — ${p.price}/mes</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
-              <input value={form.phone} onChange={f('phone')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Teléfono</label>
+              <input value={form.phone} onChange={f('phone')} className={inp} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Correo</label>
-              <input type="email" value={form.email} onChange={f('email')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Correo</label>
+              <input type="email" value={form.email} onChange={f('email')} className={inp} />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
-              <input value={form.address} onChange={f('address')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Dirección</label>
+              <input value={form.address} onChange={f('address')} className={inp} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Ciudad</label>
-              <input value={form.city} onChange={f('city')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Ciudad</label>
+              <input value={form.city} onChange={f('city')} className={inp} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Color principal</label>
-              <input type="color" value={form.primary_color} onChange={f('primary_color')} className="w-full h-10 border border-slate-200 rounded-xl px-2 cursor-pointer" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Color principal</label>
+              <input type="color" value={form.primary_color} onChange={f('primary_color')} className="w-full h-10 bg-white/5 border border-white/10 rounded-xl px-2 cursor-pointer" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Tarifa delivery ($)</label>
-              <input type="number" value={form.delivery_fee} onChange={f('delivery_fee')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Tarifa delivery ($)</label>
+              <input type="number" value={form.delivery_fee} onChange={f('delivery_fee')} className={inp} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Impuesto (%)</label>
-              <input type="number" step="0.01" value={form.tax_rate} onChange={f('tax_rate')} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Impuesto (%)</label>
+              <input type="number" step="0.01" value={form.tax_rate} onChange={f('tax_rate')} className={inp} />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Dominio personalizado</label>
-              <input value={form.custom_domain} onChange={f('custom_domain')} placeholder="menu.mirestaurante.com" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Dominio personalizado</label>
+              <input value={form.custom_domain} onChange={f('custom_domain')} placeholder="menu.mirestaurante.com" className={inp} />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notas internas</label>
-              <textarea value={form.notes} onChange={f('notes')} rows={2} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+              <label className="block text-xs font-semibold text-white/50 mb-1.5 uppercase tracking-wider">Notas internas</label>
+              <textarea value={form.notes} onChange={f('notes')} rows={2} className={inp + ' resize-none'} />
             </div>
           </div>
-          <button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors">
+          <button onClick={handleSave} disabled={saving} className="bg-[#a3e635] hover:brightness-110 disabled:opacity-60 text-black font-bold px-6 py-2.5 rounded-xl text-sm transition-all">
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>
 
         {/* Owner */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <h2 className="font-semibold text-slate-800 border-b border-slate-100 pb-3 mb-4">Cuenta del Dueño</h2>
+        <div className="bg-white/5 border border-white/8 rounded-2xl p-6">
+          <h2 className="font-semibold text-white border-b border-white/8 pb-3 mb-4">Cuenta del Dueño</h2>
           {owner ? (
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-semibold text-sm">
+              <div className="w-9 h-9 bg-[#a3e635]/10 border border-[#a3e635]/20 rounded-full flex items-center justify-center text-[#a3e635] font-bold text-sm">
                 {(owner.full_name ?? 'U')[0].toUpperCase()}
               </div>
               <div>
-                <p className="font-medium text-slate-800 text-sm">{owner.full_name}</p>
-                <p className="text-slate-400 text-xs">{owner.is_active ? 'Cuenta activa' : 'Cuenta suspendida'}</p>
+                <p className="font-medium text-white text-sm">{owner.full_name}</p>
+                <p className="text-white/40 text-xs">{owner.is_active ? 'Cuenta activa' : 'Cuenta suspendida'}</p>
               </div>
             </div>
           ) : (
             <div>
               {!showOwnerForm ? (
-                <button onClick={() => setShowOwnerForm(true)} className="text-indigo-600 text-sm font-medium hover:underline">
+                <button onClick={() => setShowOwnerForm(true)} className="text-[#a3e635] text-sm font-medium hover:underline">
                   + Crear cuenta del dueño
                 </button>
               ) : (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
-                    <input value={ownerForm.name} onChange={e => setOwnerForm(f => ({ ...f, name: e.target.value }))} placeholder="Nombre completo" className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    <input value={ownerForm.email} onChange={e => setOwnerForm(f => ({ ...f, email: e.target.value }))} placeholder="correo@ejemplo.com" type="email" className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    <input value={ownerForm.password} onChange={e => setOwnerForm(f => ({ ...f, password: e.target.value }))} placeholder="Contraseña temporal" type="text" className="col-span-2 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <input value={ownerForm.name} onChange={e => setOwnerForm(f => ({ ...f, name: e.target.value }))} placeholder="Nombre completo" className={inp} />
+                    <input value={ownerForm.email} onChange={e => setOwnerForm(f => ({ ...f, email: e.target.value }))} placeholder="correo@ejemplo.com" type="email" className={inp} />
+                    <input value={ownerForm.password} onChange={e => setOwnerForm(f => ({ ...f, password: e.target.value }))} placeholder="Contraseña temporal" type="text" className={'col-span-2 ' + inp} />
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setShowOwnerForm(false)} className="border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm">Cancelar</button>
-                    <button onClick={handleCreateOwner} disabled={creatingOwner} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm disabled:opacity-60">
+                    <button onClick={() => setShowOwnerForm(false)} className="border border-white/10 text-white/60 px-4 py-2 rounded-xl text-sm hover:bg-white/5 transition-colors">Cancelar</button>
+                    <button onClick={handleCreateOwner} disabled={creatingOwner} className="bg-[#a3e635] text-black font-bold px-4 py-2 rounded-xl text-sm disabled:opacity-60">
                       {creatingOwner ? 'Creando...' : 'Crear cuenta'}
                     </button>
                   </div>

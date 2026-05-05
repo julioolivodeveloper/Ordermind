@@ -83,6 +83,7 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
   const [item3D, setItem3D] = useState<MenuItem | null>(null)
   const [navVisible, setNavVisible] = useState(false)
   const [lang, setLang] = useState<'es' | 'en'>('es')
+  const [heroUser, setHeroUser] = useState<{ name: string | null; email: string | null } | null>(null)
   const heroRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const isOpen = isOpenNow(restaurant.business_hours)
@@ -96,6 +97,19 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
   }
 
   useEffect(() => { setRestaurant(restaurant.slug) }, [restaurant.slug])
+
+  useEffect(() => {
+    fetch(`/api/public/${restaurant.slug}/me`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.userEmail) {
+          setHeroUser({ name: data.customer?.name ?? null, email: data.userEmail })
+        } else {
+          setHeroUser({ name: null, email: null })
+        }
+      })
+      .catch(() => setHeroUser({ name: null, email: null }))
+  }, [restaurant.slug])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -358,6 +372,37 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
           </motion.button>
         </div>
 
+        {/* Login / Welcome button in hero */}
+        {heroUser !== null && (
+          <div className="absolute top-4 left-4 z-10">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {heroUser.email ? (
+                <Link
+                  href={`/r/${restaurant.slug}/account`}
+                  className="flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-white/25 transition-all"
+                >
+                  <User className="w-4 h-4 shrink-0" />
+                  <span className="max-w-[140px] truncate">
+                    {heroUser.name ? `Bienvenido, ${heroUser.name}` : heroUser.email}
+                  </span>
+                </Link>
+              ) : (
+                <Link
+                  href={`/r/${restaurant.slug}/login`}
+                  className="flex items-center gap-2 bg-white/15 backdrop-blur border border-white/20 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-white/25 transition-all"
+                >
+                  <User className="w-4 h-4" />
+                  Iniciar sesión
+                </Link>
+              )}
+            </motion.div>
+          </div>
+        )}
+
         {/* Cart FAB in hero */}
         <div className="absolute top-4 right-4 z-10">
           <motion.button
@@ -560,6 +605,19 @@ export function PublicMenu({ restaurant, categories, promotions = [], reviews = 
                         <span className="inline-flex items-center gap-0.5 text-[10px] text-red-500 font-semibold mt-1.5">
                           <Flame className="w-2.5 h-2.5" /> {t.spicy}
                         </span>
+                      )}
+
+                      {/* 3D button */}
+                      {item.model_url && (
+                        <motion.button
+                          whileTap={{ scale: 0.97 }}
+                          onClick={e => { e.stopPropagation(); setItem3D(item) }}
+                          className="w-full flex items-center justify-center gap-2 mt-3 py-2 rounded-xl text-xs font-bold border transition-all hover:brightness-110"
+                          style={{ backgroundColor: primary + '15', color: primary, borderColor: primary + '40' }}
+                        >
+                          <Box className="w-3.5 h-3.5" />
+                          Ver en 3D / AR
+                        </motion.button>
                       )}
 
                       {/* Price + Add */}
