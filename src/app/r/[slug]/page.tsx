@@ -23,15 +23,30 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
     { data: promotions },
     { data: reviews },
   ] = await Promise.all([
-    supabase.from('menu_categories').select('*, menu_items(*, ingredients:item_ingredients(*), option_groups:item_option_groups(*, options:item_options(*)), combo_items:combo_items(id, component_id, quantity, sort_order))').eq('restaurant_id', restaurant.id).eq('is_active', true).order('sort_order'),
+    supabase.from('menu_categories').select('*, menu_items(*, ingredients:item_ingredients(*), option_groups:item_option_groups(*, options:item_options(*)))').eq('restaurant_id', restaurant.id).eq('is_active', true).order('sort_order'),
     admin.from('promotions').select('*').eq('restaurant_id', restaurant.id).eq('is_active', true).order('sort_order'),
     admin.from('reviews').select('*').eq('restaurant_id', restaurant.id).eq('is_visible', true).order('created_at', { ascending: false }).limit(20),
   ])
 
+  // Fetch combo_items separately to avoid PostgREST ambiguous FK error
+  const allItemIds = (categories ?? []).flatMap(c => (c.menu_items ?? []).map((i: any) => i.id))
+  const { data: comboItems } = allItemIds.length
+    ? await supabase.from('combo_items').select('id, combo_id, component_id, quantity, sort_order').in('combo_id', allItemIds)
+    : { data: [] }
+
+  // Attach combo_items to their menu_items
+  const categoriesWithCombos = (categories ?? []).map((cat: any) => ({
+    ...cat,
+    menu_items: (cat.menu_items ?? []).map((item: any) => ({
+      ...item,
+      combo_items: (comboItems ?? []).filter((ci: any) => ci.combo_id === item.id),
+    })),
+  }))
+
   return (
     <PublicMenu
       restaurant={restaurant}
-      categories={categories ?? []}
+      categories={categoriesWithCombos}
       promotions={promotions ?? []}
       reviews={reviews ?? []}
     />
