@@ -32,6 +32,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [itemForm, setItemForm] = useState(BLANK_ITEM)
   const [catForm, setCatForm] = useState({ name: '', icon: '🍽️' })
+  const [editingCat, setEditingCat] = useState<MenuCategory | null>(null)
   const [ingForm, setIngForm] = useState({ name: '', is_default: true, extra_cost: 0 })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -194,25 +195,62 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_available: !i.is_available } : i))
   }
 
+  function openNewCat() {
+    setEditingCat(null)
+    setCatForm({ name: '', icon: '🍽️' })
+    setCatModal(true)
+  }
+
+  function openEditCat(cat: MenuCategory) {
+    setEditingCat(cat)
+    setCatForm({ name: cat.name, icon: cat.icon ?? '🍽️' })
+    setCatModal(true)
+  }
+
   async function handleSaveCategory() {
     if (!catForm.name) return
     setSaving(true)
     try {
       const slug = catForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const res = await fetch('/api/dashboard/menu/categories', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...catForm, slug, restaurant_id: restaurantId }),
-      })
-      const created = await res.json()
-      setCategories(prev => [...prev, created])
+      if (editingCat) {
+        const res = await fetch(`/api/dashboard/menu/categories/${editingCat.id}`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: catForm.name, icon: catForm.icon, slug }),
+        })
+        const updated = await res.json()
+        if (!res.ok) throw new Error(updated.error)
+        setCategories(prev => prev.map(c => c.id === editingCat.id ? { ...c, ...updated } : c))
+        toast('Categoría actualizada')
+      } else {
+        const res = await fetch('/api/dashboard/menu/categories', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...catForm, slug, restaurant_id: restaurantId }),
+        })
+        const created = await res.json()
+        if (!res.ok) throw new Error(created.error)
+        setCategories(prev => [...prev, created])
+        toast('Categoría creada')
+      }
       setCatForm({ name: '', icon: '🍽️' })
       setCatModal(false)
-      toast('Categoría creada')
     } catch {
-      toast('Error al crear categoría', 'error')
+      toast('Error al guardar categoría', 'error')
     } finally {
       setSaving(false)
     }
+  }
+
+  async function handleDeleteCategory(cat: MenuCategory) {
+    const count = items.filter(i => i.category_id === cat.id).length
+    const msg = count > 0
+      ? `¿Eliminar "${cat.name}"? Tiene ${count} platillo${count > 1 ? 's' : ''} que quedarán sin categoría.`
+      : `¿Eliminar la categoría "${cat.name}"?`
+    if (!confirm(msg)) return
+    const res = await fetch(`/api/dashboard/menu/categories/${cat.id}`, { method: 'DELETE' })
+    if (!res.ok) { toast('Error al eliminar categoría', 'error'); return }
+    setCategories(prev => prev.filter(c => c.id !== cat.id))
+    if (selectedCat === cat.id) setSelectedCat('all')
+    toast('Categoría eliminada')
   }
 
   async function handleAddIngredient() {
@@ -250,7 +288,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
     <div>
       {/* Actions */}
       <div className="flex items-center gap-3 mb-5">
-        <button onClick={() => setCatModal(true)} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+        <button onClick={openNewCat} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
           + Categoría
         </button>
         <button onClick={openNewItem} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
@@ -267,13 +305,26 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
           Todos ({items.length})
         </button>
         {categories.map(c => (
-          <button
-            key={c.id}
-            onClick={() => setSelectedCat(c.id)}
-            className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${selectedCat === c.id ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}
-          >
-            {c.icon} {c.name} ({items.filter(i => i.category_id === c.id).length})
-          </button>
+          <div key={c.id} className="group relative flex items-center">
+            <button
+              onClick={() => setSelectedCat(c.id)}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors pr-14 ${selectedCat === c.id ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}
+            >
+              {c.icon} {c.name} ({items.filter(i => i.category_id === c.id).length})
+            </button>
+            <div className="absolute right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={e => { e.stopPropagation(); openEditCat(c) }}
+                className={`p-1 rounded-lg text-xs transition-colors ${selectedCat === c.id ? 'hover:bg-white/20 text-white/80' : 'hover:bg-slate-100 text-slate-400'}`}
+                title="Editar"
+              >✏️</button>
+              <button
+                onClick={e => { e.stopPropagation(); handleDeleteCategory(c) }}
+                className={`p-1 rounded-lg text-xs transition-colors ${selectedCat === c.id ? 'hover:bg-white/20 text-white/80' : 'hover:bg-red-50 text-red-400'}`}
+                title="Eliminar"
+              >✕</button>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -502,7 +553,7 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
       </Modal>
 
       {/* Category Modal */}
-      <Modal open={catModal} onClose={() => setCatModal(false)} title="Nueva Categoría" size="sm">
+      <Modal open={catModal} onClose={() => setCatModal(false)} title={editingCat ? 'Editar Categoría' : 'Nueva Categoría'} size="sm">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
@@ -514,8 +565,8 @@ export function MenuManager({ restaurantId, initialCategories, initialItems }: P
           </div>
           <div className="flex gap-3">
             <button onClick={() => setCatModal(false)} className="flex-1 border border-slate-200 text-slate-700 py-2.5 rounded-xl text-sm">Cancelar</button>
-            <button onClick={handleSaveCategory} disabled={saving} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-medium disabled:opacity-60">
-              {saving ? 'Creando...' : 'Crear categoría'}
+            <button onClick={handleSaveCategory} disabled={saving || !catForm.name} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-medium disabled:opacity-60">
+              {saving ? 'Guardando...' : editingCat ? 'Guardar cambios' : 'Crear categoría'}
             </button>
           </div>
         </div>
