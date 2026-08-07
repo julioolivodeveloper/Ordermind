@@ -472,6 +472,152 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── CONTABILIDAD ── */}
+      <section className="bg-[#0f0f0f] py-24 px-6 md:px-12 border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left — copy */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 rounded-full px-4 py-1.5 mb-6">
+                <TrendingUp className="w-4 h-4 text-purple-400" />
+                <span className="text-purple-400 text-sm font-bold tracking-wide">Incluido en Plan Pro</span>
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black uppercase leading-[0.95] tracking-tight text-white mb-6">
+                Sabe qué<br />
+                vender más<br />
+                <span className="text-[#a3e635]">y qué mejorar.</span>
+              </h2>
+              <p className="text-slate-400 text-lg leading-relaxed mb-8 max-w-lg">
+                El dashboard de Ordermind incluye un sistema de contabilidad integrado. Ve en tiempo real qué platillos están generando más dinero y cuáles necesitan atención.
+              </p>
+              <div className="space-y-4 mb-10">
+                {[
+                  { icon: TrendingUp, color: 'text-[#a3e635]', text: 'Platillos más vendidos del día, semana y mes' },
+                  { icon: Zap,         color: 'text-yellow-400', text: 'Detecta qué platillos no se venden y cuestan dinero' },
+                  { icon: BadgeDollarSign, color: 'text-emerald-400', text: 'Ingresos netos y ventas en tiempo real' },
+                  { icon: LayoutDashboard, color: 'text-blue-400', text: 'Horarios pico para prepararte mejor' },
+                  { icon: Shield,      color: 'text-purple-400', text: 'Exporta reportes completos cuando quieras' },
+                ].map(({ icon: Icon, color, text }) => (
+                  <div key={text} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
+                      <Icon className={`w-4 h-4 ${color}`} strokeWidth={1.5} />
+                    </div>
+                    <p className="text-slate-300 text-base leading-relaxed">{text}</p>
+                  </div>
+                ))}
+              </div>
+              <a href="https://wa.me/12094609828" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20">
+                <MessageCircle className="w-5 h-5" /> Quiero el Plan Pro
+              </a>
+              <div className="mt-4">
+                <Link href="/menu-demo"
+                  className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-8 py-3.5 rounded-2xl font-bold text-base transition-all shadow-lg shadow-orange-500/20">
+                  Ver menú demo
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Right — fake analytics dashboard */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="absolute -inset-4 bg-purple-500/10 rounded-3xl blur-3xl" />
+              <div className="relative bg-[#111] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+
+                {/* Dashboard topbar */}
+                <div className="bg-[#1a1a1a] px-5 py-3 flex items-center gap-3 border-b border-white/10">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                  </div>
+                  <span className="text-slate-500 text-xs font-mono flex-1">dashboard.turestaurante.com / reportes</span>
+                </div>
+
+                <div className="p-5 space-y-5">
+
+                  {/* Revenue row */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'Ventas hoy', value: '$847', change: '+23%', up: true },
+                      { label: 'Esta semana', value: '$4,210', change: '+11%', up: true },
+                      { label: 'Este mes', value: '$16,480', change: '+8%', up: true },
+                    ].map((stat) => (
+                      <div key={stat.label} className="bg-white/5 rounded-xl p-3">
+                        <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-1">{stat.label}</p>
+                        <p className="text-white font-black text-lg leading-none">{stat.value}</p>
+                        <p className={`text-xs font-bold mt-1 ${stat.up ? 'text-[#a3e635]' : 'text-red-400'}`}>{stat.change}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Top sellers */}
+                  <div>
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-3">🔥 Platillos más vendidos</p>
+                    <div className="space-y-2.5">
+                      {[
+                        { name: 'Tacos de Asada', qty: 47, pct: 94, color: 'bg-[#a3e635]' },
+                        { name: 'Burrito de Pollo', qty: 31, pct: 65, color: 'bg-blue-400' },
+                        { name: 'Nachos Supremos', qty: 24, pct: 50, color: 'bg-purple-400' },
+                        { name: 'Quesadilla de Queso', qty: 18, pct: 37, color: 'bg-orange-400' },
+                      ].map((item) => (
+                        <div key={item.name}>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-slate-300 text-xs">{item.name}</span>
+                            <span className="text-slate-500 text-xs">{item.qty} vendidos</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div
+                              className={`h-full rounded-full ${item.color}`}
+                              initial={{ width: 0 }}
+                              whileInView={{ width: `${item.pct}%` }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Low performers */}
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                    <p className="text-red-400 text-xs font-black uppercase tracking-widest mb-2">⚠ Poca rotación — requiere atención</p>
+                    <div className="space-y-2">
+                      {[
+                        { name: 'Sopa del día', qty: 2, tip: 'Considera aplicar una promo' },
+                        { name: 'Postre especial', qty: 3, tip: 'Revisa el precio o la foto' },
+                      ].map((item) => (
+                        <div key={item.name} className="flex items-center justify-between">
+                          <div>
+                            <p className="text-white text-xs font-semibold">{item.name}</p>
+                            <p className="text-slate-500 text-[10px]">{item.tip}</p>
+                          </div>
+                          <span className="text-red-400 font-black text-sm">{item.qty}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section className="bg-[#0a0a0a] py-20 px-6 md:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -691,6 +837,9 @@ export default function Home() {
                   'Cupones y descuentos',
                   'Soporte prioritario por WhatsApp',
                   'Sin pausas por inactividad',
+                  'Sistema de contabilidad integrado',
+                  'Reportes de ventas por platillo',
+                  'Identifica platillos con baja rotación',
                 ].map((text) => (
                   <li key={text} className="flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 text-black shrink-0" />
