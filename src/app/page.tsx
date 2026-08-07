@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import {
   CheckCircle2, Zap, Shield, UtensilsCrossed, CreditCard,
   Bike, LayoutDashboard, Tag, Cloud, Headphones, Lock,
-  TrendingUp, MessageCircle, ArrowRight
+  TrendingUp, MessageCircle, ArrowRight, Banknote
 } from 'lucide-react'
 
 const WORDS = ['Restaurantes', 'Taquerías', 'Cafeterías', 'Pizzerías', 'Fondas', 'Bares', 'Pastelerías']
@@ -273,7 +273,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -312,6 +312,27 @@ export default function Home() {
               </div>
               <div className="flex flex-wrap justify-center gap-2 mt-1">
                 {['Visa', 'Mastercard', 'Débito', 'POS físico'].map(m => (
+                  <span key={m} className="text-xs bg-white/10 text-slate-300 px-2.5 py-1 rounded-full">{m}</span>
+                ))}
+              </div>
+            </motion.div>
+            {/* Paga en Caja */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-[#a3e635]/50 hover:bg-[#a3e635]/5 transition-all"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-[#a3e635]/10 border border-[#a3e635]/20 flex items-center justify-center">
+                <Banknote className="w-8 h-8 text-[#a3e635]" />
+              </div>
+              <div className="text-center">
+                <p className="text-white font-bold">Paga en Caja</p>
+                <p className="text-slate-400 text-sm mt-1">El cliente ordena online y paga al recoger</p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 mt-1">
+                {['Efectivo', 'Sin tarjeta', 'Pick-up'].map(m => (
                   <span key={m} className="text-xs bg-white/10 text-slate-300 px-2.5 py-1 rounded-full">{m}</span>
                 ))}
               </div>
