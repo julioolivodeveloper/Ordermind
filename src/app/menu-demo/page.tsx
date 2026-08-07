@@ -76,14 +76,14 @@ const MENU: MenuItem[] = [
   },
   {
     id: 5,
-    name: 'Agua de Horchata',
-    category: 'Bebidas',
-    description: 'Agua fresca de horchata artesanal con canela y vainilla, endulzada al gusto.',
-    price: 3.99,
+    name: 'Nieve de Horchata',
+    category: 'Postres',
+    description: 'Nieve artesanal sabor horchata con canela y vainilla. Servida en cono o vaso.',
+    price: 4.99,
     image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=700&h=500&fit=crop&auto=format&q=80',
     options: [
-      { group: 'Tamaño', type: 'single', choices: [{ label: 'Chico (16oz)' }, { label: 'Grande (24oz)', price: 1.5 }] },
-      { group: 'Personaliza', type: 'multi', choices: [{ label: 'Sin azúcar' }, { label: 'Extra canela' }, { label: 'Con leche condensada' }] },
+      { group: 'Presentación', type: 'single', choices: [{ label: 'En vaso' }, { label: 'En cono' }, { label: 'Doble bola', price: 2 }] },
+      { group: 'Toppings', type: 'multi', choices: [{ label: 'Canela extra' }, { label: 'Cajeta', price: 0.75 }, { label: 'Nuez', price: 0.75 }] },
     ],
   },
 ]
