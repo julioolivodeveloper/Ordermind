@@ -369,6 +369,140 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── PRICING ── */}
+      <section className="bg-[#0a0a0a] py-24 px-6 md:px-12 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-16"
+          >
+            <p className="text-slate-500 text-sm font-semibold uppercase tracking-widest mb-3">Precios</p>
+            <h2 className="text-4xl md:text-6xl font-black text-white uppercase leading-[0.95]">
+              Simple y<br /><span className="text-[#a3e635]">sin sorpresas</span>
+            </h2>
+            <p className="text-slate-400 mt-4 max-w-lg mx-auto">
+              Pago único al año. Sin comisiones por pedido. Sin letra chica.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Plan Básico */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col"
+            >
+              <div className="mb-6">
+                <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest mb-2">Básico</p>
+                <div className="flex items-end gap-2 mb-1">
+                  <span className="text-5xl font-black text-white">$600</span>
+                  <span className="text-slate-400 text-lg mb-1">/año</span>
+                </div>
+                <p className="text-slate-500 text-sm">= $50 al mes · Ideal para arrancar</p>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  { ok: true,  text: 'Hasta 50 platillos en el menú' },
+                  { ok: true,  text: 'Tu propio dominio' },
+                  { ok: true,  text: 'Pedidos online con pickup' },
+                  { ok: true,  text: 'Panel de administración' },
+                  { ok: true,  text: 'Pagos en caja (efectivo)' },
+                  { ok: true,  text: 'Soporte por WhatsApp' },
+                  { ok: false, text: 'Pagos con tarjeta online' },
+                  { ok: false, text: 'Cupones y descuentos' },
+                  { ok: false, text: 'Platillos ilimitados' },
+                ].map((item) => (
+                  <li key={item.text} className="flex items-center gap-3">
+                    {item.ok
+                      ? <CheckCircle2 className="w-5 h-5 text-[#a3e635] shrink-0" />
+                      : <div className="w-5 h-5 rounded-full border border-white/20 shrink-0 flex items-center justify-center"><div className="w-2 h-0.5 bg-white/20 rounded" /></div>
+                    }
+                    <span className={item.ok ? 'text-slate-300 text-sm' : 'text-slate-600 text-sm'}>{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="https://wa.me/12094609828"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-center border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-black px-6 py-3.5 rounded-2xl font-black text-base transition-all"
+              >
+                Empezar con Básico
+              </a>
+            </motion.div>
+
+            {/* Plan Pro */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative bg-[#a3e635] rounded-3xl p-8 flex flex-col shadow-2xl shadow-lime-500/20"
+            >
+              <div className="absolute top-5 right-5 bg-black/20 text-black text-xs font-black px-3 py-1 rounded-full uppercase tracking-wide">
+                Más popular
+              </div>
+
+              <div className="mb-6">
+                <p className="text-black/60 text-sm font-semibold uppercase tracking-widest mb-2">Pro</p>
+                <div className="flex items-end gap-2 mb-1">
+                  <span className="text-5xl font-black text-black">$900</span>
+                  <span className="text-black/60 text-lg mb-1">/año</span>
+                </div>
+                <p className="text-black/60 text-sm">= $75 al mes · Sin pausas, sin límites</p>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  'Platillos ilimitados en el menú',
+                  'Tu propio dominio',
+                  'Pedidos online con pickup y delivery',
+                  'Panel de administración completo',
+                  'Pagos con tarjeta (Stripe / Square)',
+                  'Pagos en caja (efectivo)',
+                  'Cupones y descuentos',
+                  'Soporte prioritario por WhatsApp',
+                  'Sin pausas por inactividad',
+                ].map((text) => (
+                  <li key={text} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-black shrink-0" />
+                    <span className="text-black text-sm font-medium">{text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="https://wa.me/12094609828"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-center bg-black hover:bg-black/80 text-[#a3e635] px-6 py-3.5 rounded-2xl font-black text-base transition-all"
+              >
+                Empezar con Pro
+              </a>
+            </motion.div>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center text-slate-600 text-sm mt-8"
+          >
+            ¿Tienes preguntas? Escríbenos por WhatsApp y te respondemos en minutos.
+          </motion.p>
+        </div>
+      </section>
+
       {/* ── NO ES SAAS ── */}
       <section className="bg-[#0a0a0a] py-24 px-6 md:px-12 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
