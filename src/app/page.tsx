@@ -148,6 +148,15 @@ export default function Home() {
               <Typewriter />
             </motion.h1>
 
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.6 }}
+              className="inline-flex items-center gap-2 bg-[#a3e635]/10 border border-[#a3e635]/30 rounded-full px-4 py-1.5 mb-5"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#a3e635] animate-pulse" />
+              <span className="text-[#a3e635] text-sm font-bold tracking-wide">Tu propio sistema — 100% tuyo</span>
+            </motion.div>
+
             <motion.p
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
