@@ -80,7 +80,7 @@ const MENU: MenuItem[] = [
     category: 'Bebidas',
     description: 'Agua fresca de horchata artesanal con canela y vainilla, endulzada al gusto.',
     price: 3.99,
-    image: 'https://images.unsplash.com/photo-1497534446932-1bda8e040d0f?w=700&h=500&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=700&h=500&fit=crop&auto=format&q=80',
     options: [
       { group: 'Tamaño', type: 'single', choices: [{ label: 'Chico (16oz)' }, { label: 'Grande (24oz)', price: 1.5 }] },
       { group: 'Personaliza', type: 'multi', choices: [{ label: 'Sin azúcar' }, { label: 'Extra canela' }, { label: 'Con leche condensada' }] },
@@ -532,7 +532,7 @@ export default function MenuDemo() {
 
       {/* ── Restaurant Header ── */}
       <div className="bg-[#0f0f0f] border-b border-white/10">
-        <div className="max-w-lg mx-auto px-4 py-5 flex items-center gap-4">
+        <div className="max-w-5xl mx-auto px-4 py-5 flex items-center gap-4">
           <a href="/" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </a>
@@ -552,7 +552,7 @@ export default function MenuDemo() {
         </div>
 
         {/* Category tabs */}
-        <div className="max-w-lg mx-auto px-4 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="max-w-5xl mx-auto px-4 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {CATEGORIES.map((cat) => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className={`shrink-0 px-4 py-2.5 rounded-t-xl text-sm font-bold transition-all border-b-2 ${activeCategory === cat ? 'text-[#a3e635] border-[#a3e635] bg-[#a3e635]/5' : 'text-slate-500 border-transparent hover:text-slate-300'}`}>
@@ -563,12 +563,12 @@ export default function MenuDemo() {
       </div>
 
       {/* ── Menu Items ── */}
-      <div className="max-w-lg mx-auto px-4 py-6 pb-32 space-y-4">
+      <div className="max-w-5xl mx-auto px-4 py-6 pb-32">
 
         {/* Promo Banner */}
         <motion.div
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-2xl border border-orange-500/40 bg-gradient-to-r from-orange-500/20 via-red-500/10 to-orange-500/20 p-4"
+          className="relative overflow-hidden rounded-2xl border border-orange-500/40 bg-gradient-to-r from-orange-500/20 via-red-500/10 to-orange-500/20 p-4 mb-4"
         >
           <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,120,0,0.1) 10px, rgba(255,120,0,0.1) 20px)' }} />
           <div className="relative flex items-center gap-3">
@@ -587,6 +587,7 @@ export default function MenuDemo() {
           </div>
         </motion.div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <AnimatePresence mode="popLayout">
           {filtered.map((item, i) => (
             <motion.button key={item.id} layout
@@ -625,6 +626,7 @@ export default function MenuDemo() {
             </motion.button>
           ))}
         </AnimatePresence>
+        </div>
 
         <div className="text-center py-4">
           <p className="text-slate-700 text-xs">
@@ -636,7 +638,7 @@ export default function MenuDemo() {
       {/* Floating Cart Button */}
       <AnimatePresence>
         {cartCount > 0 && step === 'menu' && (
-          <motion.div className="fixed bottom-6 inset-x-4 max-w-lg mx-auto z-40"
+          <motion.div className="fixed bottom-6 inset-x-4 max-w-sm mx-auto z-40"
             initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}>
             <button onClick={() => setStep('cart')}
