@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react'
 import {
   CheckCircle2, Zap, Shield, UtensilsCrossed, CreditCard,
   Bike, LayoutDashboard, Tag, Cloud, Headphones, Lock,
-  TrendingUp, MessageCircle, ArrowRight, Banknote
+  TrendingUp, MessageCircle, ArrowRight, Banknote,
+  Database, Globe, BadgeDollarSign, ShieldCheck, Palette, Smartphone
 } from 'lucide-react'
 
 const WORDS = ['Restaurantes', 'Taquerías', 'Cafeterías', 'Pizzerías', 'Fondas', 'Bares', 'Pastelerías']
@@ -257,32 +258,38 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: '🔒',
+                icon: Database,
+                color: 'bg-blue-500/15 border-blue-500/30 text-blue-400',
                 title: 'Tus datos son tuyos',
                 desc: 'Clientes, pedidos, ventas — todo queda en tu base de datos. Nadie más puede verlos, venderlos ni usarlos.',
               },
               {
-                icon: '🌐',
+                icon: Globe,
+                color: 'bg-purple-500/15 border-purple-500/30 text-purple-400',
                 title: 'Tu propio dominio',
                 desc: 'Tu menú vive en turestaurante.com, no en una plataforma de terceros. Tus clientes te recuerdan a ti, no a la app.',
               },
               {
-                icon: '💸',
+                icon: BadgeDollarSign,
+                color: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
                 title: 'Sin comisión por pedido',
                 desc: 'Las plataformas SaaS cobran 15-30% por pedido. Aquí pagas una vez y el 100% de tus ventas es tuyo.',
               },
               {
-                icon: '⚡',
+                icon: ShieldCheck,
+                color: 'bg-[#a3e635]/15 border-[#a3e635]/30 text-[#a3e635]',
                 title: 'Sin interrupciones',
                 desc: 'Si una plataforma SaaS sube precios o cierra, pierdes todo. Tu sistema no depende de nadie.',
               },
               {
-                icon: '🎨',
+                icon: Palette,
+                color: 'bg-pink-500/15 border-pink-500/30 text-pink-400',
                 title: 'Tu marca, tu estilo',
                 desc: 'Logo, colores, fotos — todo personalizado para tu negocio. No compartes espacio con competidores.',
               },
               {
-                icon: '📱',
+                icon: Smartphone,
+                color: 'bg-orange-500/15 border-orange-500/30 text-orange-400',
                 title: 'Funciona en cualquier dispositivo',
                 desc: 'Tus clientes ordenan desde el celular, tablet o computadora sin descargar ninguna app.',
               },
@@ -294,9 +301,11 @@ export default function Home() {
                 whileInView="show"
                 viewport={{ once: true }}
                 variants={fadeUp}
-                className="bg-white/5 border border-white/10 rounded-2xl p-7 hover:border-[#a3e635]/30 hover:bg-white/8 transition-all"
+                className="bg-white/5 border border-white/10 rounded-2xl p-7 hover:border-[#a3e635]/30 hover:bg-white/8 transition-all group"
               >
-                <div className="text-4xl mb-4">{item.icon}</div>
+                <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center mb-5 ${item.color}`}>
+                  <item.icon className="w-7 h-7" strokeWidth={1.5} />
+                </div>
                 <h3 className="text-white font-black text-lg mb-2">{item.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
               </motion.div>
