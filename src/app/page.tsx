@@ -784,7 +784,7 @@ export default function Home() {
                   { ok: true,  text: 'Panel de administración' },
                   { ok: true,  text: 'Pagos en caja (efectivo)' },
                   { ok: true,  text: 'Soporte por WhatsApp' },
-                  { ok: false, text: 'Pagos con tarjeta online' },
+                  { ok: true,  text: 'Pagos con tarjeta online' },
                   { ok: false, text: 'Cupones y descuentos' },
                   { ok: false, text: 'Platillos ilimitados' },
                 ].map((item) => (
