@@ -696,7 +696,7 @@ export default function Home() {
                   <span className="text-5xl font-black text-white">$400</span>
                   <span className="text-slate-400 text-lg mb-1">/año</span>
                 </div>
-                <p className="text-slate-500 text-sm">= $33 al mes · Para empezar pequeño</p>
+                <p className="text-slate-500 text-sm">Ideal para empezar pequeño</p>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 {[
@@ -739,7 +739,7 @@ export default function Home() {
                   <span className="text-5xl font-black text-white">$600</span>
                   <span className="text-slate-400 text-lg mb-1">/año</span>
                 </div>
-                <p className="text-slate-500 text-sm">= $50 al mes · Ideal para arrancar</p>
+                <p className="text-slate-500 text-sm">Ideal para arrancar</p>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 {[
@@ -785,7 +785,7 @@ export default function Home() {
                   <span className="text-5xl font-black text-black">$900</span>
                   <span className="text-black/60 text-lg mb-1">/año</span>
                 </div>
-                <p className="text-black/60 text-sm">= $75 al mes · Sin pausas, sin límites</p>
+                <p className="text-black/60 text-sm">Sin pausas, sin límites</p>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 {[
