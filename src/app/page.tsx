@@ -322,11 +322,12 @@ export default function Home() {
                   <p className="text-[#a3e635] text-xs font-black uppercase tracking-widest pt-1">Tacos</p>
                   {/* Items */}
                   {[
-                    { name: 'Taco de Asada', desc: 'Carne asada, cebolla, cilantro', price: '$3.50' },
-                    { name: 'Taco de Pollo', desc: 'Pollo adobado, pico de gallo', price: '$3.00' },
-                    { name: 'Taco de Pastor', desc: 'Pastor, piña, salsa verde', price: '$3.25' },
+                    { name: 'Taco de Asada', desc: 'Carne asada, cebolla, cilantro', price: '$3.50', emoji: '🥩', bg: 'bg-red-900/40' },
+                    { name: 'Taco de Pollo', desc: 'Pollo adobado, pico de gallo', price: '$3.00', emoji: '🍗', bg: 'bg-yellow-900/40' },
+                    { name: 'Taco de Pastor', desc: 'Pastor, piña, salsa verde', price: '$3.25', emoji: '🌮', bg: 'bg-orange-900/40' },
                   ].map((item) => (
-                    <div key={item.name} className="flex items-center justify-between gap-3 bg-white/5 rounded-xl p-3">
+                    <div key={item.name} className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+                      <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center text-2xl shrink-0`}>{item.emoji}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-semibold truncate">{item.name}</p>
                         <p className="text-slate-500 text-xs truncate">{item.desc}</p>
@@ -339,10 +340,11 @@ export default function Home() {
                   ))}
                   <p className="text-[#a3e635] text-xs font-black uppercase tracking-widest pt-1">Bebidas</p>
                   {[
-                    { name: 'Agua de Jamaica', desc: 'Fresca y natural', price: '$2.00' },
-                    { name: 'Horchata', desc: 'Con canela', price: '$2.00' },
+                    { name: 'Agua de Jamaica', desc: 'Fresca y natural', price: '$2.00', emoji: '🌺', bg: 'bg-pink-900/40' },
+                    { name: 'Horchata', desc: 'Con canela', price: '$2.00', emoji: '🥛', bg: 'bg-slate-700/40' },
                   ].map((item) => (
-                    <div key={item.name} className="flex items-center justify-between gap-3 bg-white/5 rounded-xl p-3">
+                    <div key={item.name} className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+                      <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center text-2xl shrink-0`}>{item.emoji}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-semibold truncate">{item.name}</p>
                         <p className="text-slate-500 text-xs truncate">{item.desc}</p>
