@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus, Minus, ShoppingCart, Check, ArrowLeft, MapPin, Clock } from 'lucide-react'
@@ -247,7 +246,7 @@ function ItemModal({
       >
         {/* Image */}
         <div className="relative h-52 shrink-0">
-          <Image src={item.image} alt={item.name} fill className="object-cover" sizes="600px" />
+          <img src={item.image} alt={item.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
           <button
             onClick={onClose}
@@ -397,7 +396,7 @@ function CartDrawer({
             return (
               <div key={ci.key} className="flex gap-4">
                 <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                  <Image src={ci.item.image} alt={ci.item.name} fill className="object-cover" sizes="64px" />
+                  <img src={ci.item.image} alt={ci.item.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-bold text-sm">{ci.item.name}</p>
@@ -648,12 +647,11 @@ export default function MenuDemo() {
                 </div>
                 {/* Image */}
                 <div className="relative w-32 h-32 shrink-0 m-3 rounded-xl overflow-hidden">
-                  <Image
+                  <img
                     src={item.image}
                     alt={item.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="128px"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                 </div>
               </div>
