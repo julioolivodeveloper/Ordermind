@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: 'Ordermind',
     images: [
       {
-        url: '/dashboard-preview.png',
+        url: '/dashboard-preview.jpg',
         width: 1200,
         height: 630,
         alt: 'Ordermind Dashboard',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Ordermind — Software para Restaurantes',
     description: 'El sistema completo para gestionar tu restaurante online.',
-    images: ['/dashboard-preview.png'],
+    images: ['/dashboard-preview.jpg'],
   },
 }
 

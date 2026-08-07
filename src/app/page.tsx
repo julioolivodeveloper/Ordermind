@@ -126,7 +126,7 @@ export default function Home() {
 
         <div className="absolute inset-0">
           <img
-            src="/dashboard-preview.png"
+            src="/dashboard-preview.jpg"
             alt=""
             className="w-full h-full object-cover opacity-30 object-center"
           />
@@ -220,7 +220,7 @@ export default function Home() {
             <div className="relative">
               <div className="absolute -inset-4 bg-[#a3e635]/10 rounded-3xl blur-2xl" />
               <img
-                src="/dashboard-preview.png"
+                src="/dashboard-preview.jpg"
                 alt="Dashboard Ordermind"
                 className="relative rounded-2xl shadow-2xl border border-white/10 w-full object-cover"
               />
@@ -402,7 +402,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-[#a3e635]/10 rounded-full blur-3xl scale-110" />
             <div className="relative w-full max-w-xs md:max-w-sm">
               <img
-                src="/restaurante-persona.png"
+                src="/restaurante-persona.jpg"
                 alt="Dueño de restaurante usando Ordermind"
                 className="relative rounded-3xl shadow-2xl w-full object-cover object-top"
                 style={{ aspectRatio: '3/4' }}
