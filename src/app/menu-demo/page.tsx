@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Plus, Minus, Check, ArrowLeft, MapPin, Clock,
-  Truck, Store, Lock, Tag, CreditCard, Zap,
+  Truck, Store, Lock, Tag, CreditCard, Zap, Trophy, Gift, Star,
 } from 'lucide-react'
 
 /* ─────────────── Types ─────────────── */
@@ -454,8 +454,144 @@ function CardCheckout({ total, orderType, onBack, onPay }: {
   )
 }
 
+/* ─────────────── Loyalty Modal ─────────────── */
+const REWARD_THRESHOLD = 500
+const HISTORY = [
+  { label: 'Tacos de Asada × 2', pts: 26, date: 'Ayer' },
+  { label: 'Burrito de Pollo', pts: 14, date: 'Hace 3 días' },
+  { label: 'Nachos Supremos', pts: 11, date: 'Hace 5 días' },
+]
+
+function LoyaltyModal({ points, onClose }: { points: number; onClose: () => void }) {
+  const progress = Math.min(points / REWARD_THRESHOLD, 1)
+  const remaining = Math.max(REWARD_THRESHOLD - points, 0)
+  const unlocked = points >= REWARD_THRESHOLD
+
+  return (
+    <motion.div className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <motion.div className="relative bg-[#111] w-full max-w-lg rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl z-10 max-h-[92vh] flex flex-col"
+        initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-400" />
+            <h2 className="text-white font-black text-xl">Mis Puntos</h2>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+
+          {/* Points card */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/20 via-orange-500/10 to-yellow-600/20 border border-yellow-500/30 p-5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-yellow-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-yellow-400" /> Cliente Frecuente
+                </p>
+                <p className="text-white font-black text-sm">Tacos El Paso</p>
+              </div>
+              <Trophy className="w-8 h-8 text-yellow-400 opacity-60" />
+            </div>
+            <div className="mb-3">
+              <span className="text-yellow-400 font-black text-5xl leading-none">{points}</span>
+              <span className="text-yellow-400/60 text-lg font-semibold ml-1">pts</span>
+            </div>
+            {/* Progress bar */}
+            <div className="mb-1.5">
+              <div className="w-full h-2.5 bg-black/30 rounded-full overflow-hidden">
+                <motion.div className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full"
+                  initial={{ width: 0 }} animate={{ width: `${progress * 100}%` }}
+                  transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }} />
+              </div>
+            </div>
+            <p className="text-yellow-400/70 text-xs font-semibold">
+              {unlocked ? '🎉 ¡Recompensa disponible!' : `${remaining} puntos para tu recompensa`}
+            </p>
+          </div>
+
+          {/* Reward */}
+          <div>
+            <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-3">Tu próxima recompensa</p>
+            <div className={`flex gap-4 items-center rounded-2xl border p-4 ${unlocked ? 'border-[#a3e635]/50 bg-[#a3e635]/10' : 'border-white/10 bg-white/5'}`}>
+              <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0">
+                <img src="https://images.unsplash.com/photo-1618040996337-56904b7850b9?w=200&h=200&fit=crop&auto=format&q=80"
+                  alt="Quesadilla" className="absolute inset-0 w-full h-full object-cover" />
+                {unlocked && (
+                  <div className="absolute inset-0 bg-[#a3e635]/80 flex items-center justify-center">
+                    <Gift className="w-8 h-8 text-black" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift className={`w-4 h-4 ${unlocked ? 'text-[#a3e635]' : 'text-slate-400'}`} />
+                  <p className={`font-black text-sm ${unlocked ? 'text-[#a3e635]' : 'text-white'}`}>Quesadilla de Queso GRATIS</p>
+                </div>
+                <p className="text-slate-400 text-xs mb-2">Válida en tu próxima orden</p>
+                <div className="w-full h-1.5 bg-black/30 rounded-full overflow-hidden">
+                  <motion.div className={`h-full rounded-full ${unlocked ? 'bg-[#a3e635]' : 'bg-yellow-400'}`}
+                    initial={{ width: 0 }} animate={{ width: `${progress * 100}%` }}
+                    transition={{ duration: 1, delay: 0.4, ease: 'easeOut' }} />
+                </div>
+                <p className={`text-xs mt-1 font-bold ${unlocked ? 'text-[#a3e635]' : 'text-slate-500'}`}>
+                  {unlocked ? '¡Lista para canjear! 🎉' : `${points} / ${REWARD_THRESHOLD} pts`}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* How it works */}
+          <div>
+            <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-3">Cómo funciona</p>
+            <div className="space-y-2">
+              {[
+                { icon: '💰', text: '1 punto por cada $1 gastado en tu orden' },
+                { icon: '🎁', text: 'Acumula 500 puntos = Quesadilla gratis' },
+                { icon: '♾️', text: 'Los puntos nunca expiran' },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-3 bg-white/5 rounded-xl px-4 py-3">
+                  <span className="text-lg">{item.icon}</span>
+                  <p className="text-slate-300 text-sm">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* History */}
+          <div>
+            <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-3">Historial reciente</p>
+            <div className="space-y-2">
+              {HISTORY.map((h) => (
+                <div key={h.label} className="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl">
+                  <div>
+                    <p className="text-white text-sm font-semibold">{h.label}</p>
+                    <p className="text-slate-500 text-xs">{h.date}</p>
+                  </div>
+                  <span className="text-yellow-400 font-black text-sm">+{h.pts} pts</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-center text-slate-700 text-xs pb-2">Solo demo · Los puntos son simulados</p>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 /* ─────────────── Order Success ─────────────── */
-function OrderSuccess({ orderType, onBack }: { orderType: OrderType; onBack: () => void }) {
+function OrderSuccess({ orderType, earnedPoints, newTotal, onBack }: {
+  orderType: OrderType; earnedPoints: number; newTotal: number; onBack: () => void
+}) {
   return (
     <motion.div className="fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center px-8 text-center"
       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
@@ -483,12 +619,27 @@ function OrderSuccess({ orderType, onBack }: { orderType: OrderType; onBack: () 
           {orderType === 'pickup' ? 'Tiempo estimado: 15-20 min' : 'Tiempo estimado: 30-45 min'}
         </span>
       </motion.div>
+      {/* Points earned */}
+      <motion.div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl px-6 py-4 mb-4 max-w-xs w-full"
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.45, type: 'spring' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-400" />
+            <p className="text-yellow-400 font-black text-sm">¡Ganaste puntos!</p>
+          </div>
+          <span className="text-yellow-400 font-black text-xl">+{earnedPoints} pts</span>
+        </div>
+        <p className="text-yellow-400/60 text-xs mt-1">Nuevo saldo: <strong className="text-yellow-400">{newTotal} pts</strong>
+          {newTotal >= REWARD_THRESHOLD && <span className="ml-1 text-[#a3e635]">· 🎉 ¡Quesadilla gratis disponible!</span>}
+        </p>
+      </motion.div>
+
       <motion.div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3 mb-8 max-w-xs"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}>
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
         <p className="text-amber-400 text-xs">Solo demo — ningún pedido fue procesado realmente</p>
       </motion.div>
       <motion.button onClick={onBack} className="border border-white/20 text-slate-300 hover:border-[#a3e635] hover:text-[#a3e635] px-8 py-3.5 rounded-2xl font-bold text-sm transition-all"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
         Volver al menú
       </motion.button>
     </motion.div>
@@ -502,6 +653,9 @@ export default function MenuDemo() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [step, setStep] = useState<Step>('menu')
   const [orderType, setOrderType] = useState<OrderType>('pickup')
+  const [points, setPoints] = useState(340)
+  const [earnedPoints, setEarnedPoints] = useState(0)
+  const [showPoints, setShowPoints] = useState(false)
 
   const filtered = activeCategory === 'Todo' ? MENU : MENU.filter((m) => m.category === activeCategory)
   const cartCount = cart.reduce((acc, ci) => acc + ci.quantity, 0)
@@ -520,6 +674,14 @@ export default function MenuDemo() {
 
   function changeQty(key: string, delta: number) {
     setCart((prev) => prev.map((ci) => ci.key === key ? { ...ci, quantity: ci.quantity + delta } : ci).filter((ci) => ci.quantity > 0))
+  }
+
+  function placeOrder() {
+    const earned = Math.floor(total)
+    setEarnedPoints(earned)
+    setPoints((prev) => prev + earned)
+    setCart([])
+    setStep('success')
   }
 
   return (
@@ -544,6 +706,12 @@ export default function MenuDemo() {
               <span className="flex items-center gap-1 text-xs text-[#a3e635] font-bold"><Clock className="w-3 h-3" /> Abierto ahora</span>
             </div>
           </div>
+          {/* Points button */}
+          <button onClick={() => setShowPoints(true)}
+            className="shrink-0 rounded-xl px-3 py-1.5 text-center border border-yellow-500/30 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all">
+            <Trophy className="w-4 h-4 text-yellow-400 mx-auto mb-0.5" />
+            <p className="text-[10px] font-black text-yellow-400">{points} pts</p>
+          </button>
           {/* Pickup/delivery mini badge */}
           <div className={`shrink-0 rounded-xl px-3 py-1.5 text-center border ${orderType === 'pickup' ? 'border-[#a3e635]/30 bg-[#a3e635]/10' : 'border-blue-500/30 bg-blue-500/10'}`}>
             {orderType === 'pickup' ? <Store className="w-4 h-4 text-[#a3e635] mx-auto mb-0.5" /> : <Truck className="w-4 h-4 text-blue-400 mx-auto mb-0.5" />}
@@ -671,12 +839,16 @@ export default function MenuDemo() {
       <AnimatePresence>
         {step === 'payment' && (
           <CardCheckout total={total} orderType={orderType}
-            onBack={() => setStep('cart')} onPay={() => { setCart([]); setStep('success') }} />
+            onBack={() => setStep('cart')} onPay={placeOrder} />
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {step === 'success' && <OrderSuccess orderType={orderType} onBack={() => setStep('menu')} />}
+        {step === 'success' && <OrderSuccess orderType={orderType} earnedPoints={earnedPoints} newTotal={points} onBack={() => setStep('menu')} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPoints && <LoyaltyModal points={points} onClose={() => setShowPoints(false)} />}
       </AnimatePresence>
     </div>
   )
