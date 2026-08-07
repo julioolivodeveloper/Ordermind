@@ -76,9 +76,9 @@ const MENU: MenuItem[] = [
   },
   {
     id: 5,
-    name: 'Nieve de Horchata',
+    name: 'Nieve de Vainilla',
     category: 'Postres',
-    description: 'Nieve artesanal sabor horchata con canela y vainilla. Servida en cono o vaso.',
+    description: 'Nieve artesanal de vainilla cremosa, servida en cono o vaso con toppings a elegir.',
     price: 4.99,
     image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=700&h=500&fit=crop&auto=format&q=80',
     options: [
