@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ordermind — Precios</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 12mm 14mm;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10mm;
+      padding-bottom: 6mm;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: #a3e635;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 14px; color: #000;
+    }
+    .logo-name {
+      font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+    }
+    .header-tag {
+      background: rgba(163,230,53,0.12);
+      border: 1px solid rgba(163,230,53,0.3);
+      color: #a3e635;
+      font-size: 11px; font-weight: 700;
+      padding: 4px 12px; border-radius: 999px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      margin-bottom: 10mm;
+    }
+    .hero h1 {
+      font-size: 36px; font-weight: 900;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+    .hero h1 span { color: #a3e635; }
+    .hero p {
+      color: #94a3b8; font-size: 13px; max-width: 400px;
+      margin: 0 auto; line-height: 1.6;
+    }
+
+    /* ── PLANS ── */
+    .plans {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10mm;
+    }
+
+    .plan {
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+    .plan-dark {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .plan-green {
+      background: #a3e635;
+      position: relative;
+    }
+
+    .plan-label {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .plan-dark .plan-label { color: #64748b; }
+    .plan-green .plan-label { color: rgba(0,0,0,0.5); }
+
+    .plan-price {
+      font-size: 38px; font-weight: 900;
+      line-height: 1; margin-bottom: 2px;
+    }
+    .plan-dark .plan-price { color: #fff; }
+    .plan-green .plan-price { color: #000; }
+
+    .plan-period {
+      font-size: 11px; margin-bottom: 10px;
+    }
+    .plan-dark .plan-period { color: #475569; }
+    .plan-green .plan-period { color: rgba(0,0,0,0.5); }
+
+    .divider {
+      height: 1px; margin-bottom: 10px;
+    }
+    .plan-dark .divider { background: rgba(255,255,255,0.08); }
+    .plan-green .divider { background: rgba(0,0,0,0.15); }
+
+    .plan-features { list-style: none; flex: 1; margin-bottom: 14px; }
+    .plan-features li {
+      display: flex; align-items: flex-start; gap: 7px;
+      font-size: 11.5px; margin-bottom: 7px; line-height: 1.4;
+    }
+    .plan-dark .plan-features li { color: #cbd5e1; }
+    .plan-green .plan-features li { color: #000; font-weight: 500; }
+
+    .plan-features li.off { opacity: 0.35; }
+
+    .check {
+      width: 14px; height: 14px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+      font-size: 8px; font-weight: 900;
+    }
+    .check-green { background: rgba(163,230,53,0.15); color: #a3e635; }
+    .check-black { background: rgba(0,0,0,0.15); color: #000; }
+    .check-off {
+      background: rgba(255,255,255,0.06);
+      width: 14px; height: 14px; border-radius: 50%;
+    }
+
+    .plan-btn {
+      display: block; text-align: center;
+      padding: 9px; border-radius: 10px;
+      font-size: 12px; font-weight: 800;
+      text-decoration: none; letter-spacing: 0.2px;
+    }
+    .btn-outline {
+      border: 1px solid rgba(163,230,53,0.4);
+      color: #a3e635;
+    }
+    .btn-outline-white {
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #94a3b8;
+    }
+    .btn-black {
+      background: #000; color: #a3e635;
+    }
+
+    .popular-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(0,0,0,0.2); color: #000;
+      font-size: 9px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 3px 8px; border-radius: 999px;
+    }
+
+    /* ── HIGHLIGHT ── */
+    .highlight {
+      background: rgba(163,230,53,0.06);
+      border: 1px solid rgba(163,230,53,0.2);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 10mm;
+    }
+    .hl-item { text-align: center; }
+    .hl-item .number {
+      font-size: 28px; font-weight: 900; color: #a3e635;
+      line-height: 1; margin-bottom: 3px;
+    }
+    .hl-item .label {
+      font-size: 10px; color: #64748b;
+      text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+    }
+    .hl-divider {
+      width: 1px; background: rgba(255,255,255,0.06);
+      margin: auto;
+    }
+
+    /* ── WHAT'S INCLUDED ── */
+    .included-title {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: #64748b; margin-bottom: 8px;
+    }
+    .included-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10mm;
+    }
+    .included-item {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 11.5px; color: #cbd5e1;
+    }
+    .included-item .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #a3e635; flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 8mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-left p { font-size: 11px; color: #475569; line-height: 1.7; }
+    .footer-left strong { color: #94a3b8; }
+    .footer-cta {
+      background: #a3e635;
+      color: #000; font-weight: 900; font-size: 12px;
+      padding: 10px 20px; border-radius: 10px;
+      text-decoration: none; white-space: nowrap;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #0a0a0a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { margin: 0; size: A4; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">O</div>
+      <span class="logo-name">Ordermind</span>
+    </div>
+    <span class="header-tag">Propuesta de precios</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Tu menú digital.<br /><span>Tu propio sistema.</span></h1>
+    <p style="margin-top:10px">Sin comisiones por pedido. Sin plataformas de terceros.<br />Pago único al año — el sistema es 100% tuyo.</p>
+  </div>
+
+  <!-- HIGHLIGHT NUMBERS -->
+  <div class="highlight">
+    <div class="hl-item">
+      <div class="number">0%</div>
+      <div class="label">Comisión por pedido</div>
+    </div>
+    <div class="hl-divider"></div>
+    <div class="hl-item">
+      <div class="number">24/7</div>
+      <div class="label">Tu menú disponible</div>
+    </div>
+    <div class="hl-divider"></div>
+    <div class="hl-item">
+      <div class="number">100%</div>
+      <div class="label">Tus datos, tu negocio</div>
+    </div>
+  </div>
+
+  <!-- PLANS -->
+  <div class="plans">
+
+    <!-- Starter -->
+    <div class="plan plan-dark">
+      <div class="plan-label">Starter</div>
+      <div class="plan-price">$400</div>
+      <div class="plan-period">al año &nbsp;·&nbsp; $33/mes</div>
+      <div class="divider"></div>
+      <ul class="plan-features">
+        <li><span class="check check-green">✓</span>Hasta 20 platillos</li>
+        <li><span class="check check-green">✓</span>Tu propio dominio</li>
+        <li><span class="check check-green">✓</span>Pedidos online pickup</li>
+        <li><span class="check check-green">✓</span>Panel de administración</li>
+        <li><span class="check check-green">✓</span>Pago en caja (efectivo)</li>
+        <li><span class="check check-green">✓</span>Soporte por WhatsApp</li>
+        <li class="off"><span class="check-off"></span>&nbsp; Pagos con tarjeta</li>
+        <li class="off"><span class="check-off"></span>&nbsp; Cupones y descuentos</li>
+      </ul>
+      <a href="https://wa.me/12094609828" class="plan-btn btn-outline-white">Empezar con Starter</a>
+    </div>
+
+    <!-- Básico -->
+    <div class="plan plan-dark">
+      <div class="plan-label">Básico</div>
+      <div class="plan-price">$600</div>
+      <div class="plan-period">al año &nbsp;·&nbsp; $50/mes</div>
+      <div class="divider"></div>
+      <ul class="plan-features">
+        <li><span class="check check-green">✓</span>Hasta 50 platillos</li>
+        <li><span class="check check-green">✓</span>Tu propio dominio</li>
+        <li><span class="check check-green">✓</span>Pedidos online pickup</li>
+        <li><span class="check check-green">✓</span>Panel de administración</li>
+        <li><span class="check check-green">✓</span>Pago en caja (efectivo)</li>
+        <li><span class="check check-green">✓</span>Soporte por WhatsApp</li>
+        <li class="off"><span class="check-off"></span>&nbsp; Pagos con tarjeta</li>
+        <li class="off"><span class="check-off"></span>&nbsp; Cupones y descuentos</li>
+      </ul>
+      <a href="https://wa.me/12094609828" class="plan-btn btn-outline">Empezar con Básico</a>
+    </div>
+
+    <!-- Pro -->
+    <div class="plan plan-green" style="position:relative">
+      <span class="popular-badge">Más popular</span>
+      <div class="plan-label">Pro</div>
+      <div class="plan-price">$900</div>
+      <div class="plan-period">al año &nbsp;·&nbsp; $75/mes</div>
+      <div class="divider"></div>
+      <ul class="plan-features">
+        <li><span class="check check-black">✓</span>Platillos ilimitados</li>
+        <li><span class="check check-black">✓</span>Tu propio dominio</li>
+        <li><span class="check check-black">✓</span>Pedidos pickup y delivery</li>
+        <li><span class="check check-black">✓</span>Panel de administración</li>
+        <li><span class="check check-black">✓</span>Pagos con tarjeta (Stripe/Square)</li>
+        <li><span class="check check-black">✓</span>Pago en caja (efectivo)</li>
+        <li><span class="check check-black">✓</span>Cupones y descuentos</li>
+        <li><span class="check check-black">✓</span>Soporte prioritario WhatsApp</li>
+      </ul>
+      <a href="https://wa.me/12094609828" class="plan-btn btn-black">Empezar con Pro</a>
+    </div>
+  </div>
+
+  <!-- INCLUDED IN ALL PLANS -->
+  <div class="included-title">Incluido en todos los planes</div>
+  <div class="included-grid">
+    <div class="included-item"><span class="dot"></span>Menú digital con fotos y categorías</div>
+    <div class="included-item"><span class="dot"></span>Sistema de pedidos en tiempo real</div>
+    <div class="included-item"><span class="dot"></span>Tu marca — logo, colores, dominio propio</div>
+    <div class="included-item"><span class="dot"></span>Funciona en celular, tablet y computadora</div>
+    <div class="included-item"><span class="dot"></span>Tus datos son 100% tuyos</div>
+    <div class="included-item"><span class="dot"></span>Sin comisión por pedido, nunca</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <p><strong>¿Tienes preguntas?</strong> Escríbenos y te respondemos en minutos.</p>
+      <p>WhatsApp: <strong>+1 (209) 460-9828</strong> &nbsp;·&nbsp; <strong>ordermindsystem.com</strong></p>
+    </div>
+    <a href="https://wa.me/12094609828" class="footer-cta">Solicitar demo gratis →</a>
+  </div>
+
+</body>
+</html>
