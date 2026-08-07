@@ -111,9 +111,6 @@ export default function Home() {
           initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-3"
         >
-          <Link href="/login" className="text-slate-400 hover:text-white text-sm font-medium transition-colors px-4 py-2">
-            Iniciar sesión
-          </Link>
           <a
             href="https://wa.me/12094609828"
             target="_blank"
@@ -128,7 +125,6 @@ export default function Home() {
       {/* ── HERO ── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
 
-        {/* Background image */}
         <div className="absolute inset-0">
           <img
             src="/dashboard-preview.png"
@@ -140,7 +136,6 @@ export default function Home() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
 
-          {/* Left */}
           <div>
             <motion.h1
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
@@ -164,7 +159,6 @@ export default function Home() {
               <span className="text-[#a3e635] font-bold">automatizada.</span>
             </motion.p>
 
-            {/* Badges */}
             <motion.div
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -190,12 +184,14 @@ export default function Home() {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Link
-                href="/login"
+              <a
+                href="https://wa.me/12094609828"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
               >
                 Comenzar ahora <ArrowRight className="w-5 h-5" />
-              </Link>
+              </a>
               <a
                 href="https://wa.me/12094609828"
                 target="_blank"
@@ -208,7 +204,6 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Right — dashboard mockup */}
           <motion.div
             initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
@@ -217,8 +212,8 @@ export default function Home() {
             <div className="relative">
               <div className="absolute -inset-4 bg-[#a3e635]/10 rounded-3xl blur-2xl" />
               <img
-                src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=900&q=80"
-                alt="Dashboard"
+                src="/dashboard-preview.png"
+                alt="Dashboard Ordermind"
                 className="relative rounded-2xl shadow-2xl border border-white/10 w-full object-cover"
               />
             </div>
@@ -273,8 +268,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Stripe */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -282,10 +276,9 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-[#635BFF]/50 hover:bg-[#635BFF]/5 transition-all"
             >
-              {/* Stripe logo */}
-              <span className="text-4xl font-black tracking-tight" style={{ color: '#635BFF', fontFamily: 'Arial, sans-serif' }}>
-                stripe
-              </span>
+              <svg viewBox="0 0 60 25" className="h-10 w-auto" fill="none">
+                <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.96 20.3c-1.96 0-3.14-.83-3.91-1.42l-.02 6.44-4.06.86V6.37h3.58l.19 1.38c.71-.9 1.95-1.71 3.77-1.71 3.25 0 6.24 2.97 6.24 7.12 0 4.44-2.75 7.14-5.79 7.14zm-.69-10.83c-1.02 0-1.65.4-2.07.96l.07 5.08c.41.52 1.04.9 2 .9 1.64 0 2.75-1.55 2.75-3.49s-1.1-3.45-2.75-3.45zM28.67 6.4v13.83h-4.07V6.4h4.07zm0-3.72c0 1.15-.88 2.06-2.03 2.06-1.16 0-2.04-.91-2.04-2.06C24.6.91 25.48 0 26.64 0c1.15 0 2.03.91 2.03 2.68zM20.96 7.55l-.25-1.18h-3.58v13.83h4.06V9.96c.96-1.27 2.59-.92 3.1-.77V6.37c-.52-.18-2.43-.44-3.33 1.18zM11.53 6.4H7.46v13.83h4.07V6.4zm0-3.72c0 1.15-.88 2.06-2.04 2.06C8.34 4.74 7.46 3.83 7.46 2.68 7.46.91 8.34 0 9.49 0s2.04.91 2.04 2.68zM3.4 8.88l-.04-2.51H0v13.83h4.07V9.97c.96-.88 2.28-.79 2.8-.72V6.37C6.27 6.2 4.22 5.97 3.4 8.88z" fill="#635BFF"/>
+              </svg>
               <div className="text-center">
                 <p className="text-white font-bold">Stripe</p>
                 <p className="text-slate-400 text-sm mt-1">Pagos globales, suscripciones y más</p>
@@ -297,7 +290,6 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Square */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -305,7 +297,6 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-white/30 hover:bg-white/8 transition-all"
             >
-              {/* Square logo SVG */}
               <svg viewBox="0 0 24 24" className="h-10 w-10" fill="white">
                 <rect x="0" y="0" width="24" height="24" rx="4" fill="white"/>
                 <rect x="5" y="5" width="14" height="14" rx="2" fill="black"/>
@@ -320,28 +311,6 @@ export default function Home() {
                 ))}
               </div>
             </motion.div>
-
-            {/* Efectivo */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-[#a3e635]/50 hover:bg-[#a3e635]/5 transition-all"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#a3e635]/15 border border-[#a3e635]/30 flex items-center justify-center">
-                <span className="text-2xl">💵</span>
-              </div>
-              <div className="text-center">
-                <p className="text-white font-bold">Efectivo / Caja</p>
-                <p className="text-slate-400 text-sm mt-1">El cliente paga al recoger o al entregar</p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2 mt-1">
-                {['Pickup', 'Delivery', 'Dine-in'].map(m => (
-                  <span key={m} className="text-xs bg-white/10 text-slate-300 px-2.5 py-1 rounded-full">{m}</span>
-                ))}
-              </div>
-            </motion.div>
           </div>
 
           <motion.p
@@ -351,7 +320,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-center text-slate-600 text-xs mt-8"
           >
-            Los pagos con tarjeta son procesados directamente por Stripe o Square — Ordermind nunca toca tu dinero.
+            Todos los pagos son procesados directamente por Stripe o Square — Ordermind nunca toca tu dinero.
           </motion.p>
         </div>
       </section>
@@ -360,7 +329,6 @@ export default function Home() {
       <section className="bg-[#0a0a0a] py-20 px-6 md:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-          {/* Left — text */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -375,7 +343,6 @@ export default function Home() {
               <span className="text-[#a3e635]">¡Vende más!</span>
             </h2>
 
-            {/* Underline accent */}
             <div className="w-24 h-1.5 bg-[#a3e635] rounded-full mb-8" />
 
             <ul className="space-y-4 mb-10">
@@ -399,7 +366,6 @@ export default function Home() {
             <p className="text-slate-500 text-sm mt-4">Y lleva tu restaurante al siguiente nivel.</p>
           </motion.div>
 
-          {/* Right — person photo */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -407,9 +373,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="relative flex justify-center"
           >
-            {/* Glow */}
             <div className="absolute inset-0 bg-[#a3e635]/10 rounded-full blur-3xl scale-110" />
-
             <div className="relative w-full max-w-xs md:max-w-sm">
               <img
                 src="/restaurante-persona.png"
@@ -417,7 +381,6 @@ export default function Home() {
                 className="relative rounded-3xl shadow-2xl w-full object-cover object-top"
                 style={{ aspectRatio: '3/4' }}
               />
-              {/* Badge */}
               <div className="absolute bottom-5 right-4 bg-[#a3e635] text-black rounded-2xl px-4 py-3 shadow-2xl">
                 <p className="font-black text-xs uppercase leading-tight text-center">
                   Más Control<br />Más Ventas<br />Más Clientes
