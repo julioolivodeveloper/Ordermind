@@ -118,7 +118,7 @@ export default function Home() {
             Ver demo
           </Link>
           <a
-            href="https://wa.me/12094609828"
+            href="https://wa.me/12094609828?text=Hola!%20Me%20interesa%20Ordermind%20para%20mi%20restaurante.%20%C2%BFPueden%20darme%20m%C3%A1s%20informaci%C3%B3n%3F"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[#a3e635] hover:bg-lime-400 text-black px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-lime-500/20 hover:scale-105"
@@ -200,7 +200,7 @@ export default function Home() {
               className="flex flex-col sm:flex-row gap-4"
             >
               <a
-                href="https://wa.me/12094609828"
+                href="https://wa.me/12094609828?text=Hola!%20Quiero%20empezar%20con%20Ordermind%20para%20mi%20restaurante"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
@@ -208,7 +208,7 @@ export default function Home() {
                 Comenzar ahora <ArrowRight className="w-5 h-5" />
               </a>
               <a
-                href="https://wa.me/12094609828"
+                href="https://wa.me/12094609828?text=Hola!%20Tengo%20preguntas%20sobre%20Ordermind"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all"
@@ -333,7 +333,7 @@ export default function Home() {
           >
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <a
-                href="https://wa.me/12094609828"
+                href="https://wa.me/12094609828?text=Hola!%20Quiero%20tener%20mi%20propio%20sistema%20de%20pedidos%20con%20Ordermind"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-10 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
@@ -513,7 +513,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <a href="https://wa.me/12094609828" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/12094609828?text=Hola!%20Quiero%20el%20Plan%20Pro%20de%20%24900%20al%20a%C3%B1o%20con%20contabilidad%20incluida" target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20">
                 <MessageCircle className="w-5 h-5" /> Quiero el Plan Pro
               </a>
@@ -648,7 +648,7 @@ export default function Home() {
             </ul>
 
             <a
-              href="https://wa.me/12094609828"
+              href="https://wa.me/12094609828?text=Hola!%20Quiero%20solicitar%20una%20demo%20gratis%20de%20Ordermind"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-8 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
@@ -750,7 +750,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <a href="https://wa.me/12094609828" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/12094609828?text=Hola!%20Quiero%20el%20Plan%20Starter%20de%20%24400%20al%20a%C3%B1o" target="_blank" rel="noopener noreferrer"
                 className="w-full text-center border border-white/20 text-slate-300 hover:border-[#a3e635] hover:text-[#a3e635] px-6 py-3.5 rounded-2xl font-black text-base transition-all">
                 Empezar con Starter
               </a>
@@ -797,7 +797,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <a href="https://wa.me/12094609828" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/12094609828?text=Hola!%20Quiero%20el%20Plan%20B%C3%A1sico%20de%20%24600%20al%20a%C3%B1o" target="_blank" rel="noopener noreferrer"
                 className="w-full text-center border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-black px-6 py-3.5 rounded-2xl font-black text-base transition-all">
                 Empezar con Básico
               </a>
@@ -847,7 +847,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <a href="https://wa.me/12094609828" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/12094609828?text=Hola!%20Quiero%20el%20Plan%20Pro%20de%20%24900%20al%20a%C3%B1o" target="_blank" rel="noopener noreferrer"
                 className="w-full text-center bg-black hover:bg-black/80 text-[#a3e635] px-6 py-3.5 rounded-2xl font-black text-base transition-all">
                 Empezar con Pro
               </a>
