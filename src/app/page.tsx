@@ -389,14 +389,63 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            {/* Plan Starter */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col"
+            >
+              <div className="mb-6">
+                <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest mb-2">Starter</p>
+                <div className="flex items-end gap-2 mb-1">
+                  <span className="text-5xl font-black text-white">$400</span>
+                  <span className="text-slate-400 text-lg mb-1">/año</span>
+                </div>
+                <p className="text-slate-500 text-sm">= $33 al mes · Para empezar pequeño</p>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  { ok: true,  text: 'Hasta 20 platillos en el menú' },
+                  { ok: true,  text: 'Tu propio dominio' },
+                  { ok: true,  text: 'Pedidos online con pickup' },
+                  { ok: true,  text: 'Panel de administración' },
+                  { ok: true,  text: 'Pagos en caja (efectivo)' },
+                  { ok: true,  text: 'Soporte por WhatsApp' },
+                  { ok: false, text: 'Pagos con tarjeta online' },
+                  { ok: false, text: 'Cupones y descuentos' },
+                  { ok: false, text: 'Más de 20 platillos' },
+                ].map((item) => (
+                  <li key={item.text} className="flex items-center gap-3">
+                    {item.ok
+                      ? <CheckCircle2 className="w-5 h-5 text-[#a3e635] shrink-0" />
+                      : <div className="w-5 h-5 rounded-full border border-white/20 shrink-0 flex items-center justify-center"><div className="w-2 h-0.5 bg-white/20 rounded" /></div>
+                    }
+                    <span className={item.ok ? 'text-slate-300 text-sm' : 'text-slate-600 text-sm'}>{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="https://wa.me/12094609828"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-center border border-white/20 text-slate-300 hover:border-[#a3e635] hover:text-[#a3e635] px-6 py-3.5 rounded-2xl font-black text-base transition-all"
+              >
+                Empezar con Starter
+              </a>
+            </motion.div>
 
             {/* Plan Básico */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
               className="bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col"
             >
               <div className="mb-6">
