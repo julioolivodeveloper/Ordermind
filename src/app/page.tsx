@@ -229,6 +229,100 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── NO ES SAAS ── */}
+      <section className="bg-[#0a0a0a] py-24 px-6 md:px-12 border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 bg-[#a3e635]/10 border border-[#a3e635]/30 rounded-full px-4 py-1.5 mb-6">
+              <span className="w-2 h-2 rounded-full bg-[#a3e635]" />
+              <span className="text-[#a3e635] text-sm font-bold tracking-wide">100% tuyo</span>
+            </div>
+            <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.95] tracking-tight text-white mb-6">
+              No es un SaaS.<br />
+              <span className="text-[#a3e635]">Es tu sistema.</span>
+            </h2>
+            <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
+              Tu restaurante tiene su propio sistema, su propio dominio y sus propios datos.
+              Nadie más tiene acceso. Nadie más cobra comisión por pedido.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: '🔒',
+                title: 'Tus datos son tuyos',
+                desc: 'Clientes, pedidos, ventas — todo queda en tu base de datos. Nadie más puede verlos, venderlos ni usarlos.',
+              },
+              {
+                icon: '🌐',
+                title: 'Tu propio dominio',
+                desc: 'Tu menú vive en turestaurante.com, no en una plataforma de terceros. Tus clientes te recuerdan a ti, no a la app.',
+              },
+              {
+                icon: '💸',
+                title: 'Sin comisión por pedido',
+                desc: 'Las plataformas SaaS cobran 15-30% por pedido. Aquí pagas una vez y el 100% de tus ventas es tuyo.',
+              },
+              {
+                icon: '⚡',
+                title: 'Sin interrupciones',
+                desc: 'Si una plataforma SaaS sube precios o cierra, pierdes todo. Tu sistema no depende de nadie.',
+              },
+              {
+                icon: '🎨',
+                title: 'Tu marca, tu estilo',
+                desc: 'Logo, colores, fotos — todo personalizado para tu negocio. No compartes espacio con competidores.',
+              },
+              {
+                icon: '📱',
+                title: 'Funciona en cualquier dispositivo',
+                desc: 'Tus clientes ordenan desde el celular, tablet o computadora sin descargar ninguna app.',
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="bg-white/5 border border-white/10 rounded-2xl p-7 hover:border-[#a3e635]/30 hover:bg-white/8 transition-all"
+              >
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-white font-black text-lg mb-2">{item.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-12 text-center"
+          >
+            <a
+              href="https://wa.me/12094609828"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-10 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
+            >
+              <MessageCircle className="w-6 h-6" />
+              Quiero mi propio sistema
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── FEATURES ── */}
       <section className="bg-white pt-10 pb-16 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
