@@ -141,7 +141,7 @@ export default function Home() {
               transition={{ delay: 0.1, duration: 0.7 }}
               className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight mb-6 uppercase"
             >
-              Software
+              Menú Digital
               <br />
               <span className="text-white">para</span>
               <br />
