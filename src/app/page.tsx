@@ -113,7 +113,7 @@ export default function Home() {
         >
           <Link
             href="/menu-demo"
-            className="hidden sm:inline-flex items-center gap-1.5 border border-white/20 hover:border-[#a3e635]/60 text-slate-300 hover:text-[#a3e635] px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
+            className="hidden sm:inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-400 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-orange-500/20"
           >
             Ver demo
           </Link>
@@ -218,7 +218,7 @@ export default function Home() {
               </a>
               <Link
                 href="/menu-demo"
-                className="inline-flex items-center gap-2 border border-white/10 hover:border-[#a3e635]/50 text-slate-400 hover:text-[#a3e635] px-8 py-4 rounded-2xl font-semibold text-lg transition-all"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-orange-500/20"
               >
                 Ver menú demo
               </Link>
@@ -331,15 +331,21 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-12 text-center"
           >
-            <a
-              href="https://wa.me/12094609828"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-10 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
-            >
-              <MessageCircle className="w-6 h-6" />
-              Quiero mi propio sistema
-            </a>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <a
+                href="https://wa.me/12094609828"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#a3e635] hover:bg-lime-400 text-black px-10 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-lime-500/20"
+              >
+                <MessageCircle className="w-6 h-6" />
+                Quiero mi propio sistema
+              </a>
+              <Link href="/menu-demo"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-orange-500/20">
+                Ver menú demo
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -504,7 +510,13 @@ export default function Home() {
               <MessageCircle className="w-6 h-6" />
               Solicita tu Demo Gratis
             </a>
-            <p className="text-slate-500 text-sm mt-4">Y lleva tu restaurante al siguiente nivel.</p>
+            <div className="mt-4">
+              <Link href="/menu-demo"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-8 py-3.5 rounded-2xl font-bold text-base transition-all shadow-lg shadow-orange-500/20">
+                Ver menú demo
+              </Link>
+            </div>
+            <p className="text-slate-500 text-sm mt-3">Y lleva tu restaurante al siguiente nivel.</p>
           </motion.div>
 
           <motion.div
@@ -596,6 +608,10 @@ export default function Home() {
                 className="w-full text-center border border-white/20 text-slate-300 hover:border-[#a3e635] hover:text-[#a3e635] px-6 py-3.5 rounded-2xl font-black text-base transition-all">
                 Empezar con Starter
               </a>
+              <Link href="/menu-demo"
+                className="w-full text-center bg-orange-500 hover:bg-orange-400 text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all mt-3 block">
+                Ver menú demo
+              </Link>
             </motion.div>
 
             {/* Plan Básico */}
@@ -639,6 +655,10 @@ export default function Home() {
                 className="w-full text-center border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-black px-6 py-3.5 rounded-2xl font-black text-base transition-all">
                 Empezar con Básico
               </a>
+              <Link href="/menu-demo"
+                className="w-full text-center bg-orange-500 hover:bg-orange-400 text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all mt-3 block">
+                Ver menú demo
+              </Link>
             </motion.div>
 
             {/* Plan Pro */}
@@ -682,6 +702,10 @@ export default function Home() {
                 className="w-full text-center bg-black hover:bg-black/80 text-[#a3e635] px-6 py-3.5 rounded-2xl font-black text-base transition-all">
                 Empezar con Pro
               </a>
+              <Link href="/menu-demo"
+                className="w-full text-center bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all mt-3 block">
+                Ver menú demo
+              </Link>
             </motion.div>
           </div>
 
