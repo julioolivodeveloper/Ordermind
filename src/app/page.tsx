@@ -230,6 +230,145 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── PREVIEW ── */}
+      <section className="bg-[#0f0f0f] py-24 px-6 md:px-12 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-16"
+          >
+            <p className="text-slate-500 text-sm font-semibold uppercase tracking-widest mb-3">Tu sistema en acción</p>
+            <h2 className="text-4xl md:text-6xl font-black text-white uppercase leading-[0.95]">
+              Dashboard y menú<br />
+              <span className="text-[#a3e635]">al mismo tiempo</span>
+            </h2>
+            <p className="text-slate-400 mt-4 max-w-xl mx-auto">
+              Tú controlas todo desde el dashboard. Tus clientes ven el menú en tiempo real.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            {/* Dashboard window */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="absolute -inset-2 bg-[#a3e635]/10 rounded-3xl blur-2xl" />
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50">
+                {/* Browser bar */}
+                <div className="bg-[#1a1a1a] px-4 py-3 flex items-center gap-3 border-b border-white/10">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                  </div>
+                  <div className="flex-1 bg-white/5 rounded-md px-3 py-1 text-slate-500 text-xs font-mono">
+                    dashboard.turestaurante.com
+                  </div>
+                </div>
+                <img
+                  src="/dashboard-preview.jpg"
+                  alt="Dashboard Ordermind"
+                  className="w-full object-cover object-top"
+                />
+                <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#0f0f0f] to-transparent pointer-events-none" />
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#a3e635] animate-pulse" />
+                <span className="text-slate-400 text-sm">Panel del dueño — pedidos, ventas y menú en tiempo real</span>
+              </div>
+            </motion.div>
+
+            {/* Menu phone mockup */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative flex flex-col"
+            >
+              <div className="absolute -inset-2 bg-purple-500/10 rounded-3xl blur-2xl" />
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-[#f8f8f8]">
+                {/* Browser bar */}
+                <div className="bg-[#1a1a1a] px-4 py-3 flex items-center gap-3 border-b border-white/10">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                  </div>
+                  <div className="flex-1 bg-white/5 rounded-md px-3 py-1 text-slate-500 text-xs font-mono">
+                    turestaurante.com/menu
+                  </div>
+                </div>
+                {/* Fake menu */}
+                <div className="bg-[#111] p-5 space-y-3">
+                  {/* Header */}
+                  <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                    <div className="w-10 h-10 rounded-xl bg-[#a3e635] flex items-center justify-center font-black text-black text-sm">R</div>
+                    <div>
+                      <p className="text-white font-bold text-sm">Tacos El Paso</p>
+                      <p className="text-slate-500 text-xs">Orden para llevar · Abierto ahora</p>
+                    </div>
+                  </div>
+                  {/* Category */}
+                  <p className="text-[#a3e635] text-xs font-black uppercase tracking-widest pt-1">Tacos</p>
+                  {/* Items */}
+                  {[
+                    { name: 'Taco de Asada', desc: 'Carne asada, cebolla, cilantro', price: '$3.50' },
+                    { name: 'Taco de Pollo', desc: 'Pollo adobado, pico de gallo', price: '$3.00' },
+                    { name: 'Taco de Pastor', desc: 'Pastor, piña, salsa verde', price: '$3.25' },
+                  ].map((item) => (
+                    <div key={item.name} className="flex items-center justify-between gap-3 bg-white/5 rounded-xl p-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold truncate">{item.name}</p>
+                        <p className="text-slate-500 text-xs truncate">{item.desc}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[#a3e635] font-black text-sm">{item.price}</span>
+                        <button className="w-7 h-7 rounded-full bg-[#a3e635] text-black font-black text-base flex items-center justify-center leading-none">+</button>
+                      </div>
+                    </div>
+                  ))}
+                  <p className="text-[#a3e635] text-xs font-black uppercase tracking-widest pt-1">Bebidas</p>
+                  {[
+                    { name: 'Agua de Jamaica', desc: 'Fresca y natural', price: '$2.00' },
+                    { name: 'Horchata', desc: 'Con canela', price: '$2.00' },
+                  ].map((item) => (
+                    <div key={item.name} className="flex items-center justify-between gap-3 bg-white/5 rounded-xl p-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold truncate">{item.name}</p>
+                        <p className="text-slate-500 text-xs truncate">{item.desc}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[#a3e635] font-black text-sm">{item.price}</span>
+                        <button className="w-7 h-7 rounded-full bg-[#a3e635] text-black font-black text-base flex items-center justify-center leading-none">+</button>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Cart bar */}
+                  <div className="bg-[#a3e635] rounded-xl p-3 flex items-center justify-between mt-2">
+                    <span className="text-black font-black text-sm">2 items</span>
+                    <span className="text-black font-black text-sm">Ver orden · $6.50</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                <span className="text-slate-400 text-sm">Menú del cliente — ordenan desde el celular sin app</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ── NO ES SAAS ── */}
       <section className="bg-[#0a0a0a] py-24 px-6 md:px-12 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
