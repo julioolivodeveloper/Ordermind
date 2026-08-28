@@ -1,12 +1,27 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ShoppingBag, Plus, Check } from 'lucide-react'
 import { useAcaTortasStore, cartCount } from '@/store/acatortas-store'
-import { CATEGORIES } from '@/data/acatortas-menu'
+import { CATEGORIES, DEFAULT_MENU } from '@/data/acatortas-menu'
 import CartDrawer from '@/components/acatortas/CartDrawer'
 
 export default function MenuPage() {
-  const { menu, cart, addToCart } = useAcaTortasStore()
+  const { menu, setMenu, cart, addToCart } = useAcaTortasStore()
+
+  // Cargar overrides de disponibilidad desde Supabase
+  useEffect(() => {
+    fetch('/api/acatortas/menu')
+      .then((r) => r.json())
+      .then((overrides: { item_id: string; available: boolean; price?: number }[]) => {
+        const updated = DEFAULT_MENU.map((item) => {
+          const ov = overrides.find((o) => o.item_id === item.id)
+          if (!ov) return item
+          return { ...item, available: ov.available, price: ov.price ?? item.price }
+        })
+        setMenu(updated)
+      })
+      .catch(() => {})
+  }, [setMenu])
   const [activeCategory, setActiveCategory] = useState('Todos')
   const [cartOpen, setCartOpen] = useState(false)
   const [added, setAdded] = useState<string | null>(null)

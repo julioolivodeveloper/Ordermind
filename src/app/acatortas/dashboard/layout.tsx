@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, LogOut, Lock } from 'lucide-react'
-import { ADMIN_PIN } from '@/store/acatortas-store'
 
 const NAV = [
   { href: '/acatortas/dashboard', label: 'Resumen', icon: LayoutDashboard, exact: true },
@@ -16,22 +15,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [authed, setAuthed] = useState(false)
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [checking, setChecking] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('acatortas-admin')
-    if (stored === 'true') setAuthed(true)
+    if (sessionStorage.getItem('acatortas-admin') === 'true') setAuthed(true)
   }, [])
 
-  const login = () => {
-    if (pin === ADMIN_PIN) {
-      sessionStorage.setItem('acatortas-admin', 'true')
-      setAuthed(true)
-    } else {
-      setError('PIN incorrecto')
-      setPin('')
+  const login = async () => {
+    setChecking(true)
+    setError('')
+    try {
+      const res = await fetch('/api/acatortas/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      })
+      if (res.ok) {
+        sessionStorage.setItem('acatortas-admin', 'true')
+        setAuthed(true)
+      } else {
+        setError('PIN incorrecto')
+        setPin('')
+      }
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setChecking(false)
     }
   }
 
@@ -59,19 +70,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onChange={(e) => { setPin(e.target.value); setError('') }}
               onKeyDown={(e) => e.key === 'Enter' && login()}
               placeholder="PIN de acceso"
-              maxLength={6}
+              maxLength={8}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 text-center text-xl font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-[#CC0000] placeholder:text-gray-600"
             />
             {error && <p className="text-red-400 text-sm">{error}</p>}
             <button
               onClick={login}
-              className="w-full py-3.5 rounded-xl font-black text-white text-base"
+              disabled={checking || !pin}
+              className="w-full py-3.5 rounded-xl font-black text-white text-base disabled:opacity-60 transition"
               style={{ backgroundColor: '#CC0000' }}
             >
-              Entrar
+              {checking ? 'Verificando...' : 'Entrar'}
             </button>
           </div>
-          <p className="text-gray-600 text-xs mt-6">Demo PIN: <span className="text-gray-400 font-mono font-bold">1234</span></p>
         </div>
       </div>
     )
@@ -134,7 +145,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         })}
       </div>
 
-      {/* Content */}
       <main className="md:ml-56 flex-1 min-h-screen pb-20 md:pb-0">
         {children}
       </main>

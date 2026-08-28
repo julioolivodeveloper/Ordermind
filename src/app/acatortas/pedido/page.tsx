@@ -8,16 +8,16 @@ import { useAcaTortasStore, cartTotal } from '@/store/acatortas-store'
 const DOORDASH_URL = 'https://www.doordash.com/store/aca-las-tortas-el-paso-10076-n-loop-dr-socorro-34404153/'
 
 export default function CheckoutPage() {
-  const { cart, updateQty, removeFromCart, placeOrder, findOrCreateCustomer } = useAcaTortasStore()
+  const { cart, updateQty, clearCart, setLastOrder } = useAcaTortasStore()
   const router = useRouter()
   const total = cartTotal(cart)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
-  const [usePoints, setUsePoints] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [apiError, setApiError] = useState('')
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -30,10 +30,34 @@ export default function CheckoutPage() {
   const handleOrder = async () => {
     if (!validate()) return
     setLoading(true)
-    const customer = findOrCreateCustomer(name.trim(), phone.trim())
-    const order = placeOrder({ customerName: name.trim(), customerPhone: phone.trim(), notes, customerId: customer.id })
-    await new Promise((r) => setTimeout(r, 600))
-    router.push(`/acatortas/pedido/confirmacion?id=${order.id}&num=${order.orderNumber}`)
+    setApiError('')
+
+    try {
+      const res = await fetch('/api/acatortas/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: name.trim(),
+          customerPhone: phone.trim(),
+          notes,
+          items: cart,
+          total,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error ?? 'Error al enviar la orden')
+      }
+
+      const { order } = await res.json()
+      setLastOrder(order)
+      clearCart()
+      router.push(`/acatortas/pedido/confirmacion?id=${order.id}&num=${order.order_number}`)
+    } catch (err: unknown) {
+      setApiError(err instanceof Error ? err.message : 'Error de conexión. Intenta de nuevo.')
+      setLoading(false)
+    }
   }
 
   if (cart.length === 0) {
@@ -142,7 +166,6 @@ export default function CheckoutPage() {
 
         {/* RIGHT: Summary */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Order summary */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-24">
             <h2 className="font-black text-gray-900 text-lg mb-4">Resumen</h2>
             <div className="space-y-2 text-sm text-gray-600 mb-4">
@@ -161,7 +184,6 @@ export default function CheckoutPage() {
               <p className="text-xs text-gray-400 mt-1">+ impuesto aplicable en caja</p>
             </div>
 
-            {/* Points notice */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-5">
               <p className="text-xs font-bold text-yellow-800">
                 ⭐ Ganarás <strong>{Math.floor(total)} puntos</strong> con esta orden
@@ -169,7 +191,6 @@ export default function CheckoutPage() {
               <p className="text-xs text-yellow-700 mt-0.5">100 puntos = $1.00 de descuento</p>
             </div>
 
-            {/* Pickup info */}
             <div className="bg-gray-50 rounded-xl p-4 mb-5">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg">🏪</span>
@@ -178,16 +199,21 @@ export default function CheckoutPage() {
               <p className="text-xs text-gray-500">Tu orden estará lista en 15–25 minutos. Paga con efectivo o tarjeta al recoger.</p>
             </div>
 
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
+                <p className="text-red-600 text-xs font-bold">{apiError}</p>
+              </div>
+            )}
+
             <button
               onClick={handleOrder}
               disabled={loading}
               className="w-full py-4 rounded-2xl font-black text-white text-base transition hover:opacity-90 disabled:opacity-60"
               style={{ backgroundColor: '#CC0000' }}
             >
-              {loading ? 'Enviando...' : `Confirmar Orden — $${total.toFixed(2)}`}
+              {loading ? 'Enviando orden...' : `Confirmar Orden — $${total.toFixed(2)}`}
             </button>
 
-            {/* Divider */}
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-gray-200" />
               <span className="text-xs text-gray-400 font-semibold">o delivery por</span>

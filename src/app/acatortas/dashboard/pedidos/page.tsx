@@ -1,25 +1,15 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Phone, Clock, ChevronDown, ChevronUp, X } from 'lucide-react'
-import { useAcaTortasStore, STATUS_LABELS, STATUS_COLORS, NEXT_STATUS, type Order } from '@/store/acatortas-store'
+import { useAcaTortasOrders } from '@/hooks/useAcaTortasOrders'
+import { STATUS_LABELS, STATUS_COLORS, NEXT_STATUS, type Order, type OrderStatus } from '@/store/acatortas-store'
 
-const STATUS_ORDER: Array<(typeof STATUS_LABELS) extends Record<infer K, string> ? K : never> = [
-  'nuevo', 'preparando', 'listo', 'entregado', 'cancelado',
-]
+const STATUS_ORDER: OrderStatus[] = ['nuevo', 'preparando', 'listo', 'entregado', 'cancelado']
 
 export default function PedidosPage() {
-  const { orders, updateOrderStatus } = useAcaTortasStore()
+  const { orders, loading, updateStatus } = useAcaTortasOrders()
   const [filter, setFilter] = useState<'activos' | 'todos'>('activos')
   const [expanded, setExpanded] = useState<string | null>(null)
-  const [, forceUpdate] = useState(0)
-
-  // Poll every 4s for cross-tab updates
-  useEffect(() => {
-    const id = setInterval(() => forceUpdate((n) => n + 1), 4000)
-    const onStorage = () => forceUpdate((n) => n + 1)
-    window.addEventListener('storage', onStorage)
-    return () => { clearInterval(id); window.removeEventListener('storage', onStorage) }
-  }, [])
 
   const visible = filter === 'activos'
     ? orders.filter((o) => o.status !== 'entregado' && o.status !== 'cancelado')
@@ -31,12 +21,23 @@ export default function PedidosPage() {
     return acc
   }, {} as Record<string, Order[]>)
 
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[300px]">
+        <div className="text-gray-400 text-sm">Cargando órdenes...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-white font-black text-2xl">Pedidos</h1>
-          <p className="text-gray-400 text-sm mt-0.5">Actualización automática cada 4 segundos</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <p className="text-gray-400 text-sm">Tiempo real — Supabase Realtime</p>
+          </div>
         </div>
         <div className="flex gap-1 bg-gray-900 rounded-xl border border-gray-800 p-1">
           {(['activos', 'todos'] as const).map((f) => (
@@ -56,23 +57,20 @@ export default function PedidosPage() {
       {visible.length === 0 && (
         <div className="text-center py-20 text-gray-500">
           <p className="text-lg font-semibold">No hay pedidos{filter === 'activos' ? ' activos' : ''}</p>
-          <p className="text-sm mt-1">Las órdenes aparecen aquí cuando los clientes ordenan</p>
+          <p className="text-sm mt-1">Las órdenes aparecen aquí al instante cuando los clientes ordenan</p>
         </div>
       )}
 
       <div className="space-y-8">
-        {(STATUS_ORDER as string[]).map((status) => {
+        {STATUS_ORDER.map((status) => {
           const items = byStatus[status]
           if (!items) return null
           return (
             <div key={status}>
               <div className="flex items-center gap-2 mb-3">
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: STATUS_COLORS[status as keyof typeof STATUS_COLORS] }}
-                />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[status] }} />
                 <h2 className="text-gray-300 font-black text-sm uppercase tracking-wider">
-                  {STATUS_LABELS[status as keyof typeof STATUS_LABELS]} ({items.length})
+                  {STATUS_LABELS[status]} ({items.length})
                 </h2>
               </div>
               <div className="space-y-3">
@@ -84,9 +82,9 @@ export default function PedidosPage() {
                     onToggle={() => setExpanded(expanded === order.id ? null : order.id)}
                     onAdvance={() => {
                       const next = NEXT_STATUS[order.status]
-                      if (next) updateOrderStatus(order.id, next)
+                      if (next) updateStatus(order.id, next)
                     }}
-                    onCancel={() => updateOrderStatus(order.id, 'cancelado')}
+                    onCancel={() => updateStatus(order.id, 'cancelado')}
                   />
                 ))}
               </div>
@@ -99,11 +97,7 @@ export default function PedidosPage() {
 }
 
 function OrderCard({
-  order,
-  expanded,
-  onToggle,
-  onAdvance,
-  onCancel,
+  order, expanded, onToggle, onAdvance, onCancel,
 }: {
   order: Order
   expanded: boolean
@@ -111,46 +105,41 @@ function OrderCard({
   onAdvance: () => void
   onCancel: () => void
 }) {
-  const age = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000)
+  const age = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000)
   const nextStatus = NEXT_STATUS[order.status]
+  const isNew = order.status === 'nuevo' && age < 5
 
   return (
-    <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-      {/* Header */}
+    <div className={`bg-gray-900 rounded-2xl border overflow-hidden transition ${isNew ? 'border-amber-500/50' : 'border-gray-800'}`}>
       <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-800/50 transition" onClick={onToggle}>
         <div className="flex items-center gap-3">
           <div>
-            <div className="flex items-center gap-2">
-              <p className="text-white font-black text-base">#{order.orderNumber}</p>
-              <span
-                className="text-xs font-bold px-2 py-0.5 rounded-full text-white"
-                style={{ backgroundColor: STATUS_COLORS[order.status] }}
-              >
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-white font-black text-base">#{order.order_number}</p>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: STATUS_COLORS[order.status] }}>
                 {STATUS_LABELS[order.status]}
               </span>
-              {order.status === 'nuevo' && age < 3 && (
+              {isNew && (
                 <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-bold animate-pulse">¡NUEVO!</span>
               )}
             </div>
-            <p className="text-gray-400 text-sm font-semibold mt-0.5">{order.customerName}</p>
+            <p className="text-gray-400 text-sm font-semibold mt-0.5">{order.customer_name}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-white font-black">${order.total.toFixed(2)}</p>
+            <p className="text-white font-black">${Number(order.total).toFixed(2)}</p>
             <div className="flex items-center gap-1 text-gray-500 text-xs justify-end">
               <Clock className="w-3 h-3" />
-              <span>hace {age === 0 ? 'menos de 1' : age} min</span>
+              <span>hace {age === 0 ? '<1' : age} min</span>
             </div>
           </div>
           {expanded ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
         </div>
       </div>
 
-      {/* Expanded */}
       {expanded && (
         <div className="border-t border-gray-800 p-4">
-          {/* Items */}
           <div className="space-y-1.5 mb-4">
             {order.items.map((ci) => (
               <div key={ci.item.id} className="flex justify-between text-sm">
@@ -160,7 +149,6 @@ function OrderCard({
             ))}
           </div>
 
-          {/* Notes */}
           {order.notes && (
             <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 mb-4">
               <p className="text-yellow-400 text-xs font-black mb-1">Notas del cliente:</p>
@@ -168,13 +156,11 @@ function OrderCard({
             </div>
           )}
 
-          {/* Contact */}
           <div className="flex items-center gap-2 mb-4 text-gray-400 text-sm">
             <Phone className="w-4 h-4" />
-            <span>{order.customerPhone}</span>
+            <span>{order.customer_phone}</span>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-2">
             {nextStatus && (
               <button

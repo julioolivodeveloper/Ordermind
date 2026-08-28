@@ -1,27 +1,32 @@
 'use client'
 import Link from 'next/link'
 import { ShoppingBag, DollarSign, Users, UtensilsCrossed, TrendingUp, Clock } from 'lucide-react'
-import { useAcaTortasStore, STATUS_LABELS, STATUS_COLORS } from '@/store/acatortas-store'
+import { useAcaTortasOrders } from '@/hooks/useAcaTortasOrders'
+import { STATUS_LABELS, STATUS_COLORS } from '@/store/acatortas-store'
 
 export default function DashboardHome() {
-  const { orders, customers, menu } = useAcaTortasStore()
+  const { orders, loading } = useAcaTortasOrders()
 
   const today = new Date().toDateString()
-  const todayOrders = orders.filter((o) => new Date(o.createdAt).toDateString() === today)
-  const todayRevenue = todayOrders.reduce((s, o) => s + o.total, 0)
+  const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === today)
+  const todayRevenue = todayOrders.reduce((s, o) => s + Number(o.total), 0)
   const pendingOrders = orders.filter((o) => o.status === 'nuevo' || o.status === 'preparando')
-  const availableItems = menu.filter((m) => m.available).length
-
   const recentOrders = orders.slice(0, 6)
 
   const stats = [
     { label: 'Órdenes Hoy', value: todayOrders.length.toString(), icon: ShoppingBag, color: '#CC0000' },
     { label: 'Ventas Hoy', value: `$${todayRevenue.toFixed(2)}`, icon: DollarSign, color: '#16A34A' },
     { label: 'Pendientes', value: pendingOrders.length.toString(), icon: Clock, color: '#F59E0B' },
-    { label: 'Clientes', value: customers.length.toString(), icon: Users, color: '#6366F1' },
     { label: 'Total Órdenes', value: orders.length.toString(), icon: TrendingUp, color: '#8B5CF6' },
-    { label: 'Platillos Activos', value: availableItems.toString(), icon: UtensilsCrossed, color: '#14B8A6' },
   ]
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[300px]">
+        <div className="text-gray-400 text-sm">Cargando...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6">
@@ -32,8 +37,7 @@ export default function DashboardHome() {
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {stats.map((s) => (
           <div key={s.label} className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
             <div className="flex items-center justify-between mb-3">
@@ -47,7 +51,6 @@ export default function DashboardHome() {
         ))}
       </div>
 
-      {/* Pending orders alert */}
       {pendingOrders.length > 0 && (
         <Link href="/acatortas/dashboard/pedidos" className="block mb-6">
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between hover:bg-amber-500/20 transition">
@@ -62,17 +65,15 @@ export default function DashboardHome() {
         </Link>
       )}
 
-      {/* Quick access */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {[
           { href: '/acatortas/dashboard/pedidos', icon: ShoppingBag, title: 'Gestionar Pedidos', desc: 'Ver y actualizar órdenes en tiempo real', color: '#CC0000' },
           { href: '/acatortas/dashboard/menu', icon: UtensilsCrossed, title: 'Editar Menú', desc: 'Precios, disponibilidad e ingredientes', color: '#6366F1' },
-          { href: '/acatortas/dashboard/clientes', icon: Users, title: 'Clientes', desc: 'Puntos y historial de clientes', color: '#14B8A6' },
         ].map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="bg-gray-900 rounded-2xl border border-gray-800 p-5 hover:border-gray-600 transition group"
+            className="bg-gray-900 rounded-2xl border border-gray-800 p-5 hover:border-gray-600 transition"
           >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: item.color + '20' }}>
               <item.icon className="w-5 h-5" style={{ color: item.color }} />
@@ -83,7 +84,6 @@ export default function DashboardHome() {
         ))}
       </div>
 
-      {/* Recent orders */}
       <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white font-black text-base">Órdenes Recientes</h2>
@@ -96,14 +96,14 @@ export default function DashboardHome() {
             {recentOrders.map((order) => (
               <div key={order.id} className="flex items-center justify-between py-2.5 border-b border-gray-800 last:border-0">
                 <div>
-                  <p className="text-white font-bold text-sm">#{order.orderNumber} — {order.customerName}</p>
+                  <p className="text-white font-bold text-sm">#{order.order_number} — {order.customer_name}</p>
                   <p className="text-gray-500 text-xs">
                     {order.items.length} {order.items.length === 1 ? 'platillo' : 'platillos'} ·{' '}
-                    {new Date(order.createdAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(order.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-white font-black text-sm">${order.total.toFixed(2)}</p>
+                  <p className="text-white font-black text-sm">${Number(order.total).toFixed(2)}</p>
                   <span
                     className="text-xs font-bold px-2 py-0.5 rounded-full text-white"
                     style={{ backgroundColor: STATUS_COLORS[order.status] }}

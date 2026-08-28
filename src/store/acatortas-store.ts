@@ -12,16 +12,16 @@ export type OrderStatus = 'nuevo' | 'preparando' | 'listo' | 'entregado' | 'canc
 
 export type Order = {
   id: string
-  orderNumber: number
+  order_number: number
   items: CartItem[]
-  customerName: string
-  customerPhone: string
+  customer_name: string
+  customer_phone: string
   notes: string
   status: OrderStatus
   total: number
-  createdAt: string
-  customerId?: string
-  pointsEarned: number
+  created_at: string
+  customer_id?: string
+  points_earned: number
 }
 
 export type Customer = {
@@ -29,48 +29,36 @@ export type Customer = {
   name: string
   phone: string
   points: number
-  createdAt: string
-  orderCount: number
+  created_at: string
+  order_count: number
 }
 
 type Store = {
-  // Menu
+  // Menu (local + overrides desde Supabase)
   menu: MenuItem[]
+  setMenu: (menu: MenuItem[]) => void
   updateMenuItem: (id: string, updates: Partial<MenuItem>) => void
-  addMenuItem: (item: MenuItem) => void
-  deleteMenuItem: (id: string) => void
-  resetMenu: () => void
 
-  // Cart
+  // Cart — persiste en localStorage del cliente, correcto
   cart: CartItem[]
   addToCart: (item: MenuItem) => void
   removeFromCart: (id: string) => void
   updateQty: (id: string, qty: number) => void
   clearCart: () => void
 
-  // Orders
-  orders: Order[]
-  orderCounter: number
-  placeOrder: (data: { customerName: string; customerPhone: string; notes: string; customerId?: string }) => Order
-  updateOrderStatus: (id: string, status: OrderStatus) => void
-
-  // Customers
-  customers: Customer[]
-  findOrCreateCustomer: (name: string, phone: string) => Customer
-  addPoints: (customerId: string, points: number) => void
-  redeemPoints: (customerId: string, points: number) => void
+  // Última orden confirmada (para la pantalla de confirmación)
+  lastOrder: Order | null
+  setLastOrder: (order: Order | null) => void
 }
 
 export const useAcaTortasStore = create<Store>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Menu
       menu: DEFAULT_MENU,
+      setMenu: (menu) => set({ menu }),
       updateMenuItem: (id, updates) =>
         set((s) => ({ menu: s.menu.map((m) => (m.id === id ? { ...m, ...updates } : m)) })),
-      addMenuItem: (item) => set((s) => ({ menu: [...s.menu, item] })),
-      deleteMenuItem: (id) => set((s) => ({ menu: s.menu.filter((m) => m.id !== id) })),
-      resetMenu: () => set({ menu: DEFAULT_MENU }),
 
       // Cart
       cart: [],
@@ -91,76 +79,14 @@ export const useAcaTortasStore = create<Store>()(
         })),
       clearCart: () => set({ cart: [] }),
 
-      // Orders
-      orders: [],
-      orderCounter: 1001,
-      placeOrder: ({ customerName, customerPhone, notes, customerId }) => {
-        const { cart, orderCounter, customers } = get()
-        const total = cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0)
-        const pointsEarned = Math.floor(total)
-        const order: Order = {
-          id: crypto.randomUUID(),
-          orderNumber: orderCounter,
-          items: [...cart],
-          customerName,
-          customerPhone,
-          notes,
-          status: 'nuevo',
-          total,
-          createdAt: new Date().toISOString(),
-          customerId,
-          pointsEarned,
-        }
-        // Add points to customer
-        if (customerId) {
-          const customer = customers.find((c) => c.id === customerId)
-          if (customer) {
-            set((s) => ({
-              customers: s.customers.map((c) =>
-                c.id === customerId
-                  ? { ...c, points: c.points + pointsEarned, orderCount: c.orderCount + 1 }
-                  : c
-              ),
-            }))
-          }
-        }
-        set((s) => ({ orders: [order, ...s.orders], orderCounter: s.orderCounter + 1, cart: [] }))
-        return order
-      },
-      updateOrderStatus: (id, status) =>
-        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)) })),
-
-      // Customers
-      customers: [],
-      findOrCreateCustomer: (name, phone) => {
-        const existing = get().customers.find((c) => c.phone === phone)
-        if (existing) return existing
-        const customer: Customer = {
-          id: crypto.randomUUID(),
-          name,
-          phone,
-          points: 0,
-          createdAt: new Date().toISOString(),
-          orderCount: 0,
-        }
-        set((s) => ({ customers: [...s.customers, customer] }))
-        return customer
-      },
-      addPoints: (customerId, points) =>
-        set((s) => ({
-          customers: s.customers.map((c) =>
-            c.id === customerId ? { ...c, points: c.points + points } : c
-          ),
-        })),
-      redeemPoints: (customerId, points) =>
-        set((s) => ({
-          customers: s.customers.map((c) =>
-            c.id === customerId ? { ...c, points: Math.max(0, c.points - points) } : c
-          ),
-        })),
+      // Última orden
+      lastOrder: null,
+      setLastOrder: (order) => set({ lastOrder: order }),
     }),
     {
-      name: 'acatortas-store',
+      name: 'acatortas-cart',
+      // Solo persiste el carrito y la última orden — no el menú (se carga desde Supabase)
+      partialize: (s) => ({ cart: s.cart, lastOrder: s.lastOrder }),
     }
   )
 )
@@ -193,5 +119,3 @@ export const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
   preparando: 'listo',
   listo: 'entregado',
 }
-
-export const ADMIN_PIN = '1234'
