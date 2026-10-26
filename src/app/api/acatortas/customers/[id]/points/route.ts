@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAcaTortasAdmin } from '@/lib/acatortas-auth'
 
 // PATCH /api/acatortas/customers/[id]/points — ajuste manual de puntos (canjeo en caja)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const deny = requireAcaTortasAdmin(req)
+  if (deny) return deny
   const { id } = await params
   const { delta } = await req.json()
 

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAcaTortasAdmin } from '@/lib/acatortas-auth'
 
 // GET /api/acatortas/orders — para el dashboard
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const deny = requireAcaTortasAdmin(req)
+  if (deny) return deny
   const db = createAdminClient()
   const { data, error } = await db
     .from('acatortas_orders')

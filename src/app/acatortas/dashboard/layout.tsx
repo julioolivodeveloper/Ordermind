@@ -47,6 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const logout = () => {
+    fetch('/api/acatortas/auth', { method: 'DELETE' }).catch(() => {})
     sessionStorage.removeItem('acatortas-admin')
     setAuthed(false)
     router.push('/acatortas')

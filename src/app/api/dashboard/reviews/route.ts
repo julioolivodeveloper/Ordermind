@@ -13,7 +13,7 @@ async function getRestaurantId() {
 export async function PATCH(req: Request) {
   const restaurantId = await getRestaurantId()
   if (!restaurantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-  const { id, ...body } = await req.json()
+  const { id, restaurant_id: _restaurantId, ...body } = await req.json()
   const admin = createAdminClient()
   const { data, error } = await admin.from('reviews').update(body).eq('id', id).eq('restaurant_id', restaurantId).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAcaTortasAdmin } from '@/lib/acatortas-auth'
 
 // GET /api/acatortas/menu — overrides de disponibilidad
 export async function GET() {
@@ -11,6 +12,8 @@ export async function GET() {
 
 // POST /api/acatortas/menu — upsert override de un item
 export async function POST(req: NextRequest) {
+  const deny = requireAcaTortasAdmin(req)
+  if (deny) return deny
   const { item_id, available, price } = await req.json()
   if (!item_id) return NextResponse.json({ error: 'item_id requerido' }, { status: 400 })
 

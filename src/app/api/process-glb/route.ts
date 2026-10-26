@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -17,6 +18,23 @@ export async function POST(request: Request) {
     const { url, path, widthCm, heightCm, targetCm } = body as {
       url: string; path: string
       widthCm?: number; heightCm?: number; targetCm?: number
+    }
+
+    // Only a signed-in restaurant user may write, and only under their own folder
+    const userClient = await createClient()
+    const { data: { user } } = await userClient.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const { data: profile } = await userClient.from('profiles').select('role, restaurant_id').eq('id', user.id).single()
+    const ownFolder = profile?.restaurant_id && path.startsWith(`${profile.restaurant_id}/`)
+    if (path.includes('..') || (!ownFolder && profile?.role !== 'super_admin')) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
+
+    // Block SSRF to internal hosts: public https URLs only
+    let target: URL
+    try { target = new URL(url) } catch { return NextResponse.json({ error: 'URL inválida' }, { status: 400 }) }
+    if (target.protocol !== 'https:' || /^(localhost|[\d.]+|\[.*\])$/i.test(target.hostname)) {
+      return NextResponse.json({ error: 'URL no permitida' }, { status: 400 })
     }
 
     const targetW = clamp(widthCm  ?? targetCm ?? 18, 1, 300) / 100

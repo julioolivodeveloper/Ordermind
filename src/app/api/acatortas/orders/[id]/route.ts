@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAcaTortasAdmin } from '@/lib/acatortas-auth'
 
 const VALID_STATUSES = ['nuevo', 'preparando', 'listo', 'entregado', 'cancelado']
 
@@ -8,6 +9,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const deny = requireAcaTortasAdmin(req)
+  if (deny) return deny
   const { id } = await params
   const { status } = await req.json()
 

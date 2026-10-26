@@ -10,9 +10,11 @@ export async function PATCH(request: Request) {
   if (!profile?.restaurant_id) return NextResponse.json({ error: 'No restaurant' }, { status: 400 })
 
   const body = await request.json()
+  // Owners edit their profile, not account-control fields
+  const { id: _id, status: _status, is_demo: _isDemo, plan_id: _planId, plan: _plan, owner_id: _ownerId, owner: _owner, created_at: _createdAt, ...updates } = body
   const { data, error } = await supabase
     .from('restaurants')
-    .update(body)
+    .update(updates)
     .eq('id', profile.restaurant_id)
     .select()
     .single()

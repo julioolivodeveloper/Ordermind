@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import Stripe from 'stripe'
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -30,6 +31,41 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     coupon_code, items,
   } = body
 
+  // Never trust a client-sent "paid": only mark paid after Stripe confirms this
+  // exact intent succeeded for this order's total and it isn't reused.
+  let verifiedPaymentStatus = 'pending'
+  if (payment_status === 'paid') {
+    if (!payment_intent_id) {
+      return NextResponse.json({ error: 'Pago no verificado' }, { status: 402 })
+    }
+    const { data: stripeCfg } = await admin
+      .from('restaurants')
+      .select('stripe_secret_key, stripe_connected')
+      .eq('id', restaurant.id)
+      .single()
+    if (!stripeCfg?.stripe_connected || !stripeCfg.stripe_secret_key) {
+      return NextResponse.json({ error: 'Pago no verificado' }, { status: 402 })
+    }
+    const stripe = new Stripe(stripeCfg.stripe_secret_key, { apiVersion: '2026-03-25.dahlia' })
+    let intent: Stripe.PaymentIntent
+    try {
+      intent = await stripe.paymentIntents.retrieve(String(payment_intent_id))
+    } catch {
+      return NextResponse.json({ error: 'Pago no verificado' }, { status: 402 })
+    }
+    if (intent.status !== 'succeeded' || intent.amount !== Math.round(Number(total) * 100)) {
+      return NextResponse.json({ error: 'Pago no verificado' }, { status: 402 })
+    }
+    const { count: reused } = await admin
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('payment_intent_id', intent.id)
+    if (reused) {
+      return NextResponse.json({ error: 'Pago ya utilizado' }, { status: 409 })
+    }
+    verifiedPaymentStatus = 'paid'
+  }
+
   const { data: order, error: orderError } = await admin
     .from('orders')
     .insert({
@@ -47,7 +83,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       discount_amount,
       total,
       payment_method,
-      payment_status: payment_status ?? 'pending',
+      payment_status: verifiedPaymentStatus,
       payment_intent_id: payment_intent_id ?? null,
       notes,
     })
